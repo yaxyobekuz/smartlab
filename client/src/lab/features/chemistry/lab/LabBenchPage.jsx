@@ -4,10 +4,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Flame, Undo2, Trash2, Grid3x3 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
-import Scene from "@/lab/components/Scene";
 import LabWorkspace from "@/lab/components/LabWorkspace";
 import FormulaText from "@/lab/components/FormulaText";
-import BeakerModel from "./BeakerModel";
+import LabScene from "./scene/LabScene";
 import SubstanceChest from "./SubstanceChest";
 import PeriodicTableModal from "./PeriodicTableModal";
 import { useLabBench } from "./useLabBench";
@@ -84,19 +83,13 @@ const LabBenchPage = () => {
       onSelect={pickById}
       scene={
         <div className="relative h-full w-full">
-          <Scene
-            camera={[0, 0.6, 5.5]}
-            bg="#0d1626"
-            controls={{ minDistance: 3, maxDistance: 12, target: [0, 0.1, 0] }}
-          >
-            <BeakerModel
-              liquidColor={bench.liquidColor}
-              fill={bench.fill}
-              heating={bench.heating}
-              temperature={bench.temperature}
-              reactionSeq={bench.reactionSeq}
-            />
-          </Scene>
+          <LabScene
+            liquidColor={bench.liquidColor}
+            fill={bench.fill}
+            heating={bench.heating}
+            temperature={bench.temperature}
+            reactionSeq={bench.reactionSeq}
+          />
 
           {/* Reaction headline */}
           {flash && flash.kind && (
