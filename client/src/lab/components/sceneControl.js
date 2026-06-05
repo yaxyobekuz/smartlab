@@ -1,0 +1,25 @@
+// Context object + consumer hook (kept separate from the provider component so
+// fast-refresh stays happy — a file may export either components or non-components).
+import { createContext, useContext } from "react";
+
+export const SceneControlContext = createContext(null);
+
+// Safe defaults for scenes rendered outside a provider (e.g. the landing hero).
+const NOOP_CONTROL = {
+  paused: false,
+  togglePause: () => {},
+  reset: () => {},
+  controlsRef: { current: null },
+};
+
+// Throws if no provider — use where the toolbar is guaranteed (workspace).
+export const useSceneControl = () => {
+  const ctx = useContext(SceneControlContext);
+  if (!ctx)
+    throw new Error("useSceneControl must be used within SceneControlProvider");
+  return ctx;
+};
+
+// Never throws — falls back to no-op when there is no provider.
+export const useSceneControlOptional = () =>
+  useContext(SceneControlContext) ?? NOOP_CONTROL;
