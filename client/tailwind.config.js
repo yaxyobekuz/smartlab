@@ -12,6 +12,58 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      keyframes: {
+        // AI chat: xabar pastdan silliq ko'tariladi.
+        "msg-in": {
+          "0%": { opacity: "0", transform: "translateY(10px) scale(0.97)" },
+          "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
+        },
+        // Avatar atrofidagi nafas oluvchi halo.
+        "halo-pulse": {
+          "0%, 100%": { opacity: "0.55", transform: "scale(1)" },
+          "50%": { opacity: "0.9", transform: "scale(1.18)" },
+        },
+        // Aylanuvchi gradient (AI o'ylayotganida).
+        "spin-slow": {
+          to: { transform: "rotate(360deg)" },
+        },
+        // Konfetti uchadigan zarralar emas - oddiy "pop" tasdiq.
+        pop: {
+          "0%": { transform: "scale(0.6)", opacity: "0" },
+          "60%": { transform: "scale(1.08)" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
+        // Noto'g'ri javobda silkinish.
+        shake: {
+          "0%, 100%": { transform: "translateX(0)" },
+          "20%, 60%": { transform: "translateX(-4px)" },
+          "40%, 80%": { transform: "translateX(4px)" },
+        },
+        // To'g'ri javobda yorug'lik yuguradi.
+        shimmer: {
+          "100%": { transform: "translateX(100%)" },
+        },
+        // Streaming kursor miltillashi.
+        blink: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0" },
+        },
+        // Gradient matn rangi siljiydi.
+        "gradient-x": {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
+      },
+      animation: {
+        "msg-in": "msg-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both",
+        "halo-pulse": "halo-pulse 2.4s ease-in-out infinite",
+        "spin-slow": "spin-slow 3s linear infinite",
+        pop: "pop 0.35s cubic-bezier(0.22, 1, 0.36, 1) both",
+        shake: "shake 0.4s ease-in-out",
+        shimmer: "shimmer 1.2s ease-in-out",
+        blink: "blink 1s step-end infinite",
+        "gradient-x": "gradient-x 4s ease infinite",
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
