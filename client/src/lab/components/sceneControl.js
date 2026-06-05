@@ -9,6 +9,8 @@ const NOOP_CONTROL = {
   paused: false,
   togglePause: () => {},
   reset: () => {},
+  zoomIn: () => {},
+  zoomOut: () => {},
   controlsRef: { current: null },
 };
 
