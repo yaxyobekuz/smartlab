@@ -29,8 +29,15 @@ const ToolButton = ({ label, active, onClick, children }) => (
 );
 
 const Toolbar = ({ onToggleFullscreen, onTogglePanels, panelsHidden }) => {
-  const { paused, togglePause, reset, zoomIn, zoomOut, vrSupported, enterVR } =
-    useSceneControl();
+  const {
+    paused,
+    togglePause,
+    reset,
+    zoomIn,
+    zoomOut,
+    gyroSupported,
+    toggleCardboard,
+  } = useSceneControl();
 
   // Keyboard zoom: +/= zooms in, -/_ zooms out (ignored while typing in a field).
   useEffect(() => {
@@ -88,10 +95,10 @@ const Toolbar = ({ onToggleFullscreen, onTogglePanels, panelsHidden }) => {
           <Maximize2 size={18} />
         </ToolButton>
 
-        {vrSupported && (
+        {gyroSupported && (
           <>
             <div className="mx-1 h-5 w-px bg-border" />
-            <ToolButton label="VR rejimi" onClick={enterVR}>
+            <ToolButton label="VR rejimi (cardboard)" onClick={toggleCardboard}>
               <Glasses size={18} />
             </ToolButton>
           </>

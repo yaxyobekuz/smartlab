@@ -3,16 +3,22 @@
 // Also hosts the AI assistant's context + action bus so the agent can drive the scene.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createXRStore } from "@react-three/xr";
 import { SceneControlContext } from "./sceneControl";
 
 const ZOOM_STEP = 1.2; // multiply/divide camera distance per zoom step
 
+// Phone cardboard VR is feasible when the device exposes orientation events.
+// (Touch + a coarse pointer ~ a phone; DeviceOrientationEvent ~ a gyroscope.)
+const detectGyro = () =>
+  typeof window !== "undefined" &&
+  "DeviceOrientationEvent" in window &&
+  window.matchMedia?.("(pointer: coarse)").matches;
+
 export const SceneControlProvider = ({ children }) => {
   const navigate = useNavigate();
   const [paused, setPaused] = useState(false);
-  const [inVR, setInVR] = useState(false);
-  const [vrSupported, setVrSupported] = useState(false);
+  const [cardboard, setCardboard] = useState(false);
+  const [gyroSupported] = useState(detectGyro);
   const controlsRef = useRef(null);
 
   // What the user is looking at right now - fed to the AI as live context.
@@ -34,30 +40,31 @@ export const SceneControlProvider = ({ children }) => {
     if (buf.length > 12) buf.shift();
   }, []);
 
-  // One XR store per workspace; shared with the Canvas (<XR store>) and toolbar.
-  const xrStore = useMemo(() => createXRStore(), []);
-
-  // Feature-detect immersive-vr so we only show the button on capable devices.
-  useEffect(() => {
-    let active = true;
-    navigator.xr
-      ?.isSessionSupported?.("immersive-vr")
-      .then((ok) => active && setVrSupported(!!ok))
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
+  // iOS 13+ needs an explicit gesture-triggered permission for gyroscope.
+  const requestGyroPermission = useCallback(async () => {
+    const D = window.DeviceOrientationEvent;
+    if (D && typeof D.requestPermission === "function") {
+      try {
+        return (await D.requestPermission()) === "granted";
+      } catch {
+        return false;
+      }
+    }
+    return true;
   }, []);
 
-  // Track whether an XR session is currently running.
-  useEffect(
-    () => xrStore.subscribe((s) => setInVR(s.session != null)),
-    [xrStore],
-  );
+  const exitCardboard = useCallback(() => setCardboard(false), []);
+  const toggleCardboard = useCallback(async () => {
+    if (cardboard) {
+      setCardboard(false);
+      return;
+    }
+    const ok = await requestGyroPermission();
+    if (ok) setCardboard(true);
+  }, [cardboard, requestGyroPermission]);
 
   const togglePause = () => setPaused((p) => !p);
   const reset = useCallback(() => controlsRef.current?.reset(), []);
-  const enterVR = useCallback(() => xrStore.enterVR(), [xrStore]);
 
   // Dolly the camera toward/away from the orbit target, clamped to the
   // controls' min/max distance. `factor < 1` zooms in, `> 1` zooms out.
@@ -78,6 +85,14 @@ export const SceneControlProvider = ({ children }) => {
 
   const zoomIn = useCallback(() => dolly(1 / ZOOM_STEP), [dolly]);
   const zoomOut = useCallback(() => dolly(ZOOM_STEP), [dolly]);
+
+  // Leaving cardboard mode on Escape (e.g. when testing on desktop).
+  useEffect(() => {
+    if (!cardboard) return;
+    const onKey = (e) => e.key === "Escape" && setCardboard(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [cardboard]);
 
   // Executes a tool call emitted by the AI agent. Returns true when handled,
   // so the panel can show a small "bajarildi" confirmation.
@@ -114,26 +129,42 @@ export const SceneControlProvider = ({ children }) => {
     [zoomIn, zoomOut, reset, navigate],
   );
 
+  const value = useMemo(
+    () => ({
+      paused,
+      togglePause,
+      reset,
+      zoomIn,
+      zoomOut,
+      controlsRef,
+      cardboard,
+      gyroSupported,
+      toggleCardboard,
+      exitCardboard,
+      aiContext,
+      setAiContext,
+      runAiAction,
+      recentActions,
+      logAction,
+    }),
+    [
+      paused,
+      reset,
+      zoomIn,
+      zoomOut,
+      cardboard,
+      gyroSupported,
+      toggleCardboard,
+      exitCardboard,
+      aiContext,
+      setAiContext,
+      runAiAction,
+      logAction,
+    ],
+  );
+
   return (
-    <SceneControlContext.Provider
-      value={{
-        paused,
-        togglePause,
-        reset,
-        zoomIn,
-        zoomOut,
-        controlsRef,
-        xrStore,
-        inVR,
-        vrSupported,
-        enterVR,
-        aiContext,
-        setAiContext,
-        runAiAction,
-        recentActions,
-        logAction,
-      }}
-    >
+    <SceneControlContext.Provider value={value}>
       {children}
     </SceneControlContext.Provider>
   );

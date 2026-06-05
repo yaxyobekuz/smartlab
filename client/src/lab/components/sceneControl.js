@@ -12,10 +12,11 @@ const NOOP_CONTROL = {
   zoomIn: () => {},
   zoomOut: () => {},
   controlsRef: { current: null },
-  xrStore: null,
-  inVR: false,
-  vrSupported: false,
-  enterVR: () => {},
+  // Phone cardboard VR: split-screen stereo + gyroscope.
+  cardboard: false,
+  gyroSupported: false,
+  toggleCardboard: () => {},
+  exitCardboard: () => {},
   // AI yordamchi uchun: joriy kontekst, uni o'rnatish va agent aksiyalarini bajarish.
   aiContext: {},
   setAiContext: () => {},

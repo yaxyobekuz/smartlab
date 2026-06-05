@@ -60,10 +60,11 @@ const WorkspaceBody = ({
   const rootRef = useRef(null);
   const [panelsHidden, setPanelsHidden] = useState(false);
   const { subject, topic } = useParams();
-  const { inVR, setAiContext, logAction } = useSceneControl();
+  const { cardboard, exitCardboard, setAiContext, logAction } =
+    useSceneControl();
 
-  // Side panels are hidden when manually collapsed OR while in VR.
-  const panelsVisible = !panelsHidden && !inVR;
+  // Side panels are hidden when manually collapsed OR while in cardboard VR.
+  const panelsVisible = !panelsHidden && !cardboard;
 
   // Feed the live page context to the AI agent (subject, topic, items, active item).
   useEffect(() => {
@@ -108,7 +109,19 @@ const WorkspaceBody = ({
 
       <div className="relative min-w-0 flex-1">
         {scene}
-        {!inVR && (
+
+        {cardboard ? (
+          <>
+            {/* Center seam to help align the phone in the headset. */}
+            <div className="pointer-events-none absolute inset-y-0 left-1/2 z-20 w-px -translate-x-1/2 bg-white/40" />
+            <button
+              onClick={exitCardboard}
+              className="absolute right-3 top-3 z-30 rounded-lg bg-background/90 px-3 py-1.5 text-sm font-medium shadow-md backdrop-blur"
+            >
+              Chiqish
+            </button>
+          </>
+        ) : (
           <Toolbar
             panelsHidden={panelsHidden}
             onTogglePanels={() => setPanelsHidden((v) => !v)}

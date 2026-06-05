@@ -3,8 +3,8 @@
 import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, AdaptiveDpr } from "@react-three/drei";
-import { XR } from "@react-three/xr";
 import { useSceneControlOptional } from "./sceneControl";
+import CardboardView from "./CardboardView";
 
 const Loader = () => (
   <div className="absolute inset-0 grid place-items-center text-muted-foreground text-sm">
@@ -22,42 +22,42 @@ const Scene = ({
   autoRotate = false,
   frameloop = "always",
 }) => {
-  const { paused, controlsRef, xrStore } = useSceneControlOptional();
+  const { paused, controlsRef, cardboard } = useSceneControlOptional();
 
-  // Wrap in <XR> only when a store exists (workspace); the hero has no provider.
-  const content = (
-    <>
-      {bg && <color attach="background" args={[bg]} />}
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[5, 5, 5]} intensity={1.1} />
-      <directionalLight position={[-5, -3, -5]} intensity={0.4} />
-      {children}
-      {/* Adaptive dpr only in "always" mode; in "demand" it would never get the
-          frames to restore resolution, leaving the view permanently blurry. */}
-      {frameloop === "always" && <AdaptiveDpr pixelated />}
-      <OrbitControls
-        ref={controlsRef}
-        enablePan={false}
-        minDistance={3}
-        maxDistance={40}
-        autoRotate={autoRotate && !paused}
-        autoRotateSpeed={0.8}
-        regress={frameloop === "always"}
-        {...controls}
-      />
-    </>
-  );
+  // In cardboard mode the gyroscope drives the camera, so disable orbit + adaptive
+  // dpr (CardboardView always renders) and stop auto-rotate.
+  const cardboardOn = !!cardboard;
 
   return (
     <div className="relative h-full w-full">
       <Suspense fallback={<Loader />}>
         {/* Full-resolution rendering; perf comes from frameloop, not lower dpr. */}
         <Canvas
-          frameloop={frameloop}
+          frameloop={cardboardOn ? "always" : frameloop}
           camera={{ position: camera, fov: 50 }}
           dpr={[1, 2]}
         >
-          {xrStore ? <XR store={xrStore}>{content}</XR> : content}
+          {bg && <color attach="background" args={[bg]} />}
+          <ambientLight intensity={0.6} />
+          <directionalLight position={[5, 5, 5]} intensity={1.1} />
+          <directionalLight position={[-5, -3, -5]} intensity={0.4} />
+          {children}
+
+          <CardboardView enabled={cardboardOn} />
+
+          {!cardboardOn && frameloop === "always" && <AdaptiveDpr pixelated />}
+          {!cardboardOn && (
+            <OrbitControls
+              ref={controlsRef}
+              enablePan={false}
+              minDistance={3}
+              maxDistance={40}
+              autoRotate={autoRotate && !paused}
+              autoRotateSpeed={0.8}
+              regress={frameloop === "always"}
+              {...controls}
+            />
+          )}
         </Canvas>
       </Suspense>
     </div>
