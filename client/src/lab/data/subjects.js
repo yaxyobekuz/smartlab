@@ -1,6 +1,15 @@
 // Central registry: subjects (chemistry/biology/physics) -> topics.
 // `slug` values are URL params: /:subject and /:subject/:topic.
 // UI text in Uzbek, code values in English.
+import { ANATOMY } from "./anatomy";
+
+// Human anatomy GLB models -> biology topics (myology, angiology, ...).
+const ANATOMY_TOPICS = ANATOMY.map((a) => ({
+  slug: a.slug,
+  title: a.title,
+  short: a.short,
+  icon: a.icon,
+}));
 
 export const SUBJECTS = [
   {
@@ -49,6 +58,7 @@ export const SUBJECTS = [
         short: "Qo'sh spiral va nukleotidlarni ko'ring.",
         icon: "🧬",
       },
+      ...ANATOMY_TOPICS,
     ],
   },
   {

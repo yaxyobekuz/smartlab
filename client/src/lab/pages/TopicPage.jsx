@@ -3,8 +3,18 @@
 import { lazy, Suspense } from "react";
 import { useParams } from "react-router-dom";
 import NotFoundPage from "./NotFoundPage";
+import { ANATOMY } from "@/lab/data/anatomy";
+
+// One shared page renders every anatomy topic; it reads the slug from the URL.
+const AnatomyPage = lazy(() =>
+  import("@/lab/features/biology/anatomy/AnatomyPage"),
+);
+const ANATOMY_PAGES = Object.fromEntries(
+  ANATOMY.map((a) => [`biology/${a.slug}`, AnatomyPage]),
+);
 
 const PAGES = {
+  ...ANATOMY_PAGES,
   "chemistry/molecules": lazy(() =>
     import("@/lab/features/chemistry/molecules/MoleculesPage"),
   ),
