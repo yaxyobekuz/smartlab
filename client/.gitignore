@@ -26,11 +26,3 @@ package-lock.json
 
 # Env
 .env
-
-# Large 3D model assets (host on CDN/storage, not in git)
-src/shared/assets/models/angiology.glb
-src/shared/assets/models/arthrology.glb
-src/shared/assets/models/muscular_insertions.glb
-src/shared/assets/models/myology.glb
-src/shared/assets/models/neurology.glb
-src/shared/assets/models/splanchnology.glb
