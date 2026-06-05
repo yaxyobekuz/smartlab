@@ -12,6 +12,10 @@ const NOOP_CONTROL = {
   zoomIn: () => {},
   zoomOut: () => {},
   controlsRef: { current: null },
+  xrStore: null,
+  inVR: false,
+  vrSupported: false,
+  enterVR: () => {},
 };
 
 // Throws if no provider - use where the toolbar is guaranteed (workspace).

@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, AdaptiveDpr } from "@react-three/drei";
+import { XR } from "@react-three/xr";
 import { useSceneControlOptional } from "./sceneControl";
 
 const Loader = () => (
@@ -18,7 +19,30 @@ const Scene = ({
   bg,
   autoRotate = false,
 }) => {
-  const { paused, controlsRef } = useSceneControlOptional();
+  const { paused, controlsRef, xrStore } = useSceneControlOptional();
+
+  // Wrap in <XR> only when a store exists (workspace); the hero has no provider.
+  const content = (
+    <>
+      {bg && <color attach="background" args={[bg]} />}
+      <ambientLight intensity={0.6} />
+      <directionalLight position={[5, 5, 5]} intensity={1.1} />
+      <directionalLight position={[-5, -3, -5]} intensity={0.4} />
+      {children}
+      {/* Drops resolution while orbiting (regress), restores it when idle. */}
+      <AdaptiveDpr pixelated />
+      <OrbitControls
+        ref={controlsRef}
+        enablePan={false}
+        minDistance={3}
+        maxDistance={40}
+        autoRotate={autoRotate && !paused}
+        autoRotateSpeed={0.8}
+        regress
+        {...controls}
+      />
+    </>
+  );
 
   return (
     <div className="relative h-full w-full">
@@ -29,23 +53,7 @@ const Scene = ({
           dpr={[1, 1.5]}
           performance={{ min: 0.5 }}
         >
-          {bg && <color attach="background" args={[bg]} />}
-          <ambientLight intensity={0.6} />
-          <directionalLight position={[5, 5, 5]} intensity={1.1} />
-          <directionalLight position={[-5, -3, -5]} intensity={0.4} />
-          {children}
-          {/* Drops resolution while orbiting (regress), restores it when idle. */}
-          <AdaptiveDpr pixelated />
-          <OrbitControls
-            ref={controlsRef}
-            enablePan={false}
-            minDistance={3}
-            maxDistance={40}
-            autoRotate={autoRotate && !paused}
-            autoRotateSpeed={0.8}
-            regress
-            {...controls}
-          />
+          {xrStore ? <XR store={xrStore}>{content}</XR> : content}
         </Canvas>
       </Suspense>
     </div>

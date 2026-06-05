@@ -8,6 +8,7 @@ import {
   PanelsTopLeft,
   Plus,
   Minus,
+  Glasses,
 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { useSceneControl } from "./sceneControl";
@@ -28,7 +29,8 @@ const ToolButton = ({ label, active, onClick, children }) => (
 );
 
 const Toolbar = ({ onToggleFullscreen, onTogglePanels, panelsHidden }) => {
-  const { paused, togglePause, reset, zoomIn, zoomOut } = useSceneControl();
+  const { paused, togglePause, reset, zoomIn, zoomOut, vrSupported, enterVR } =
+    useSceneControl();
 
   // Keyboard zoom: +/= zooms in, -/_ zooms out (ignored while typing in a field).
   useEffect(() => {
@@ -85,6 +87,15 @@ const Toolbar = ({ onToggleFullscreen, onTogglePanels, panelsHidden }) => {
         <ToolButton label="To'liq ekran" onClick={onToggleFullscreen}>
           <Maximize2 size={18} />
         </ToolButton>
+
+        {vrSupported && (
+          <>
+            <div className="mx-1 h-5 w-px bg-border" />
+            <ToolButton label="VR rejimi" onClick={enterVR}>
+              <Glasses size={18} />
+            </ToolButton>
+          </>
+        )}
       </div>
     </div>
   );

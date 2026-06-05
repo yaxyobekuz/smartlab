@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { SceneControlProvider } from "./SceneControlProvider";
+import { useSceneControl } from "./sceneControl";
 import Toolbar from "./Toolbar";
 import AiPanel from "./AiPanel";
 
@@ -44,7 +45,7 @@ const LeftPanel = ({ title, description, backTo, backLabel, items, activeId, onS
   </div>
 );
 
-const LabWorkspace = ({
+const WorkspaceBody = ({
   title,
   description,
   backTo = "/",
@@ -57,6 +58,10 @@ const LabWorkspace = ({
 }) => {
   const rootRef = useRef(null);
   const [panelsHidden, setPanelsHidden] = useState(false);
+  const { inVR } = useSceneControl();
+
+  // Side panels are hidden when manually collapsed OR while in VR.
+  const panelsVisible = !panelsHidden && !inVR;
 
   const toggleFullscreen = () => {
     if (document.fullscreenElement) document.exitFullscreen();
@@ -64,38 +69,44 @@ const LabWorkspace = ({
   };
 
   return (
-    <SceneControlProvider>
-      <div ref={rootRef} className="flex h-full w-full bg-background">
-        {!panelsHidden && (
-          <LeftPanel
-            title={title}
-            description={description}
-            backTo={backTo}
-            backLabel={backLabel}
-            items={items}
-            activeId={activeId}
-            onSelect={onSelect}
-            info={info}
-          />
-        )}
+    <div ref={rootRef} className="flex h-full w-full bg-background">
+      {panelsVisible && (
+        <LeftPanel
+          title={title}
+          description={description}
+          backTo={backTo}
+          backLabel={backLabel}
+          items={items}
+          activeId={activeId}
+          onSelect={onSelect}
+          info={info}
+        />
+      )}
 
-        <div className="relative min-w-0 flex-1">
-          {scene}
+      <div className="relative min-w-0 flex-1">
+        {scene}
+        {!inVR && (
           <Toolbar
             panelsHidden={panelsHidden}
             onTogglePanels={() => setPanelsHidden((v) => !v)}
             onToggleFullscreen={toggleFullscreen}
           />
-        </div>
-
-        {!panelsHidden && (
-          <aside className="z-10 hidden h-full w-80 border-l border-border bg-card shadow-[-4px_0_16px_-4px_rgba(0,0,0,0.06)] lg:block">
-            <AiPanel />
-          </aside>
         )}
       </div>
-    </SceneControlProvider>
+
+      {panelsVisible && (
+        <aside className="z-10 hidden h-full w-80 border-l border-border bg-card shadow-[-4px_0_16px_-4px_rgba(0,0,0,0.06)] lg:block">
+          <AiPanel />
+        </aside>
+      )}
+    </div>
   );
 };
+
+const LabWorkspace = (props) => (
+  <SceneControlProvider>
+    <WorkspaceBody {...props} />
+  </SceneControlProvider>
+);
 
 export default LabWorkspace;
