@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Scene from "@/lab/components/Scene";
-import LabViewer from "@/lab/components/LabViewer";
+import LabWorkspace from "@/lab/components/LabWorkspace";
 import CellModel from "./CellModel";
 import { ORGANELLES, getOrganelle } from "@/lab/data/cell";
 
@@ -9,7 +9,7 @@ const CellPage = () => {
   const organelle = getOrganelle(activeId);
 
   return (
-    <LabViewer
+    <LabWorkspace
       title="Hujayra"
       description="Organoid ustiga bosing yoki ro'yxatdan tanlang. Hujayrani aylantiring."
       backTo="/biology"

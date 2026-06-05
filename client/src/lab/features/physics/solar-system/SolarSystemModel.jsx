@@ -1,8 +1,8 @@
 // Sun at center, planets orbiting on circular paths. Click a planet to select it.
 import { useRef, useState } from "react";
-import { useFrame } from "@react-three/fiber";
 import { Line, Html } from "@react-three/drei";
 import * as THREE from "three";
+import { usePausableFrame } from "@/lab/components/usePausableFrame";
 import { SUN, PLANETS } from "@/lab/data/planets";
 
 const orbitPoints = (radius, segments = 96) => {
@@ -18,7 +18,7 @@ const Planet = ({ planet, selected, onSelect }) => {
   const ref = useRef();
   const [hover, setHover] = useState(false);
 
-  useFrame((state) => {
+  usePausableFrame((state) => {
     const t = state.clock.elapsedTime * planet.speed * 12 + planet.distance;
     if (ref.current) {
       ref.current.position.x = Math.cos(t) * planet.distance;

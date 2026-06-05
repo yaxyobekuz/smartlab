@@ -1,6 +1,6 @@
 // Animated sine wave (moving point line) or a swinging pendulum.
 import { useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { usePausableFrame } from "@/lab/components/usePausableFrame";
 
 const SEGMENTS = 120;
 const SPAN = 8;
@@ -8,7 +8,7 @@ const SPAN = 8;
 const SineWave = ({ amplitude, frequency }) => {
   const ref = useRef();
 
-  useFrame((state) => {
+  usePausableFrame((state) => {
     const geometry = ref.current?.geometry;
     if (!geometry) return;
     const arr = geometry.attributes.position.array;
@@ -39,7 +39,7 @@ const Pendulum = ({ amplitude, frequency }) => {
   const arm = useRef();
   const length = 3;
 
-  useFrame((state) => {
+  usePausableFrame((state) => {
     const angle = Math.sin(state.clock.elapsedTime * frequency * 2) * amplitude;
     if (arm.current) arm.current.rotation.z = angle;
   });

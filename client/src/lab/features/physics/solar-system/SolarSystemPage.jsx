@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Scene from "@/lab/components/Scene";
-import LabViewer from "@/lab/components/LabViewer";
+import LabWorkspace from "@/lab/components/LabWorkspace";
 import SolarSystemModel from "./SolarSystemModel";
 import { PLANETS, getPlanet } from "@/lab/data/planets";
 
@@ -9,7 +9,7 @@ const SolarSystemPage = () => {
   const planet = getPlanet(activeId);
 
   return (
-    <LabViewer
+    <LabWorkspace
       title="Quyosh tizimi"
       description="Sayyora ustiga bosing yoki ro'yxatdan tanlang. Sahnani aylantiring."
       backTo="/physics"

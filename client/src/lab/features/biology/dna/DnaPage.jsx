@@ -1,5 +1,5 @@
 import Scene from "@/lab/components/Scene";
-import LabViewer from "@/lab/components/LabViewer";
+import LabWorkspace from "@/lab/components/LabWorkspace";
 import DnaModel from "./DnaModel";
 
 const BASES = [
@@ -10,7 +10,7 @@ const BASES = [
 ];
 
 const DnaPage = () => (
-  <LabViewer
+  <LabWorkspace
     title="DNK spirali"
     description="Qo'sh spiralni aylantirib turli tomondan ko'ring."
     backTo="/biology"

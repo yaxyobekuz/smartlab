@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Scene from "@/lab/components/Scene";
-import LabViewer from "@/lab/components/LabViewer";
+import LabWorkspace from "@/lab/components/LabWorkspace";
 import MoleculeModel from "./MoleculeModel";
 import { MOLECULES, getMolecule } from "@/lab/data/molecules";
 
@@ -9,7 +9,7 @@ const MoleculesPage = () => {
   const molecule = getMolecule(activeId);
 
   return (
-    <LabViewer
+    <LabWorkspace
       title="Molekulalar"
       description="Molekulani sichqoncha bilan aylantiring, atom ustiga olib boring."
       backTo="/chemistry"

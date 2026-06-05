@@ -1,6 +1,6 @@
 // Rotating DNA double helix: two phosphate backbones + colored base-pair rungs.
 import { useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { usePausableFrame } from "@/lab/components/usePausableFrame";
 
 const RUNGS = 22;
 const RADIUS = 1.1;
@@ -10,7 +10,7 @@ const BASE_COLORS = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b"];
 
 const DnaModel = () => {
   const group = useRef();
-  useFrame((_, delta) => {
+  usePausableFrame((_, delta) => {
     if (group.current) group.current.rotation.y += delta * 0.5;
   });
 

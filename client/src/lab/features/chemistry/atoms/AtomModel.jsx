@@ -1,8 +1,8 @@
 // Bohr-style atom: glowing nucleus + electrons orbiting on tilted shells.
 import { useRef } from "react";
-import { useFrame } from "@react-three/fiber";
 import { Line } from "@react-three/drei";
 import * as THREE from "three";
+import { usePausableFrame } from "@/lab/components/usePausableFrame";
 
 const ORBIT_GAP = 1.1;
 const BASE_RADIUS = 1.2;
@@ -18,7 +18,7 @@ const orbitPoints = (radius, segments = 64) => {
 
 const Electron = ({ radius, speed, offset }) => {
   const ref = useRef();
-  useFrame((state) => {
+  usePausableFrame((state) => {
     const t = state.clock.elapsedTime * speed + offset;
     if (ref.current) {
       ref.current.position.x = Math.cos(t) * radius;

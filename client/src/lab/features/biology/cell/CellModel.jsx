@@ -1,6 +1,6 @@
 // Translucent cell membrane with organelles inside. Click an organelle to select it.
 import { useRef, useState } from "react";
-import { useFrame } from "@react-three/fiber";
+import { usePausableFrame } from "@/lab/components/usePausableFrame";
 import { Html } from "@react-three/drei";
 import { ORGANELLES } from "@/lab/data/cell";
 
@@ -41,7 +41,7 @@ const Organelle = ({ organelle, selected, onSelect }) => {
 
 const CellModel = ({ activeId, onSelect }) => {
   const group = useRef();
-  useFrame((_, delta) => {
+  usePausableFrame((_, delta) => {
     if (group.current) group.current.rotation.y += delta * 0.15;
   });
 

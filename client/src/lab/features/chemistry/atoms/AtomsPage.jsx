@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Scene from "@/lab/components/Scene";
-import LabViewer from "@/lab/components/LabViewer";
+import LabWorkspace from "@/lab/components/LabWorkspace";
 import AtomModel from "./AtomModel";
 import { ATOMS, getAtom } from "@/lab/data/atoms";
 
@@ -16,7 +16,7 @@ const AtomsPage = () => {
   const atom = getAtom(activeId);
 
   return (
-    <LabViewer
+    <LabWorkspace
       title="Atomlar"
       description="Yadro atrofida aylanayotgan elektron qobiqlarini kuzating."
       backTo="/chemistry"

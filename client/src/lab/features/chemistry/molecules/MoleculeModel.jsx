@@ -1,8 +1,8 @@
 // Ball-and-stick molecule. Atoms are spheres, bonds are cylinders between them.
 import { useMemo, useRef, useState } from "react";
-import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
+import { usePausableFrame } from "@/lab/components/usePausableFrame";
 import { ELEMENTS } from "@/lab/data/molecules";
 
 const Bond = ({ start, end }) => {
@@ -64,7 +64,7 @@ const Atom = ({ el, pos }) => {
 
 const MoleculeModel = ({ molecule }) => {
   const group = useRef();
-  useFrame((_, delta) => {
+  usePausableFrame((_, delta) => {
     if (group.current) group.current.rotation.y += delta * 0.25;
   });
 

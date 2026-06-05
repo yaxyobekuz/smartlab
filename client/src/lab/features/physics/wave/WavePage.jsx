@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Scene from "@/lab/components/Scene";
-import LabViewer from "@/lab/components/LabViewer";
+import LabWorkspace from "@/lab/components/LabWorkspace";
 import WaveModel from "./WaveModel";
 import { WAVES, getWave } from "@/lab/data/waves";
 
@@ -9,7 +9,7 @@ const WavePage = () => {
   const wave = getWave(activeId);
 
   return (
-    <LabViewer
+    <LabWorkspace
       title="To'lqin va tebranish"
       description="Tebranish turini tanlang. Sahnani aylantirib turli burchakdan ko'ring."
       backTo="/physics"
