@@ -29,6 +29,7 @@ const AnatomyPage = () => {
         <>
           <Scene
             camera={[0, 1, 6]}
+            frameloop="demand"
             controls={{
               minDistance: 0.5,
               maxDistance: 30,

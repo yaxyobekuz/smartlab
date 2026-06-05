@@ -1,25 +1,26 @@
 // Shared loader for human anatomy (Z-Anatomy) GLB models.
-// The models are heavy (millions of triangles), so picking uses a BVH to keep
-// raycasting cheap, and pointer events are throttled to avoid per-frame work.
 // Parts are named only by material (Bone, Muscles, Eye...) and many ship without
 // color, so we tint each mesh by its material and, on click, surface its Uzbek
-// detail to the parent (shown in the corner modal).
+// detail to the parent (corner modal).
+//
+// Perf: the models are heavy (millions of triangles). The scene renders on demand
+// (no idle spin), so a static view costs nothing. Raycasting uses a BVH built
+// *after* first paint so picking is cheap without blocking the initial load.
 import { useEffect, useMemo, useRef } from "react";
-import { useGLTF, Center, Bounds, Bvh } from "@react-three/drei";
+import { useGLTF, Center, Bounds } from "@react-three/drei";
+import { useThree } from "@react-three/fiber";
+import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import * as THREE from "three";
-import { usePausableFrame } from "@/lab/components/usePausableFrame";
 import { resolveMaterial } from "@/lab/data/anatomyMaterials";
 
 const HOVER_COLOR = new THREE.Color("#22d3ee");
-const HOVER_THROTTLE_MS = 60; // pick at most ~16x/sec, not every frame
 
 const AnatomyModel = ({ url, onPick, frozen = false }) => {
-  const group = useRef();
   const { scene } = useGLTF(url);
-  const hoveredMesh = useRef(null);
-  const lastMove = useRef(0);
+  const invalidate = useThree((s) => s.invalidate);
+  const selected = useRef(null);
 
-  // Clone so two pages can show the same model without sharing mutated materials.
+  // Clone so the cached source scene is never mutated.
   const model = useMemo(() => scene.clone(true), [scene]);
 
   // Tint every mesh by its material name; store the resolved detail per mesh.
@@ -38,66 +39,71 @@ const AnatomyModel = ({ url, onPick, frozen = false }) => {
       });
       child.userData.baseColor = child.material.color.clone();
     });
+    invalidate();
+  }, [model, invalidate]);
+
+  // Build the raycast BVH off the critical path so first paint isn't blocked.
+  useEffect(() => {
+    const build = () => {
+      model.traverse((child) => {
+        if (child.isMesh && !child.geometry.boundsTree) {
+          child.geometry.boundsTree = new MeshBVH(child.geometry);
+          child.raycast = acceleratedRaycast;
+        }
+      });
+    };
+    const ric = window.requestIdleCallback;
+    const id = ric ? ric(build) : setTimeout(build, 200);
+    return () => (ric ? window.cancelIdleCallback(id) : clearTimeout(id));
   }, [model]);
 
-  // Idle spin, paused while hovering or while a part's detail is open.
-  usePausableFrame((_, delta) => {
-    if (group.current && !hoveredMesh.current && !frozen)
-      group.current.rotation.y += delta * 0.3;
-  });
+  const restore = (mesh) => {
+    if (!mesh?.userData.baseColor) return;
+    mesh.material.color.copy(mesh.userData.baseColor);
+    mesh.material.emissive.set("#000000");
+  };
 
-  const highlight = (mesh) => {
-    if (hoveredMesh.current === mesh) return;
-    const prev = hoveredMesh.current;
-    if (prev?.userData.baseColor) {
-      prev.material.color.copy(prev.userData.baseColor);
-      prev.material.emissive.set("#000000");
+  // Clear the highlight when the detail modal is closed.
+  useEffect(() => {
+    if (!frozen && selected.current) {
+      restore(selected.current);
+      selected.current = null;
+      invalidate();
     }
-    hoveredMesh.current = mesh;
-    if (mesh) {
-      mesh.material.color.lerp(HOVER_COLOR, 0.45);
-      mesh.material.emissive.copy(HOVER_COLOR).multiplyScalar(0.25);
-    }
-  };
-
-  const handleMove = (e) => {
-    e.stopPropagation();
-    const now = performance.now();
-    if (now - lastMove.current < HOVER_THROTTLE_MS) return;
-    lastMove.current = now;
-    if (e.object === hoveredMesh.current) return; // same part: nothing to update
-    highlight(e.object);
-    document.body.style.cursor = e.object.userData.detail ? "pointer" : "default";
-  };
-
-  const handleOut = (e) => {
-    e.stopPropagation();
-    highlight(null);
-    document.body.style.cursor = "default";
-  };
+  }, [frozen, invalidate]);
 
   const handleClick = (e) => {
     e.stopPropagation();
-    const detail = e.object.userData.detail;
-    if (detail) onPick?.(detail);
+    const mesh = e.object;
+    const detail = mesh.userData.detail;
+    if (!detail) return;
+    restore(selected.current);
+    selected.current = mesh;
+    mesh.material.color.lerp(HOVER_COLOR, 0.45);
+    mesh.material.emissive.copy(HOVER_COLOR).multiplyScalar(0.25);
+    onPick?.(detail);
+    invalidate();
   };
 
   return (
-    <group ref={group}>
-      <Bounds fit observe margin={1.1}>
-        <Center>
-          {/* BVH makes raycasting on the multi-million-triangle model cheap. */}
-          <Bvh firstHitOnly>
-            <primitive
-              object={model}
-              onPointerMove={handleMove}
-              onPointerOut={handleOut}
-              onClick={handleClick}
-            />
-          </Bvh>
-        </Center>
-      </Bounds>
-    </group>
+    <Bounds fit observe margin={1.1}>
+      <Center>
+        <primitive
+          object={model}
+          onClick={handleClick}
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            document.body.style.cursor = e.object.userData.detail
+              ? "pointer"
+              : "default";
+          }}
+          onPointerOut={(e) => {
+            e.stopPropagation();
+            document.body.style.cursor = "default";
+          }}
+        />
+      </Center>
+    </Bounds>
   );
 };
 
