@@ -191,7 +191,7 @@ const WorkspaceBody = ({
                 <>
                   <p className="mt-1 text-sm text-muted-foreground">
                     Telefonni ko'zoynakka joylang. Boshingizni burib atrofga
-                    qarang — telefonni ko'tarsangiz tepaga, tushirsangiz pastga
+                    qarang - telefonni ko'tarsangiz tepaga, tushirsangiz pastga
                     qaraysiz. Ekranni bosib turib oldinga yuriladi.
                   </p>
                   <button

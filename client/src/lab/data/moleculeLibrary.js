@@ -1,4 +1,4 @@
-// AUTO-GENERATED — do not edit by hand.
+// AUTO-GENERATED - do not edit by hand.
 // 240 molecules ported from the SmartLab project (PubChem 3D data).
 // Re-generate with the conversion script if the source dataset changes.
 // Shape matches the lab viewer: atoms {el, pos:[x,y,z]}, bonds [a, b, order].

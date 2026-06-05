@@ -1,11 +1,11 @@
-// Tuman — MASSIVE dry-ice fog for water + dry ice. Cold CO₂ fog billows up out
+// Tuman - MASSIVE dry-ice fog for water + dry ice. Cold CO₂ fog billows up out
 // of the tube mouth, pours down the sides like a waterfall and rolls outward in
 // a thick blanket across the bench (the fog is denser than air, so it sinks and
 // spreads). One InstancedMesh holds ~110 soft puffs (a single draw call); each
-// puff loops through its own life — born tiny at the mouth, swelling as it
+// puff loops through its own life - born tiny at the mouth, swelling as it
 // cascades and spreads, fading to nothing at the far edge so it recycles.
 // The whole cloud incubates briefly then eases in, so adding dry ice never pops
-// fog out instantly — it creeps up the way real sublimation does.
+// fog out instantly - it creeps up the way real sublimation does.
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";

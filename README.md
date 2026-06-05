@@ -1,6 +1,6 @@
-# SmartLab — 3D virtual laboratoriya
+# SmartLab - 3D virtual laboratoriya
 
-SmartLab — o'quvchilar uchun **interaktiv 3D virtual laboratoriya**. Kimyo, biologiya va
+SmartLab - o'quvchilar uchun **interaktiv 3D virtual laboratoriya**. Kimyo, biologiya va
 fizika mavzularini brauzerda aylantirib, yaqindan ko'rib o'rganish mumkin. Loyihaga
 **Mira AI** yordamchisi va **Cardboard (gyroskop) VR** rejimi ham qo'shilgan.
 
@@ -10,13 +10,13 @@ Texnik jihatdan bu **monorepo**: `React (Vite)` frontend + `Express + MongoDB` b
 
 ## ✨ Asosiy imkoniyatlar
 
-- **3D mavzular** — `three.js` + React Three Fiber asosida:
-  - 🧪 **Kimyo** — molekulalar (suv, CO₂, metan...), atomlar (yadro + orbita), interaktiv laboratoriya (reaktivlarni quyib reaksiyalarni kuzatish).
-  - 🧫 **Biologiya** — hujayra organoidlari, DNK qo'sh spirali, odam anatomiyasi (mushak, qon-tomir, asab, bo'g'im, ichki a'zolar).
-  - 🔭 **Fizika** — Quyosh tizimi (orbital aylanish), to'lqin va mayatnik tebranishi.
-- **Mira AI** — laboratoriya ichida savol-javob qiluvchi AI yordamchi (OpenAI orqali).
-- **Cardboard VR** — telefon gyroskopi yordamida 3D sahnani VR ko'rinishida ko'rish.
-- **Bug report** — ixtiyoriy Telegram bot orqali xatolik xabarini yuborish.
+- **3D mavzular** - `three.js` + React Three Fiber asosida:
+  - 🧪 **Kimyo** - molekulalar (suv, CO₂, metan...), atomlar (yadro + orbita), interaktiv laboratoriya (reaktivlarni quyib reaksiyalarni kuzatish).
+  - 🧫 **Biologiya** - hujayra organoidlari, DNK qo'sh spirali, odam anatomiyasi (mushak, qon-tomir, asab, bo'g'im, ichki a'zolar).
+  - 🔭 **Fizika** - Quyosh tizimi (orbital aylanish), to'lqin va mayatnik tebranishi.
+- **Mira AI** - laboratoriya ichida savol-javob qiluvchi AI yordamchi (OpenAI orqali).
+- **Cardboard VR** - telefon gyroskopi yordamida 3D sahnani VR ko'rinishida ko'rish.
+- **Bug report** - ixtiyoriy Telegram bot orqali xatolik xabarini yuborish.
 
 ---
 
@@ -38,16 +38,16 @@ Batafsil qoidalar: [client/CLAUDE.md](client/CLAUDE.md) va [server/CLAUDE.md](se
 
 **Frontend** (`client/`)
 - React 19 + Vite 7
-- Three.js, `@react-three/fiber`, `@react-three/drei` — 3D sahna
-- Redux Toolkit, TanStack Query — holat va API
-- Tailwind CSS + shadcn/ui — interfeys
+- Three.js, `@react-three/fiber`, `@react-three/drei` - 3D sahna
+- Redux Toolkit, TanStack Query - holat va API
+- Tailwind CSS + shadcn/ui - interfeys
 - React Router 7
 
 **Backend** (`server/`)
 - Node.js + Express 4
 - MongoDB + Mongoose
 - JWT auth (access + refresh), Agenda (fon vazifalari)
-- OpenAI SDK — Mira AI yordamchisi
+- OpenAI SDK - Mira AI yordamchisi
 - Helmet, CORS, rate-limit, Pino logger
 
 ---
@@ -99,8 +99,8 @@ npm run dev                # http://localhost:5173
 | O'zgaruvchi | Tavsif |
 |---|---|
 | `VITE_API_URL` | Backend API manzili (default `http://localhost:5000/api`) |
-| `VITE_BUG_REPORT_BOT_TOKEN` | (Ixtiyoriy) Telegram bot token — bug report uchun |
-| `VITE_BUG_REPORT_CHAT_ID` | (Ixtiyoriy) Telegram chat ID — bug report uchun |
+| `VITE_BUG_REPORT_BOT_TOKEN` | (Ixtiyoriy) Telegram bot token - bug report uchun |
+| `VITE_BUG_REPORT_CHAT_ID` | (Ixtiyoriy) Telegram chat ID - bug report uchun |
 
 ### 4. Brauzerda ochish
 
@@ -112,9 +112,9 @@ Frontend tayyor bo'lgach, brauzerda **http://localhost:5173** manzilini oching.
 
 | Yo'nalish | Sahifa |
 |---|---|
-| `/` | Bosh sahifa — fanlar ro'yxati |
-| `/:subject` | Fan sahifasi — mavzular ro'yxati (masalan `/chemistry`) |
-| `/:subject/:topic` | 3D ish maydoni — to'liq ekran (masalan `/chemistry/molecules`) |
+| `/` | Bosh sahifa - fanlar ro'yxati |
+| `/:subject` | Fan sahifasi - mavzular ro'yxati (masalan `/chemistry`) |
+| `/:subject/:topic` | 3D ish maydoni - to'liq ekran (masalan `/chemistry/molecules`) |
 
 Mavjud fanlar va mavzular ro'yxati: [client/src/lab/data/subjects.js](client/src/lab/data/subjects.js).
 
@@ -147,7 +147,7 @@ client/src/
 ├─ shared/         # global komponentlar (ui, shadcn, layout), hooks, utils
 └─ lab/            # laboratoriya yadrosi
    ├─ components/  # Scene, AiPanel, CardboardView, Toolbar, ...
-   ├─ features/    # chemistry / biology / physics — har mavzu alohida
+   ├─ features/    # chemistry / biology / physics - har mavzu alohida
    ├─ data/        # subjects, molecules, atoms, anatomy, planets, ...
    ├─ pages/       # LandingPage, SubjectPage, TopicPage
    └─ layouts/     # LabLayout, LabWorkspaceLayout
@@ -159,5 +159,5 @@ Backend tuzilmasi: [server/CLAUDE.md](server/CLAUDE.md).
 
 ## 🌐 Til qoidasi
 
-- **Foydalanuvchiga ko'rinadigan matn** — o'zbek tilida.
-- **Kod qiymatlari** (id, route, slug, query key) — ingliz tilida.
+- **Foydalanuvchiga ko'rinadigan matn** - o'zbek tilida.
+- **Kod qiymatlari** (id, route, slug, query key) - ingliz tilida.

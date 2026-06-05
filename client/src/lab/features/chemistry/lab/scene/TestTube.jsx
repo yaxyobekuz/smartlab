@@ -13,7 +13,7 @@ import {
   TUBE_LIQUID_MAX,
 } from "./labGeometry";
 
-// Glass outline: revolve a 2D profile around Y — rounded hemispherical bottom,
+// Glass outline: revolve a 2D profile around Y - rounded hemispherical bottom,
 // straight wall, slightly flared rim.
 const buildGlassProfile = (radius, height) => {
   const pts = [];
@@ -31,7 +31,7 @@ const buildGlassProfile = (radius, height) => {
 // Build the liquid as a CLOSED volume sized to the current level: a true rounded
 // bottom (radius ≤ inner radius, so it always fits inside the glass), a straight
 // column, and a flat top surface. We rebuild this instead of Y-scaling a fixed
-// mesh — scaling squashed the rounded bottom and pushed its wide part out
+// mesh - scaling squashed the rounded bottom and pushed its wide part out
 // through the narrow glass tip.
 const buildLiquidGeometry = (level) => {
   const R = TUBE_INNER_R;

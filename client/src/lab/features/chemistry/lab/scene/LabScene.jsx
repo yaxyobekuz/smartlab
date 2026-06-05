@@ -71,7 +71,7 @@ const Apparatus = ({
     <Burner />
     {heating && <Flame position={[TUBE_X, FLAME_Y, 0]} temperature={temperature} paused={paused} />}
     <Bubbles active={heating && fill > 0.02} fill={fill} temperature={temperature} paused={paused} />
-    {/* Steam only once there's enough liquid AND it's genuinely hot — so a fresh
+    {/* Steam only once there's enough liquid AND it's genuinely hot - so a fresh
         pour doesn't puff vapour out of a near-empty tube. */}
     <Steam active={heating && fill > 0.12 && temperature > 0.5} temperature={temperature} paused={paused} />
     <Fog active={fogging} paused={paused} />

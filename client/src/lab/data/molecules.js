@@ -360,8 +360,8 @@ export const MOLECULES = [
 
 export const getMolecule = (id) => MOLECULES.find((m) => m.id === id) || null;
 
-// Erish (mp) va qaynash (bp) haroratlari, °C — moddaning xona haroratidagi
-// holatini (qattiq/suyuq/gaz) tushuntirish uchun. `sub: true` — sublimatsiya.
+// Erish (mp) va qaynash (bp) haroratlari, °C - moddaning xona haroratidagi
+// holatini (qattiq/suyuq/gaz) tushuntirish uchun. `sub: true` - sublimatsiya.
 export const PHASE_POINTS = {
   water: { mp: 0, bp: 100 },
   co2: { mp: -78, bp: -78, sub: true },

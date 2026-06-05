@@ -73,7 +73,7 @@ const ReactionBurst = ({ reactionSeq, kind }) => {
       fireMat.current.opacity = e * (isBig ? 0.92 : 0.5);
     }
 
-    // Shockwave shell — explosions only.
+    // Shockwave shell - explosions only.
     if (shock.current && shockMat.current) {
       const on = isBig && e > 0.01;
       shock.current.visible = on;
@@ -83,7 +83,7 @@ const ReactionBurst = ({ reactionSeq, kind }) => {
       }
     }
 
-    // Flying debris sparks — explosions only.
+    // Flying debris sparks - explosions only.
     if (sparks.current) {
       const d = dirs.current;
       const on = isBig && e > 0.01 && d.length > 0;

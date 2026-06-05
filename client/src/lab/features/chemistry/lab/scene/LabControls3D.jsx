@@ -1,4 +1,4 @@
-// Sahna ichidagi 3D boshqaruv paneli — VR kontrolleri nuri bilan (yoki desktopda
+// Sahna ichidagi 3D boshqaruv paneli - VR kontrolleri nuri bilan (yoki desktopda
 // sichqoncha bilan) bosib ishlatiladi. Reaktiv shishalarini idishga quyish,
 // isitish (tortma kalit) va tozalash (cho'tkali 3D tugma) shu yerdan boshqariladi.
 // Pointer (onClick) hodisalari @react-three/xr da kontroller "select" bilan ishlaydi.
@@ -11,7 +11,7 @@ const SHELF_Z = 2.2;
 const ROW_Y = 1.0;
 const STEP = 0.5;
 
-// Lerp maqsadlari — har kadrda yangi Color yaratmaslik uchun modul darajasida.
+// Lerp maqsadlari - har kadrda yangi Color yaratmaslik uchun modul darajasida.
 const HEAT_ON = new THREE.Color("#f97316");
 const HEAT_OFF = new THREE.Color("#475569");
 const GLOW_OFF = new THREE.Color("#0b1220");
@@ -130,7 +130,7 @@ const HeatSwitch = ({ x, on, onToggle }) => {
   );
 };
 
-// Cho'tka (supurgi) iconi — primitivlardan: qiya dasta + pastga yoyilgan tola.
+// Cho'tka (supurgi) iconi - primitivlardan: qiya dasta + pastga yoyilgan tola.
 const Broom = (props) => (
   <group rotation={[0, 0, 0.5]} {...props}>
     {/* dasta */}

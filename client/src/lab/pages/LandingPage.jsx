@@ -17,7 +17,7 @@ const LandingPage = () => {
     try {
       xrStore.enterVR()?.catch(() => {});
     } catch {
-      // WebXR yo'q qurilma — lab sahifasidagi overlay yo'l-yo'riq beradi.
+      // WebXR yo'q qurilma - lab sahifasidagi overlay yo'l-yo'riq beradi.
     }
     navigate("/chemistry/lab?vr=1");
   };
