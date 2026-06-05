@@ -1,5 +1,5 @@
 // Tiny hex-colour helpers for blending poured substances into one liquid colour.
-// Mixing happens in plain sRGB — not physically accurate, but reads naturally.
+// Mixing happens in plain sRGB - not physically accurate, but reads naturally.
 
 const FALLBACK = "#dfe9f2";
 

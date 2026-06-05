@@ -1,4 +1,4 @@
-// Isitkich — an alcohol burner (spirtovka) directly under the tube: a brass
+// Isitkich - an alcohol burner (spirtovka) directly under the tube: a brass
 // reservoir, a tapered shoulder, a steel collar and a wick. The flame itself is
 // a separate <Flame/> composed above it in the scene.
 import { BURNER_Y, TUBE_X } from "./labGeometry";

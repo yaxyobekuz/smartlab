@@ -1,4 +1,4 @@
-// Shtativ — a heavy flat metal base with a single vertical steel rod. Brushed
+// Shtativ - a heavy flat metal base with a single vertical steel rod. Brushed
 // metal: high metalness, mid roughness so it reads as steel, not chrome.
 import { RoundedBox } from "@react-three/drei";
 import { ROD_X } from "./labGeometry";

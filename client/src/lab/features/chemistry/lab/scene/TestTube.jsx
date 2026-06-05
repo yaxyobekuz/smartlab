@@ -1,4 +1,4 @@
-// Probirka — a borosilicate test tube: a single LatheGeometry shell (rounded
+// Probirka - a borosilicate test tube: a single LatheGeometry shell (rounded
 // bottom, straight wall, slight rim) rendered as real glass via transmission,
 // with a separate liquid column whose colour and height follow app state.
 import { useMemo, useRef } from "react";

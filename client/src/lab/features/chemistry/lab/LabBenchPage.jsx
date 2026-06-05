@@ -75,7 +75,7 @@ const LabBenchPage = () => {
   return (
     <LabWorkspace
       title="Interaktiv laboratoriya"
-      description="Element yoki reaktivni idishga quying — ranglar aralashadi, reaksiya yuz beradi."
+      description="Element yoki reaktivni idishga quying - ranglar aralashadi, reaksiya yuz beradi."
       backTo="/chemistry"
       backLabel="Kimyo"
       items={quickItems}
@@ -132,7 +132,7 @@ const LabBenchPage = () => {
           {bench.overfilled && (
             <div className="pointer-events-none absolute inset-x-0 bottom-20 z-10 flex justify-center px-4">
               <div className="rounded-full border border-amber-300 bg-amber-50/95 px-4 py-1.5 text-sm font-medium text-amber-700 shadow-sm backdrop-blur">
-                Idish to'ldi — suyuqlik toshib ketdi
+                Idish to'ldi - suyuqlik toshib ketdi
               </div>
             </div>
           )}

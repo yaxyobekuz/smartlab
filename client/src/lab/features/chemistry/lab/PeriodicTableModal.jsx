@@ -20,7 +20,7 @@ const PeriodicTableModal = ({ onPick, onClose }) => (
     >
       <div className="flex items-center gap-3 border-b border-border px-5 py-3">
         <h2 className="text-sm font-semibold">Davriy jadval</h2>
-        <span className="text-xs text-muted-foreground">Bosing — idishga qo'shiladi</span>
+        <span className="text-xs text-muted-foreground">Bosing - idishga qo'shiladi</span>
         <button
           onClick={onClose}
           aria-label="Yopish"

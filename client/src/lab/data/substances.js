@@ -1,7 +1,7 @@
 // The catalog of pickable laboratory substances (the chest contents).
-//   1. Elementlar — single elements in their true CPK colour (build molecules
+//   1. Elementlar - single elements in their true CPK colour (build molecules
 //      atom-by-atom: 2 Vodorod + 1 Kislorod -> suv).
-//   2. Reaktivlar — common ready-made reagents in a representative colour.
+//   2. Reaktivlar - common ready-made reagents in a representative colour.
 // `composition` is the element multiset poured into the vessel.
 
 import { ELEMENTS, parseFormula } from "./molecules";

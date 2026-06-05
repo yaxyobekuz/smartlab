@@ -1,4 +1,4 @@
-// Zaxvat — a horizontal arm from the rod ending in a ring that grips the test
+// Zaxvat - a horizontal arm from the rod ending in a ring that grips the test
 // tube's neck. The ring's inner radius sits just at the tube wall so the tube
 // visibly rests IN the clamp. Rubber pads (dark) cushion the grip.
 import * as THREE from "three";

@@ -1,8 +1,8 @@
-// Olov — a compact, upright burner flame that sits in the gap BELOW the tube,
+// Olov - a compact, upright burner flame that sits in the gap BELOW the tube,
 // its tip just reaching the glass bottom (tegib-tegmay). Stacked translucent
 // cones (orange → yellow → blue core) with additive blending read as fire, and
 // a flickering point light sells the heat. Each layer is anchored at its base
-// so flicker stretches the tip, not the root — and it stays vertical (no
+// so flicker stretches the tip, not the root - and it stays vertical (no
 // outward splay), so it heats the tube from directly underneath.
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";

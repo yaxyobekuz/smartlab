@@ -1,4 +1,4 @@
-// Pufakchalar — bubbles rising through the liquid while heating. A single
+// Pufakchalar - bubbles rising through the liquid while heating. A single
 // InstancedMesh (one draw call) holds every bubble; each rises on its own phase
 // from the liquid floor to the surface, growing then shrinking. Inactive or
 // paused → all instances collapse to zero scale (invisible, no extra cost).

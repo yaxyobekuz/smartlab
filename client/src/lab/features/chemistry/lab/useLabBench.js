@@ -1,6 +1,6 @@
 // Live state of the laboratory vessel: pour substances, blend colours, detect
 // reactions (offline rules) and recognise the molecule the mixture adds up to.
-// A lighter port of SmartLab's useBench — no external service, no sound.
+// A lighter port of SmartLab's useBench - no external service, no sound.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   addComposition,

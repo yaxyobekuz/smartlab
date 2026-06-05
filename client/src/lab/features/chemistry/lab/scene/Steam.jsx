@@ -1,4 +1,4 @@
-// Bug' — a few faint puffs drifting up from the tube mouth while heating, each
+// Bug' - a few faint puffs drifting up from the tube mouth while heating, each
 // growing and fading as it rises. Soft transparent spheres (additive-free so
 // they read as pale vapour, not glow). Each keeps its own material so they can
 // fade independently.

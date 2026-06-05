@@ -1,4 +1,4 @@
-// Tuman — thick dry-ice fog. When water meets dry ice the vessel brims with
+// Tuman - thick dry-ice fog. When water meets dry ice the vessel brims with
 // cold CO₂ fog that billows up from the mouth and spills DOWN the sides (the
 // fog is denser than air, so it sinks). Soft white puffs, each on its own
 // phase, growing and fading as they cascade outward.

@@ -1,6 +1,6 @@
 // The full 3D laboratory: a test tube clamped to a retort stand with a burner
 // beneath it. Uses a dedicated Canvas so it can have studio image-based
-// lighting (Lightformer Environment — offline-safe, no HDRI download) for real
+// lighting (Lightformer Environment - offline-safe, no HDRI download) for real
 // glass reflections, plus soft contact shadows for grounding. Camera/animation
 // pause + reset are wired to the workspace toolbar via SceneControl.
 import { Suspense, useRef } from "react";
