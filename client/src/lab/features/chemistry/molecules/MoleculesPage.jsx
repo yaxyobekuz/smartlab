@@ -12,6 +12,8 @@ const MoleculesPage = () => {
     <LabViewer
       title="Molekulalar"
       description="Molekulani sichqoncha bilan aylantiring, atom ustiga olib boring."
+      backTo="/chemistry"
+      backLabel="Kimyo"
       items={MOLECULES}
       activeId={activeId}
       onSelect={setActiveId}

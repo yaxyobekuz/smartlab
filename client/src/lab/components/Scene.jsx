@@ -9,10 +9,11 @@ const Loader = () => (
   </div>
 );
 
-const Scene = ({ children, camera = [0, 0, 8], controls = {} }) => (
+const Scene = ({ children, camera = [0, 0, 8], controls = {}, bg }) => (
   <div className="relative h-full w-full">
     <Suspense fallback={<Loader />}>
       <Canvas camera={{ position: camera, fov: 50 }} dpr={[1, 2]}>
+        {bg && <color attach="background" args={[bg]} />}
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 5, 5]} intensity={1.1} />
         <directionalLight position={[-5, -3, -5]} intensity={0.4} />

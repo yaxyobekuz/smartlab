@@ -12,6 +12,8 @@ const SolarSystemPage = () => {
     <LabViewer
       title="Quyosh tizimi"
       description="Sayyora ustiga bosing yoki ro'yxatdan tanlang. Sahnani aylantiring."
+      backTo="/physics"
+      backLabel="Fizika"
       items={PLANETS}
       activeId={activeId}
       onSelect={setActiveId}

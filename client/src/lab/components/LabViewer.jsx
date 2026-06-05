@@ -12,13 +12,15 @@ const LabViewer = ({
   onSelect,
   scene,
   info,
+  backTo = "/",
+  backLabel = "Bosh sahifa",
 }) => (
   <div className="container py-6">
     <Link
-      to="/"
+      to={backTo}
       className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
     >
-      <ArrowLeft size={16} /> Bosh sahifa
+      <ArrowLeft size={16} /> {backLabel}
     </Link>
 
     <div className="grid gap-6 lg:grid-cols-[1fr_340px]">

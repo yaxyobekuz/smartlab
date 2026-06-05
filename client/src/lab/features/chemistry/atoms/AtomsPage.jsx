@@ -19,6 +19,8 @@ const AtomsPage = () => {
     <LabViewer
       title="Atomlar"
       description="Yadro atrofida aylanayotgan elektron qobiqlarini kuzating."
+      backTo="/chemistry"
+      backLabel="Kimyo"
       items={ATOMS}
       activeId={activeId}
       onSelect={setActiveId}
