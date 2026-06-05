@@ -1,10 +1,11 @@
 // Shared loader for human anatomy (Z-Anatomy) GLB models.
-// The models are heavy (millions of triangles), so hover-picking uses a BVH to
-// keep raycasting cheap, and pointer events are throttled to avoid per-frame work.
+// The models are heavy (millions of triangles), so picking uses a BVH to keep
+// raycasting cheap, and pointer events are throttled to avoid per-frame work.
 // Parts are named only by material (Bone, Muscles, Eye...) and many ship without
-// color, so we tint each mesh by its material and show its Uzbek label on hover.
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useGLTF, Center, Bounds, Bvh, Html } from "@react-three/drei";
+// color, so we tint each mesh by its material and, on click, surface its Uzbek
+// detail to the parent (shown in the corner modal).
+import { useEffect, useMemo, useRef } from "react";
+import { useGLTF, Center, Bounds, Bvh } from "@react-three/drei";
 import * as THREE from "three";
 import { usePausableFrame } from "@/lab/components/usePausableFrame";
 import { resolveMaterial } from "@/lab/data/anatomyMaterials";
@@ -12,17 +13,16 @@ import { resolveMaterial } from "@/lab/data/anatomyMaterials";
 const HOVER_COLOR = new THREE.Color("#22d3ee");
 const HOVER_THROTTLE_MS = 60; // pick at most ~16x/sec, not every frame
 
-const AnatomyModel = ({ url }) => {
+const AnatomyModel = ({ url, onPick, frozen = false }) => {
   const group = useRef();
   const { scene } = useGLTF(url);
   const hoveredMesh = useRef(null);
   const lastMove = useRef(0);
-  const [tip, setTip] = useState(null); // { label, point: [x,y,z] }
 
   // Clone so two pages can show the same model without sharing mutated materials.
   const model = useMemo(() => scene.clone(true), [scene]);
 
-  // Tint every mesh by its material name; store the resolved label per mesh.
+  // Tint every mesh by its material name; store the resolved detail per mesh.
   useEffect(() => {
     model.traverse((child) => {
       if (!child.isMesh) return;
@@ -30,7 +30,7 @@ const AnatomyModel = ({ url }) => {
         ? child.material[0]?.name
         : child.material?.name;
       const resolved = resolveMaterial(matName);
-      child.userData.label = resolved?.label || null;
+      child.userData.detail = resolved;
       child.material = new THREE.MeshStandardMaterial({
         color: resolved?.color || "#cfd8dc",
         roughness: 0.7,
@@ -40,9 +40,9 @@ const AnatomyModel = ({ url }) => {
     });
   }, [model]);
 
-  // Stop the idle spin while hovering so the user can read/aim at a part.
+  // Idle spin, paused while hovering or while a part's detail is open.
   usePausableFrame((_, delta) => {
-    if (group.current && !hoveredMesh.current)
+    if (group.current && !hoveredMesh.current && !frozen)
       group.current.rotation.y += delta * 0.3;
   });
 
@@ -65,47 +65,39 @@ const AnatomyModel = ({ url }) => {
     const now = performance.now();
     if (now - lastMove.current < HOVER_THROTTLE_MS) return;
     lastMove.current = now;
-
-    const mesh = e.object;
-    if (mesh === hoveredMesh.current) return; // same part: nothing to update
-    highlight(mesh);
-    // Pin the tooltip to the hit point once, not on every move (avoids re-renders).
-    setTip(mesh.userData.label ? { label: mesh.userData.label, point: e.point.toArray() } : null);
+    if (e.object === hoveredMesh.current) return; // same part: nothing to update
+    highlight(e.object);
+    document.body.style.cursor = e.object.userData.detail ? "pointer" : "default";
   };
 
   const handleOut = (e) => {
     e.stopPropagation();
     highlight(null);
-    setTip(null);
+    document.body.style.cursor = "default";
+  };
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    const detail = e.object.userData.detail;
+    if (detail) onPick?.(detail);
   };
 
   return (
-    <>
-      <group ref={group}>
-        <Bounds fit clip observe margin={1.1}>
-          <Center>
-            {/* BVH makes raycasting on the multi-million-triangle model cheap. */}
-            <Bvh firstHitOnly>
-              <primitive
-                object={model}
-                onPointerMove={handleMove}
-                onPointerOut={handleOut}
-              />
-            </Bvh>
-          </Center>
-        </Bounds>
-      </group>
-
-      {/* Tooltip lives outside the spinning group; e.point is in world space and
-          the model is frozen while hovered, so it stays pinned to the part. */}
-      {tip && (
-        <Html position={tip.point} center distanceFactor={8} zIndexRange={[20, 0]}>
-          <div className="pointer-events-none -translate-y-3 whitespace-nowrap rounded bg-foreground px-2 py-0.5 text-xs font-medium text-background shadow">
-            {tip.label}
-          </div>
-        </Html>
-      )}
-    </>
+    <group ref={group}>
+      <Bounds fit observe margin={1.1}>
+        <Center>
+          {/* BVH makes raycasting on the multi-million-triangle model cheap. */}
+          <Bvh firstHitOnly>
+            <primitive
+              object={model}
+              onPointerMove={handleMove}
+              onPointerOut={handleOut}
+              onClick={handleClick}
+            />
+          </Bvh>
+        </Center>
+      </Bounds>
+    </group>
   );
 };
 
