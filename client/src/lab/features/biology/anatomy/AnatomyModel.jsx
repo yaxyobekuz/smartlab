@@ -1,19 +1,22 @@
 // Shared loader for human anatomy (Z-Anatomy) GLB models.
-// The models name parts only by material (Bone, Muscles, Eye...) and many ship
-// without color, so we: (1) tint every mesh by its material name, and
-// (2) show the material's Uzbek label on hover, at the pointer position.
+// The models are heavy (millions of triangles), so hover-picking uses a BVH to
+// keep raycasting cheap, and pointer events are throttled to avoid per-frame work.
+// Parts are named only by material (Bone, Muscles, Eye...) and many ship without
+// color, so we tint each mesh by its material and show its Uzbek label on hover.
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useGLTF, Center, Bounds, Html } from "@react-three/drei";
+import { useGLTF, Center, Bounds, Bvh, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { usePausableFrame } from "@/lab/components/usePausableFrame";
 import { resolveMaterial } from "@/lab/data/anatomyMaterials";
 
 const HOVER_COLOR = new THREE.Color("#22d3ee");
+const HOVER_THROTTLE_MS = 60; // pick at most ~16x/sec, not every frame
 
 const AnatomyModel = ({ url }) => {
   const group = useRef();
   const { scene } = useGLTF(url);
   const hoveredMesh = useRef(null);
+  const lastMove = useRef(0);
   const [tip, setTip] = useState(null); // { label, point: [x,y,z] }
 
   // Clone so two pages can show the same model without sharing mutated materials.
@@ -57,26 +60,38 @@ const AnatomyModel = ({ url }) => {
     }
   };
 
+  const handleMove = (e) => {
+    e.stopPropagation();
+    const now = performance.now();
+    if (now - lastMove.current < HOVER_THROTTLE_MS) return;
+    lastMove.current = now;
+
+    const mesh = e.object;
+    if (mesh === hoveredMesh.current) return; // same part: nothing to update
+    highlight(mesh);
+    // Pin the tooltip to the hit point once, not on every move (avoids re-renders).
+    setTip(mesh.userData.label ? { label: mesh.userData.label, point: e.point.toArray() } : null);
+  };
+
+  const handleOut = (e) => {
+    e.stopPropagation();
+    highlight(null);
+    setTip(null);
+  };
+
   return (
     <>
       <group ref={group}>
         <Bounds fit clip observe margin={1.1}>
           <Center>
-            <primitive
-              object={model}
-              onPointerMove={(e) => {
-                e.stopPropagation();
-                highlight(e.object);
-                const label = e.object.userData.label;
-                if (label) setTip({ label, point: e.point.toArray() });
-                else setTip(null);
-              }}
-              onPointerOut={(e) => {
-                e.stopPropagation();
-                highlight(null);
-                setTip(null);
-              }}
-            />
+            {/* BVH makes raycasting on the multi-million-triangle model cheap. */}
+            <Bvh firstHitOnly>
+              <primitive
+                object={model}
+                onPointerMove={handleMove}
+                onPointerOut={handleOut}
+              />
+            </Bvh>
           </Center>
         </Bounds>
       </group>
