@@ -83,14 +83,18 @@ const TestTube = ({ liquidColor, fill }) => {
       <mesh>
         <latheGeometry args={[profile, 64]} />
         <meshPhysicalMaterial
-          color="#eaf2fb"
+          color="#f4f9ff"
           transmission={1}
-          thickness={0.5}
-          ior={1.5}
-          roughness={0.06}
+          thickness={0.18}
+          ior={1.45}
+          roughness={0.04}
           metalness={0}
           clearcoat={1}
-          clearcoatRoughness={0.1}
+          clearcoatRoughness={0.06}
+          envMapIntensity={1.8}
+          specularIntensity={1}
+          attenuationColor="#ffffff"
+          attenuationDistance={4}
           transparent
           opacity={1}
           side={THREE.DoubleSide}

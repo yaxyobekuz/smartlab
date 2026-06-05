@@ -19,6 +19,8 @@ import Burner from "./Burner";
 import Flame from "./Flame";
 import Bubbles from "./Bubbles";
 import Steam from "./Steam";
+import PourDrop from "./PourDrop";
+import Fog from "./Fog";
 import { CAMERA_POSITION, CAMERA_TARGET, FLAME_Y, TUBE_X } from "./labGeometry";
 
 const Loader = () => (
@@ -31,9 +33,11 @@ const Loader = () => (
 // reflections and a sense of depth without fetching any external HDRI.
 const StudioEnv = () => (
   <Environment resolution={256}>
-    <Lightformer form="rect" intensity={2.2} position={[0, 4, 3]} scale={[7, 3, 1]} color="#ffffff" />
-    <Lightformer form="rect" intensity={1.1} position={[-5, 2, -1]} scale={[4, 5, 1]} color="#dbe6ff" />
-    <Lightformer form="rect" intensity={1.3} position={[5, 1.5, 2]} scale={[3, 4, 1]} color="#fff0dc" />
+    <Lightformer form="rect" intensity={3} position={[0, 5, 3]} scale={[8, 3, 1]} color="#ffffff" />
+    <Lightformer form="rect" intensity={2} position={[-5, 2, 1]} scale={[5, 6, 1]} color="#dbe6ff" />
+    <Lightformer form="rect" intensity={2} position={[5, 2, 2]} scale={[4, 5, 1]} color="#fff0dc" />
+    {/* Bright panel BEHIND the apparatus so the glass refracts light, not a black void */}
+    <Lightformer form="rect" intensity={2.6} position={[0, 3, -5]} scale={[9, 7, 1]} color="#cfe0ff" />
   </Environment>
 );
 
@@ -72,7 +76,17 @@ const ReactionFlash = ({ reactionSeq }) => {
   );
 };
 
-const Apparatus = ({ liquidColor, fill, heating, temperature, reactionSeq, paused }) => (
+const Apparatus = ({
+  liquidColor,
+  fill,
+  heating,
+  temperature,
+  reactionSeq,
+  pourSeq,
+  pourColor,
+  fogging,
+  paused,
+}) => (
   <group>
     <RetortStand />
     <Clamp />
@@ -81,6 +95,8 @@ const Apparatus = ({ liquidColor, fill, heating, temperature, reactionSeq, pause
     {heating && <Flame position={[TUBE_X, FLAME_Y, 0]} temperature={temperature} paused={paused} />}
     <Bubbles active={heating && fill > 0.02} fill={fill} temperature={temperature} paused={paused} />
     <Steam active={heating && temperature > 0.25} temperature={temperature} paused={paused} />
+    <Fog active={fogging} paused={paused} />
+    <PourDrop pourSeq={pourSeq} pourColor={pourColor} fill={fill} paused={paused} />
     <ReactionFlash reactionSeq={reactionSeq} />
   </group>
 );
@@ -94,7 +110,7 @@ const LabScene = (props) => {
         <Canvas dpr={[1, 2]} gl={{ antialias: true }} camera={{ position: CAMERA_POSITION, fov: 42 }}>
           <color attach="background" args={["#0e1626"]} />
           <StudioEnv />
-          <ambientLight intensity={0.25} />
+          <ambientLight intensity={0.4} />
           <directionalLight position={[4, 7, 4]} intensity={1.1} />
           <directionalLight position={[-5, 3, -4]} intensity={0.4} color="#bcd2ff" />
 

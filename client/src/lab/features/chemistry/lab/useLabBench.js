@@ -9,7 +9,9 @@ import {
 import { blendColors } from "@/lab/data/chemColor";
 import {
   classifyReaction,
+  detectCombo,
   effectForStatus,
+  isFogging,
   PRODUCT_COLORS,
 } from "@/lab/data/reactions";
 
@@ -59,8 +61,9 @@ export const useLabBench = () => {
     setPoured((prev) => {
       const next = [...prev, substance];
 
-      const beforeStatus = classifyReaction(elementSymbols(prev));
-      const status = classifyReaction(elementSymbols(next));
+      // Reagent combos (e.g. water + dry ice) take priority over element rules.
+      const beforeStatus = detectCombo(prev) || classifyReaction(elementSymbols(prev));
+      const status = detectCombo(next) || classifyReaction(elementSymbols(next));
       const fired = status && status !== beforeStatus;
       const effect = fired ? effectForStatus(status) : null;
       const stepProduct = findProduct(compositionOf(next));
@@ -96,6 +99,7 @@ export const useLabBench = () => {
 
   const composition = useMemo(() => compositionOf(poured), [poured]);
   const product = useMemo(() => findProduct(composition), [composition]);
+  const fogging = useMemo(() => isFogging(poured), [poured]);
 
   const liquidColor = useMemo(() => {
     if (poured.length === 0) return EMPTY_COLOR;
@@ -111,7 +115,10 @@ export const useLabBench = () => {
     liquidColor,
     fill: Math.min(poured.length / CAPACITY, 1),
     overfilled: poured.length > CAPACITY,
+    fogging,
     pourSeq: pour.seq,
+    pourColor: pour.color,
+    pourState: pour.state,
     reactionSeq: reaction.seq,
     reactionEffect: reaction.effect,
     heating,

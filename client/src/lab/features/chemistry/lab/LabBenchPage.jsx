@@ -89,6 +89,9 @@ const LabBenchPage = () => {
             heating={bench.heating}
             temperature={bench.temperature}
             reactionSeq={bench.reactionSeq}
+            pourSeq={bench.pourSeq}
+            pourColor={bench.pourColor}
+            fogging={bench.fogging}
           />
 
           {/* Reaction headline */}

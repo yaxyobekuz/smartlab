@@ -21,6 +21,7 @@ const STATUS_INFO = {
   chokma: { kind: "flash", title: "Cho'kma", detail: "Cho'kma hosil bo'ldi." },
   gaz_ajralishi: { kind: "smoke", title: "Gaz ajraldi", detail: "Reaksiyada gaz chiqdi." },
   issiqlik: { kind: "flash", title: "Issiqlik ajraldi", detail: "Ekzotermik reaksiya." },
+  tuman: { kind: "smoke", title: "Tuman!", detail: "Quruq muz suvda bug'lanib quyuq tuman hosil qiladi." },
   neytral: { kind: null, title: "Reaksiya yo'q", detail: "Sezilarli o'zgarish yo'q." },
 };
 
@@ -45,6 +46,22 @@ export const classifyReaction = (elementSymbols) => {
   }
   return null;
 };
+
+// Reactions between whole reagents (by substance id), e.g. water + dry ice ->
+// thick fog. These take priority over the element rules.
+const COMBO_RULES = [{ needs: ["cmp-h2o", "cmp-dryice"], status: "tuman" }];
+
+// A status for a poured list based on which named reagents are present.
+export const detectCombo = (poured) => {
+  const ids = new Set(poured.map((s) => s.id));
+  for (const rule of COMBO_RULES) {
+    if (rule.needs.every((id) => ids.has(id))) return rule.status;
+  }
+  return null;
+};
+
+// True while the contents are actively producing fog (water + dry ice).
+export const isFogging = (poured) => detectCombo(poured) === "tuman";
 
 // Representative liquid colours for recognised products, keyed by molecule id,
 // so a correct reaction reads right (water clear-blue, not pink).

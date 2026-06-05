@@ -78,6 +78,7 @@ export const COMPOUND_SUBSTANCES = [
   compound("h2o2", "Vodorod peroksid", "H2O2", "#e9f6ff", "suyuq"),
   compound("nh3", "Ammiak eritmasi", "NH3", "#eef7f0", "suyuq"),
   compound("h2so4", "Sulfat kislota", "H2SO4", "#f6f1d6", "suyuq"),
+  compound("dryice", "Quruq muz", "CO2", "#eaf3fb", "qattiq"),
 ];
 
 // Grouped for the chest UI.
