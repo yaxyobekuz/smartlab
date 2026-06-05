@@ -1,4 +1,4 @@
-// Hierarchical key factory: all/lists/list/details/detail — matches the invalidation granularity TanStack expects
+// Hierarchical key factory: all/lists/list/details/detail - matches the invalidation granularity TanStack expects
 export const createQueryKeys = (feature) => ({
   all: [feature],
   lists: () => [feature, "list"],

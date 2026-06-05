@@ -8,12 +8,12 @@ description: Used when creating a new modal with ModalWrapper (opened by the nam
 ## Rules
 
 - Modals are managed in the **Redux store** (`modal.slice.js`).
-- Each modal has a **unique string name** — declared as a constant inside `shared/constants/modals.js`.
+- Each modal has a **unique string name** - declared as a constant inside `shared/constants/modals.js`.
 - `ModalWrapper` wraps each modal component and injects the required props (`isLoading`, `setIsLoading`, `close`, `data`).
 
 ## Steps
 
-1. **Add the modal name** — in `client/src/shared/constants/modals.js`:
+1. **Add the modal name** - in `client/src/shared/constants/modals.js`:
    ```js
    export const MODAL = Object.freeze({
      POST_CREATE: "post:create",
@@ -21,7 +21,7 @@ description: Used when creating a new modal with ModalWrapper (opened by the nam
      // ...
    });
    ```
-2. **Create the modal body component** — `<feature>/components/modals/PostCreateModal.jsx`:
+2. **Create the modal body component** - `<feature>/components/modals/PostCreateModal.jsx`:
    ```jsx
    const PostCreateModal = ({ close, isLoading, setIsLoading, ...data }) => {
      const handleSubmit = async (form) => {
@@ -37,7 +37,7 @@ description: Used when creating a new modal with ModalWrapper (opened by the nam
    };
    export default PostCreateModal;
    ```
-3. **Wire it on the page** — `<feature>/pages/PostsListPage.jsx`:
+3. **Wire it on the page** - `<feature>/pages/PostsListPage.jsx`:
    ```jsx
    import ModalWrapper from "@/shared/components/ui/ModalWrapper";
    import { MODAL } from "@/shared/constants/modals";
@@ -52,7 +52,7 @@ description: Used when creating a new modal with ModalWrapper (opened by the nam
      </>
    );
    ```
-4. **Open the modal** — from any button:
+4. **Open the modal** - from any button:
    ```jsx
    const { openModal } = useModal();
    <Button onClick={() => openModal(MODAL.POST_CREATE, { initialData })}>
@@ -72,6 +72,6 @@ description: Used when creating a new modal with ModalWrapper (opened by the nam
 ## Avoid
 
 - Managing the modal via `useState` on the page.
-- Using `<Dialog>` or `<Drawer>` directly — always go through `ModalWrapper`.
-- Writing the modal name as a hard-coded string — always use the `MODAL.X` constant.
+- Using `<Dialog>` or `<Drawer>` directly - always go through `ModalWrapper`.
+- Writing the modal name as a hard-coded string - always use the `MODAL.X` constant.
 - Re-rendering the same modal component on every page (`ModalWrapper` lives only on the page that needs that modal).

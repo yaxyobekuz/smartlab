@@ -43,7 +43,7 @@ const CommandList = React.forwardRef(
       [ref],
     );
 
-    // cmdk ichki sizer wheel hodisasini ushlab qoladi — qo'lda forward qilamiz
+    // cmdk ichki sizer wheel hodisasini ushlab qoladi - qo'lda forward qilamiz
     const handleWheel = (e) => {
       onWheel?.(e);
       if (!innerRef.current || e.defaultPrevented) return;

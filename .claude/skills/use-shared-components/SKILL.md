@@ -1,18 +1,18 @@
 ---
 name: use-shared-components
-description: Used when building any page/feature in the client panel — pages and features must consume only shared/components/ui (and guards/layout); shadcn primitives stay encapsulated inside shared and must never be imported from feature/page code.
+description: Used when building any page/feature in the client panel - pages and features must consume only shared/components/ui (and guards/layout); shadcn primitives stay encapsulated inside shared and must never be imported from feature/page code.
 ---
 
 # Using shared components in the client panel
 
-This skill defines where pages and features in `client/` may — and **may not** — pull UI components from. Core idea: **shadcn is an internal "primitive" layer**; it is enriched only inside `shared/` and exposed to the outside world via `shared/components/ui/*` (and `guards/`, `layout/`).
+This skill defines where pages and features in `client/` may - and **may not** - pull UI components from. Core idea: **shadcn is an internal "primitive" layer**; it is enriched only inside `shared/` and exposed to the outside world via `shared/components/ui/*` (and `guards/`, `layout/`).
 
 ## Core rules (strict)
 
 1. A page or feature **must never** import from `@/shared/components/shadcn/*`.
 2. Every UI element a page needs comes from `@/shared/components/ui/*` (or `guards/`, `layout/` if applicable).
-3. If `shared/components/ui/` does not yet have the wrapper you need — create the wrapper inside `shared/` first, then use it on the page. Reaching directly for a shadcn primitive "just this once" violates the rule.
-4. Editing a `shadcn/*` file is reserved for changes to the official primitive behavior (default variants, default classes). Project-specific logic (permission, redux, mask, locale, etc.) **never** goes inside `shadcn/` — it belongs in the `ui/` wrapper.
+3. If `shared/components/ui/` does not yet have the wrapper you need - create the wrapper inside `shared/` first, then use it on the page. Reaching directly for a shadcn primitive "just this once" violates the rule.
+4. Editing a `shadcn/*` file is reserved for changes to the official primitive behavior (default variants, default classes). Project-specific logic (permission, redux, mask, locale, etc.) **never** goes inside `shadcn/` - it belongs in the `ui/` wrapper.
 
 ## Why this rule?
 
@@ -30,28 +30,28 @@ Layers inside `@/shared/components/`:
 | **guards** | `shared/components/guards/*` | `AuthGuard`, `GuestGuard`, `RoleGuard`, `PermissionGuard` | ✅ yes (route/section protection) |
 | **layout** | `shared/components/layout/*` | `AppHeader`, `AppSidebar`, `BackHeader`, `BugReport` | ✅ yes (mostly in layout files) |
 | **bg** | `shared/components/bg/*` | `MainBackgroundPatterns` | ✅ yes |
-| **shadcn** | `shared/components/shadcn/*` | `button`, `dialog`, `dropdown-menu`, `select`, `sidebar`, `sonner`, ... | ❌ **NO** — only inside `ui/` |
+| **shadcn** | `shared/components/shadcn/*` | `button`, `dialog`, `dropdown-menu`, `select`, `sidebar`, `sonner`, ... | ❌ **NO** - only inside `ui/` |
 
 ## Correct vs incorrect imports
 
 ```jsx
-// ❌ wrong — page uses shadcn directly
+// ❌ wrong - page uses shadcn directly
 import { Button } from "@/shared/components/shadcn/button";
 import { Dialog } from "@/shared/components/shadcn/dialog";
 
-// ✅ correct — page goes through shared/ui
+// ✅ correct - page goes through shared/ui
 import Button from "@/shared/components/ui/button/Button";
 import ModalWrapper from "@/shared/components/ui/modal/ModalWrapper";
 ```
 
-The `@/components/*` alias is equivalent to `@/shared/components/*` — match whichever style the existing code in the project uses.
+The `@/components/*` alias is equivalent to `@/shared/components/*` - match whichever style the existing code in the project uses.
 
-## When a new UI element is needed — the right route
+## When a new UI element is needed - the right route
 
 Say a page needs `Accordion`, but `shared/components/ui/` does not have it yet. Steps:
 
-1. **Check the shadcn primitive** — `shared/components/shadcn/accordion.jsx`. If missing, install it via the shadcn CLI (it lands inside `shadcn/`).
-2. **Create the wrapper** — `shared/components/ui/accordion/Accordion.jsx`:
+1. **Check the shadcn primitive** - `shared/components/shadcn/accordion.jsx`. If missing, install it via the shadcn CLI (it lands inside `shadcn/`).
+2. **Create the wrapper** - `shared/components/ui/accordion/Accordion.jsx`:
    ```jsx
    import { Accordion as AccordionRoot, AccordionItem, AccordionTrigger, AccordionContent }
      from "@/shared/components/shadcn/accordion";
@@ -74,9 +74,9 @@ Say a page needs `Accordion`, but `shared/components/ui/` does not have it yet. 
    import Accordion from "@/shared/components/ui/accordion/Accordion";
    ```
 
-The wrapper layer is where icons, default styles, internal state, `useTranslation` calls, and so on live — they stay inside this file so the page remains clean.
+The wrapper layer is where icons, default styles, internal state, `useTranslation` calls, and so on live - they stay inside this file so the page remains clean.
 
-## Modals — a special case
+## Modals - a special case
 
 A modal is **never** written directly via `shadcn/dialog` or `shadcn/drawer`. Everything goes through `ModalWrapper`:
 
@@ -90,11 +90,11 @@ import PostCreateModal from "../components/modals/PostCreateModal";
 </ModalWrapper>
 ```
 
-Details — `.claude/skills/add-modal/SKILL.md`.
+Details - `.claude/skills/add-modal/SKILL.md`.
 
-## Buttons — a special case
+## Buttons - a special case
 
-A page uses `shared/components/ui/button/Button`, not `shared/components/shadcn/button`. The wrapper leaves room for future global behavior (style presets, disabled handling, etc.) — bypassing it loses that consistency.
+A page uses `shared/components/ui/button/Button`, not `shared/components/shadcn/button`. The wrapper leaves room for future global behavior (style presets, disabled handling, etc.) - bypassing it loses that consistency.
 
 ```jsx
 import Button from "@/shared/components/ui/button/Button";
@@ -104,7 +104,7 @@ import Button from "@/shared/components/ui/button/Button";
 
 ## Input/Select family
 
-`Input` and `Select` come in several flavors — pick the right one:
+`Input` and `Select` come in several flavors - pick the right one:
 
 | Purpose | Component |
 |---|---|
@@ -119,9 +119,9 @@ import Button from "@/shared/components/ui/button/Button";
 | Searchable select | `SelectSearch` |
 | User picker | `SelectAllUsers` |
 
-If you need something from underneath `shadcn/select`, build a new wrapper — never surface shadcn directly on a page.
+If you need something from underneath `shadcn/select`, build a new wrapper - never surface shadcn directly on a page.
 
-## Guards — at the page level
+## Guards - at the page level
 
 To protect a page or an entire route:
 
@@ -145,4 +145,4 @@ import PermissionGuard from "@/shared/components/guards/PermissionGuard";
 
 ## When may I edit the shadcn file itself?
 
-Only when the **official primitive behavior** changes (default variants, default classes). Project-specific logic (redux, permission, mask, locale) **never** belongs inside `shadcn/` — its home is the `ui/` wrapper.
+Only when the **official primitive behavior** changes (default variants, default classes). Project-specific logic (redux, permission, mask, locale) **never** belongs inside `shadcn/` - its home is the `ui/` wrapper.

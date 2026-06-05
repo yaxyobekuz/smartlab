@@ -8,7 +8,7 @@ export const isRoleAllowed = (userRole, allowedRoles) => {
   return allowedRoles.includes(userRole);
 };
 
-// Owner is excluded — it cannot be assigned via the UI
+// Owner is excluded - it cannot be assigned via the UI
 export const getAllRoles = (roles = []) =>
   roles
     .filter((r) => r.value !== "owner")

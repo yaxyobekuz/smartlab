@@ -21,7 +21,7 @@ const seed = async () => {
   }
   logger.info(`Permissions seed qilindi: ${Object.keys(permIds).length}`);
 
-  // Owner — super-admin, always has every permission.
+  // Owner - super-admin, always has every permission.
   await Role.findOneAndUpdate(
     { value: ROLES.OWNER },
     {

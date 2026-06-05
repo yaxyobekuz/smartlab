@@ -29,7 +29,7 @@ modules/<name>/
 ## Steps
 
 1. **Create the module folders.**
-2. **Service** — business logic and DB:
+2. **Service** - business logic and DB:
    ```js
    // services/posts.service.js
    import Post from "../../../models/post.model.js";
@@ -51,7 +51,7 @@ modules/<name>/
      return Post.create(body);
    };
    ```
-3. **Validator** — zod schema:
+3. **Validator** - zod schema:
    ```js
    // validators/create.validator.js
    import { z } from "zod";
@@ -63,7 +63,7 @@ modules/<name>/
      }),
    });
    ```
-4. **Handler** — one file per endpoint:
+4. **Handler** - one file per endpoint:
    ```js
    // handlers/create.handler.js
    import asyncHandler from "../../../middleware/asyncHandler.js";
@@ -76,7 +76,7 @@ modules/<name>/
 
    export default create;
    ```
-5. **Routes** — wire up the endpoints:
+5. **Routes** - wire up the endpoints:
    ```js
    // posts.routes.js
    import { Router } from "express";
@@ -92,16 +92,16 @@ modules/<name>/
    router.post("/", requireAuth, requirePermission("posts.create"), validate(createSchema), create);
    export default router;
    ```
-6. **Mount it on the main router** — in `routes/index.js`:
+6. **Mount it on the main router** - in `routes/index.js`:
    ```js
    import postsRouter from "../modules/posts/posts.routes.js";
    router.use("/posts", postsRouter);
    ```
-7. **Permission seed** — add the new permission keys to the DB (`posts.read`, `posts.create`, ...).
+7. **Permission seed** - add the new permission keys to the DB (`posts.read`, `posts.create`, ...).
 
 ## Rules
 
-- **Handlers** contain NO business logic — they are just the req/res bridge. Logic lives in the `service`.
+- **Handlers** contain NO business logic - they are just the req/res bridge. Logic lives in the `service`.
 - The **service** works directly with the model and throws `ApiError` on errors.
 - Every handler is wrapped with `asyncHandler` (no try/catch).
 - Validation is done via the `validate(schema)` middleware, so the handler receives a clean body.
@@ -112,4 +112,4 @@ modules/<name>/
 - Stuffing all CRUD into a single `posts.controller.js` file.
 - Writing `try/catch` inside a handler (`asyncHandler` is in place).
 - Skipping the service and using the model directly inside a handler.
-- `res.status(500).json(...)` — let `errorHandler` do that; throw `ApiError` instead.
+- `res.status(500).json(...)` - let `errorHandler` do that; throw `ApiError` instead.

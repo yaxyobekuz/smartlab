@@ -6,7 +6,7 @@ description: Used when creating a new middleware on the backend.
 # Adding a backend middleware
 
 ## Location
-`server/src/middleware/<name>.js` — one middleware per file.
+`server/src/middleware/<name>.js` - one middleware per file.
 
 ## Example
 
@@ -57,10 +57,10 @@ router.post(
 - Each middleware is responsible for **one task** (auth, role, permission, validate, rateLimit).
 - Throw via `next(new ApiError(...))`. Never call `res.status(...).json(...)` directly.
 - Attach data to `req` (`req.user`, `req.permissions`); the next handler reads it from there.
-- For async work — wrap with `asyncHandler` or use `try/catch -> next(err)`.
+- For async work - wrap with `asyncHandler` or use `try/catch -> next(err)`.
 
 ## Avoid
 
 - Putting business logic inside a middleware.
-- Leaving `console.log` calls (use the logger — `config/logger.js`).
+- Leaving `console.log` calls (use the logger - `config/logger.js`).
 - Calling `res.send` (on errors call `next(error)`).

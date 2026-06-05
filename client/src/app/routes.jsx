@@ -13,14 +13,14 @@ import {
 
 const Routes = () => (
   <RoutesWrapper>
-    {/* Content pages — with header */}
+    {/* Content pages - with header */}
     <Route element={<LabLayout />}>
       <Route index element={<LandingPage />} />
       <Route path="/:subject" element={<SubjectPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Route>
 
-    {/* 3D workspace — no header, full screen */}
+    {/* 3D workspace - no header, full screen */}
     <Route element={<LabWorkspaceLayout />}>
       <Route path="/:subject/:topic" element={<TopicPage />} />
     </Route>

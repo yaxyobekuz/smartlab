@@ -47,6 +47,6 @@ queryKey: ["postlar"]                  // ❌
 
 ## Special cases
 
-- **Date/number formatting** — Uzbek format on the UI (`12-noyabr 2026`), ISO on the API (`2026-11-12`).
-- **Phone number** — `+998 (90) 123-45-67` on the UI, `998901234567` on the API.
-- **Form field label** — Uzbek (`"Telefon raqami"`); the input `name` attribute stays English (`name="phone"`).
+- **Date/number formatting** - Uzbek format on the UI (`12-noyabr 2026`), ISO on the API (`2026-11-12`).
+- **Phone number** - `+998 (90) 123-45-67` on the UI, `998901234567` on the API.
+- **Form field label** - Uzbek (`"Telefon raqami"`); the input `name` attribute stays English (`name="phone"`).

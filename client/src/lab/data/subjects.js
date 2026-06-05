@@ -6,7 +6,7 @@ export const SUBJECTS = [
   {
     slug: "chemistry",
     title: "Kimyo",
-    short: "Modda tuzilishi — molekula va atomlarni 3D da o'rganing.",
+    short: "Modda tuzilishi - molekula va atomlarni 3D da o'rganing.",
     icon: "🧪",
     color: "#2563eb",
     topics: [
@@ -27,7 +27,7 @@ export const SUBJECTS = [
   {
     slug: "biology",
     title: "Biologiya",
-    short: "Tirik organizm asoslari — hujayra va DNK tuzilishi.",
+    short: "Tirik organizm asoslari - hujayra va DNK tuzilishi.",
     icon: "🧫",
     color: "#059669",
     topics: [
@@ -48,7 +48,7 @@ export const SUBJECTS = [
   {
     slug: "physics",
     title: "Fizika",
-    short: "Tabiat qonunlari — koinot va tebranishlarni kuzating.",
+    short: "Tabiat qonunlari - koinot va tebranishlarni kuzating.",
     icon: "🔭",
     color: "#ea580c",
     topics: [

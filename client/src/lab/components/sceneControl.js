@@ -1,5 +1,5 @@
 // Context object + consumer hook (kept separate from the provider component so
-// fast-refresh stays happy — a file may export either components or non-components).
+// fast-refresh stays happy - a file may export either components or non-components).
 import { createContext, useContext } from "react";
 
 export const SceneControlContext = createContext(null);
@@ -12,7 +12,7 @@ const NOOP_CONTROL = {
   controlsRef: { current: null },
 };
 
-// Throws if no provider — use where the toolbar is guaranteed (workspace).
+// Throws if no provider - use where the toolbar is guaranteed (workspace).
 export const useSceneControl = () => {
   const ctx = useContext(SceneControlContext);
   if (!ctx)
@@ -20,6 +20,6 @@ export const useSceneControl = () => {
   return ctx;
 };
 
-// Never throws — falls back to no-op when there is no provider.
+// Never throws - falls back to no-op when there is no provider.
 export const useSceneControlOptional = () =>
   useContext(SceneControlContext) ?? NOOP_CONTROL;

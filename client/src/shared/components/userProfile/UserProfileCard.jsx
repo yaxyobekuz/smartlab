@@ -11,7 +11,7 @@ const Row = ({ label, value, muted = false }) => (
   <div>
     <p className="text-xs text-muted-foreground">{label}</p>
     <p className={muted ? "text-muted-foreground" : "font-medium"}>
-      {value || "—"}
+      {value || "-"}
     </p>
   </div>
 );

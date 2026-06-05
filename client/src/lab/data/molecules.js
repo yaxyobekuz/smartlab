@@ -16,7 +16,7 @@ export const MOLECULES = [
     name: "Suv",
     formula: "H₂O",
     about:
-      "Suv — eng muhim birikma. Bir kislorod va ikki vodorod atomidan iborat, burchakli shaklga ega.",
+      "Suv - eng muhim birikma. Bir kislorod va ikki vodorod atomidan iborat, burchakli shaklga ega.",
     atoms: [
       { el: "O", pos: [0, 0, 0] },
       { el: "H", pos: [0.76, 0.59, 0] },
@@ -32,7 +32,7 @@ export const MOLECULES = [
     name: "Karbonat angidrid",
     formula: "CO₂",
     about:
-      "Karbonat angidrid — chiziqli molekula. Markazda uglerod, ikki tomonida ikki kislorod joylashgan.",
+      "Karbonat angidrid - chiziqli molekula. Markazda uglerod, ikki tomonida ikki kislorod joylashgan.",
     atoms: [
       { el: "C", pos: [0, 0, 0] },
       { el: "O", pos: [1.16, 0, 0] },
@@ -48,7 +48,7 @@ export const MOLECULES = [
     name: "Metan",
     formula: "CH₄",
     about:
-      "Metan — tabiiy gazning asosiy qismi. Uglerod atrofida to'rt vodorod tetraedr shaklida joylashgan.",
+      "Metan - tabiiy gazning asosiy qismi. Uglerod atrofida to'rt vodorod tetraedr shaklida joylashgan.",
     atoms: [
       { el: "C", pos: [0, 0, 0] },
       { el: "H", pos: [0.63, 0.63, 0.63] },
@@ -68,7 +68,7 @@ export const MOLECULES = [
     name: "Ammiak",
     formula: "NH₃",
     about:
-      "Ammiak — azot va uch vodoroddan iborat. Piramidasimon shaklga ega va o'tkir hidli gaz.",
+      "Ammiak - azot va uch vodoroddan iborat. Piramidasimon shaklga ega va o'tkir hidli gaz.",
     atoms: [
       { el: "N", pos: [0, 0, 0] },
       { el: "H", pos: [0.94, 0.3, 0] },

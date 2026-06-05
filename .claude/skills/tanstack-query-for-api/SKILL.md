@@ -17,7 +17,7 @@ A page **always** goes through a hook; it never uses axios directly.
 
 ## Query Keys
 
-`shared/lib/query/keys.js` — central registry:
+`shared/lib/query/keys.js` - central registry:
 
 ```js
 export const qk = {
@@ -82,12 +82,12 @@ These can be overridden at the feature level (per-query options).
 ## Rules
 
 - The server response is `{ success, data, ... }`, so the hook returns `r.data.data`.
-- For cache invalidation — always use the highest-level key (`qk.posts.all()`) so all queries in the group are refreshed.
-- On a successful mutation — show a `toast` with UI text in Uzbek.
+- For cache invalidation - always use the highest-level key (`qk.posts.all()`) so all queries in the group are refreshed.
+- On a successful mutation - show a `toast` with UI text in Uzbek.
 - Do not use the `useEffect`-with-fetch pattern inside `useQuery`.
 
 ## Avoid
 
 - Calling `axios.get` outside of a hook (on a page).
-- Ad-hoc query keys (`["posts-list"]`) — always go through `qk`.
-- `enabled: undefined` — for a conditional query, write an explicit `enabled: Boolean(...)`.
+- Ad-hoc query keys (`["posts-list"]`) - always go through `qk`.
+- `enabled: undefined` - for a conditional query, write an explicit `enabled: Boolean(...)`.

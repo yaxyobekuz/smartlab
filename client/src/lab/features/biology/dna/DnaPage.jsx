@@ -26,7 +26,7 @@ const DnaPage = () => (
     info={
       <div className="space-y-3">
         <p className="text-sm text-muted-foreground">
-          DNK — irsiy axborotni saqlovchi molekula. Ikki ip o'zaro buralib
+          DNK - irsiy axborotni saqlovchi molekula. Ikki ip o'zaro buralib
           qo'sh spiral hosil qiladi, ular azot asoslari bilan bog'lanadi.
         </p>
         <div>

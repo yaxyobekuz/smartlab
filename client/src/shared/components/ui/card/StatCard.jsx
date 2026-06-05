@@ -44,7 +44,7 @@ const StatCard = ({
 
       <p className="text-2xl font-semibold tracking-tight">
         {value === null || value === undefined ? (
-          <span className="text-zinc-400">—</span>
+          <span className="text-zinc-400">-</span>
         ) : (
           <AnimatedCounter
             value={safeValue}

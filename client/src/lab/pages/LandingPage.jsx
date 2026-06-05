@@ -17,7 +17,7 @@ const LandingPage = () => (
           Fanni <span className="text-primary">3D</span> olamida o'rganing
         </h1>
         <p className="mt-4 max-w-md text-muted-foreground">
-          Smartlab — kimyo, biologiya va fizika hodisalarini aylantirib, bosib
+          Smartlab - kimyo, biologiya va fizika hodisalarini aylantirib, bosib
           va o'rganib ko'rishingiz mumkin bo'lgan virtual laboratoriya.
         </p>
         <Link

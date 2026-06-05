@@ -1,4 +1,4 @@
-// Central registry of TanStack Query keys — extend here when adding a feature
+// Central registry of TanStack Query keys - extend here when adding a feature
 export const qk = Object.freeze({
   auth: {
     me: () => ["auth", "me"],

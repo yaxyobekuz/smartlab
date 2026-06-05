@@ -5,7 +5,7 @@ export const WAVES = [
     id: "sine",
     name: "Sinus to'lqini",
     about:
-      "Sinus to'lqini — eng oddiy davriy tebranish. Amplituda balandlikni, chastota tezlikni belgilaydi.",
+      "Sinus to'lqini - eng oddiy davriy tebranish. Amplituda balandlikni, chastota tezlikni belgilaydi.",
     type: "wave",
     amplitude: 1.2,
     frequency: 1.5,
@@ -23,7 +23,7 @@ export const WAVES = [
     id: "pendulum",
     name: "Mayatnik",
     about:
-      "Mayatnik — og'irlik kuchi ta'sirida tebranuvchi jism. Tebranish davri ip uzunligiga bog'liq.",
+      "Mayatnik - og'irlik kuchi ta'sirida tebranuvchi jism. Tebranish davri ip uzunligiga bog'liq.",
     type: "pendulum",
     amplitude: 0.9,
     frequency: 1,

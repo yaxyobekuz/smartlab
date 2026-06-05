@@ -1,8 +1,8 @@
 // Sana formati: "12.05.2026"
 export const formatDateUz = (dateLike) => {
-  if (!dateLike) return "—";
+  if (!dateLike) return "-";
   const d = new Date(dateLike);
-  if (Number.isNaN(d.getTime())) return "—";
+  if (Number.isNaN(d.getTime())) return "-";
   const dd = String(d.getDate()).padStart(2, "0");
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   return `${dd}.${mm}.${d.getFullYear()}`;

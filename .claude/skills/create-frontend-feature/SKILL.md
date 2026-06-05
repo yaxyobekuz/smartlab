@@ -40,7 +40,7 @@ description: Used when adding a new feature to a role panel on the frontend (FSD
 ## Steps
 
 1. **Create the folder** with the structure above.
-2. **API**: `api/<feature>.api.js` — only axios calls.
+2. **API**: `api/<feature>.api.js` - only axios calls.
    ```js
    import http from "@/shared/api/http";
    export const postsAPI = {
@@ -71,28 +71,28 @@ description: Used when adding a new feature to a role panel on the frontend (FSD
        queryFn: () => postsAPI.list(params).then((r) => r.data.data),
      });
    ```
-5. **Page** — page component (UI text in Uzbek):
+5. **Page** - page component (UI text in Uzbek):
    ```jsx
    const PostsListPage = () => {
      const { data = [], isLoading } = usePostsQuery();
      return <div>...</div>;
    };
    ```
-6. **Public API** — `index.js`:
+6. **Public API** - `index.js`:
    ```js
    export { default as PostsListPage } from "./pages/PostsListPage";
    export { usePostsQuery } from "./hooks/usePostsQuery";
    ```
-7. **Wire up the route** — inside `<role>/routes/index.jsx`.
-8. **Sidebar** — add an entry to `<role>/navigation/sidebar.config.js` (with a permission if needed).
+7. **Wire up the route** - inside `<role>/routes/index.jsx`.
+8. **Sidebar** - add an entry to `<role>/navigation/sidebar.config.js` (with a permission if needed).
 
 ## Rules
 
-- A page does not call axios directly — only via a hook.
-- Do not use `shadcn/*` components directly on a page — go through `shared/components/ui/*`.
+- A page does not call axios directly - only via a hook.
+- Do not use `shadcn/*` components directly on a page - go through `shared/components/ui/*`.
 - Modals are managed via `ModalWrapper` + the `MODAL` constant. (See the `add-modal` skill.)
 - Export only what external code needs from the public API.
-- Do not import internal files of another feature — only its `index.js`.
+- Do not import internal files of another feature - only its `index.js`.
 
 ## Avoid
 

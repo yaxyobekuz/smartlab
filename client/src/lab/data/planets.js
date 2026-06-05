@@ -29,7 +29,7 @@ export const PLANETS = [
     size: 0.6,
     distance: 8.5,
     speed: 0.029,
-    about: "Bizning sayyoramiz — hayot mavjud bo'lgan yagona ma'lum sayyora.",
+    about: "Bizning sayyoramiz - hayot mavjud bo'lgan yagona ma'lum sayyora.",
   },
   {
     id: "mars",

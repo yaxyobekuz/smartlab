@@ -23,7 +23,7 @@ export const DAY_OPTIONS = Object.entries(DAY_LABELS_FULL_UZ).map(
 );
 
 export const formatSchedule = (schedule = []) => {
-  if (!Array.isArray(schedule) || schedule.length === 0) return "—";
+  if (!Array.isArray(schedule) || schedule.length === 0) return "-";
   return schedule
     .map((s) => `${DAY_LABELS_UZ[s.day] || s.day} ${s.startTime}–${s.endTime}`)
     .join(", ");

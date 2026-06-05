@@ -26,7 +26,7 @@ export const setQueryData = (queryKey, data) => {
   queryClient.setQueryData(queryKey, data);
 };
 
-// Optimistic update helper — updater receives old data
+// Optimistic update helper - updater receives old data
 export const updateQueryData = (queryKey, updater) => {
   queryClient.setQueryData(queryKey, updater);
 };

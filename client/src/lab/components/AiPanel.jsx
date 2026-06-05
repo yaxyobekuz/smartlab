@@ -1,5 +1,5 @@
 // Right-side AI assistant panel. Chat UI is a placeholder until the backend
-// agent is wired up — input is disabled and marked "tez kunda".
+// agent is wired up - input is disabled and marked "tez kunda".
 import { Sparkles, Send } from "lucide-react";
 
 const AiPanel = () => (
