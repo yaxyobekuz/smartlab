@@ -1,28 +1,29 @@
 // Shared loader for human anatomy (Z-Anatomy) GLB models.
-// The models are heavy (millions of triangles), so hover-picking uses a BVH to
-// keep raycasting cheap, and pointer events are throttled to avoid per-frame work.
 // Parts are named only by material (Bone, Muscles, Eye...) and many ship without
-// color, so we tint each mesh by its material and show its Uzbek label on hover.
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useGLTF, Center, Bounds, Bvh, Html } from "@react-three/drei";
+// color, so we tint each mesh by its material and, on click, surface its Uzbek
+// detail to the parent (corner modal).
+//
+// Perf: the models are heavy (millions of triangles). The scene renders on demand
+// (no idle spin), so a static view costs nothing. Raycasting uses a BVH built
+// *after* first paint so picking is cheap without blocking the initial load.
+import { useEffect, useMemo, useRef } from "react";
+import { useGLTF, Center, Bounds } from "@react-three/drei";
+import { useThree } from "@react-three/fiber";
+import { MeshBVH, acceleratedRaycast } from "three-mesh-bvh";
 import * as THREE from "three";
-import { usePausableFrame } from "@/lab/components/usePausableFrame";
 import { resolveMaterial } from "@/lab/data/anatomyMaterials";
 
 const HOVER_COLOR = new THREE.Color("#22d3ee");
-const HOVER_THROTTLE_MS = 60; // pick at most ~16x/sec, not every frame
 
-const AnatomyModel = ({ url }) => {
-  const group = useRef();
+const AnatomyModel = ({ url, onPick, frozen = false }) => {
   const { scene } = useGLTF(url);
-  const hoveredMesh = useRef(null);
-  const lastMove = useRef(0);
-  const [tip, setTip] = useState(null); // { label, point: [x,y,z] }
+  const invalidate = useThree((s) => s.invalidate);
+  const selected = useRef(null);
 
-  // Clone so two pages can show the same model without sharing mutated materials.
+  // Clone so the cached source scene is never mutated.
   const model = useMemo(() => scene.clone(true), [scene]);
 
-  // Tint every mesh by its material name; store the resolved label per mesh.
+  // Tint every mesh by its material name; store the resolved detail per mesh.
   useEffect(() => {
     model.traverse((child) => {
       if (!child.isMesh) return;
@@ -30,7 +31,7 @@ const AnatomyModel = ({ url }) => {
         ? child.material[0]?.name
         : child.material?.name;
       const resolved = resolveMaterial(matName);
-      child.userData.label = resolved?.label || null;
+      child.userData.detail = resolved;
       child.material = new THREE.MeshStandardMaterial({
         color: resolved?.color || "#cfd8dc",
         roughness: 0.7,
@@ -38,74 +39,71 @@ const AnatomyModel = ({ url }) => {
       });
       child.userData.baseColor = child.material.color.clone();
     });
+    invalidate();
+  }, [model, invalidate]);
+
+  // Build the raycast BVH off the critical path so first paint isn't blocked.
+  useEffect(() => {
+    const build = () => {
+      model.traverse((child) => {
+        if (child.isMesh && !child.geometry.boundsTree) {
+          child.geometry.boundsTree = new MeshBVH(child.geometry);
+          child.raycast = acceleratedRaycast;
+        }
+      });
+    };
+    const ric = window.requestIdleCallback;
+    const id = ric ? ric(build) : setTimeout(build, 200);
+    return () => (ric ? window.cancelIdleCallback(id) : clearTimeout(id));
   }, [model]);
 
-  // Stop the idle spin while hovering so the user can read/aim at a part.
-  usePausableFrame((_, delta) => {
-    if (group.current && !hoveredMesh.current)
-      group.current.rotation.y += delta * 0.3;
-  });
-
-  const highlight = (mesh) => {
-    if (hoveredMesh.current === mesh) return;
-    const prev = hoveredMesh.current;
-    if (prev?.userData.baseColor) {
-      prev.material.color.copy(prev.userData.baseColor);
-      prev.material.emissive.set("#000000");
-    }
-    hoveredMesh.current = mesh;
-    if (mesh) {
-      mesh.material.color.lerp(HOVER_COLOR, 0.45);
-      mesh.material.emissive.copy(HOVER_COLOR).multiplyScalar(0.25);
-    }
+  const restore = (mesh) => {
+    if (!mesh?.userData.baseColor) return;
+    mesh.material.color.copy(mesh.userData.baseColor);
+    mesh.material.emissive.set("#000000");
   };
 
-  const handleMove = (e) => {
-    e.stopPropagation();
-    const now = performance.now();
-    if (now - lastMove.current < HOVER_THROTTLE_MS) return;
-    lastMove.current = now;
+  // Clear the highlight when the detail modal is closed.
+  useEffect(() => {
+    if (!frozen && selected.current) {
+      restore(selected.current);
+      selected.current = null;
+      invalidate();
+    }
+  }, [frozen, invalidate]);
 
+  const handleClick = (e) => {
+    e.stopPropagation();
     const mesh = e.object;
-    if (mesh === hoveredMesh.current) return; // same part: nothing to update
-    highlight(mesh);
-    // Pin the tooltip to the hit point once, not on every move (avoids re-renders).
-    setTip(mesh.userData.label ? { label: mesh.userData.label, point: e.point.toArray() } : null);
-  };
-
-  const handleOut = (e) => {
-    e.stopPropagation();
-    highlight(null);
-    setTip(null);
+    const detail = mesh.userData.detail;
+    if (!detail) return;
+    restore(selected.current);
+    selected.current = mesh;
+    mesh.material.color.lerp(HOVER_COLOR, 0.45);
+    mesh.material.emissive.copy(HOVER_COLOR).multiplyScalar(0.25);
+    onPick?.(detail);
+    invalidate();
   };
 
   return (
-    <>
-      <group ref={group}>
-        <Bounds fit clip observe margin={1.1}>
-          <Center>
-            {/* BVH makes raycasting on the multi-million-triangle model cheap. */}
-            <Bvh firstHitOnly>
-              <primitive
-                object={model}
-                onPointerMove={handleMove}
-                onPointerOut={handleOut}
-              />
-            </Bvh>
-          </Center>
-        </Bounds>
-      </group>
-
-      {/* Tooltip lives outside the spinning group; e.point is in world space and
-          the model is frozen while hovered, so it stays pinned to the part. */}
-      {tip && (
-        <Html position={tip.point} center distanceFactor={8} zIndexRange={[20, 0]}>
-          <div className="pointer-events-none -translate-y-3 whitespace-nowrap rounded bg-foreground px-2 py-0.5 text-xs font-medium text-background shadow">
-            {tip.label}
-          </div>
-        </Html>
-      )}
-    </>
+    <Bounds fit observe margin={1.1}>
+      <Center>
+        <primitive
+          object={model}
+          onClick={handleClick}
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            document.body.style.cursor = e.object.userData.detail
+              ? "pointer"
+              : "default";
+          }}
+          onPointerOut={(e) => {
+            e.stopPropagation();
+            document.body.style.cursor = "default";
+          }}
+        />
+      </Center>
+    </Bounds>
   );
 };
 

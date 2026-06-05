@@ -21,6 +21,9 @@ const env = Object.freeze({
   COOKIE_DOMAIN: process.env.COOKIE_DOMAIN || "localhost",
 
   CLIENT_URL: process.env.CLIENT_URL || "http://localhost:5173",
+
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
+  OPENAI_MODEL: process.env.OPENAI_MODEL || "gpt-4o-mini",
 });
 
 export const isProd = env.NODE_ENV === "production";
