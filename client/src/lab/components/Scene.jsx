@@ -32,8 +32,9 @@ const Scene = ({
       <directionalLight position={[5, 5, 5]} intensity={1.1} />
       <directionalLight position={[-5, -3, -5]} intensity={0.4} />
       {children}
-      {/* Drops resolution while orbiting (regress), restores it when idle. */}
-      <AdaptiveDpr pixelated />
+      {/* Adaptive dpr only in "always" mode; in "demand" it would never get the
+          frames to restore resolution, leaving the view permanently blurry. */}
+      {frameloop === "always" && <AdaptiveDpr pixelated />}
       <OrbitControls
         ref={controlsRef}
         enablePan={false}
@@ -41,7 +42,7 @@ const Scene = ({
         maxDistance={40}
         autoRotate={autoRotate && !paused}
         autoRotateSpeed={0.8}
-        regress
+        regress={frameloop === "always"}
         {...controls}
       />
     </>
