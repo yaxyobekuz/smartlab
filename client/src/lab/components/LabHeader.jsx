@@ -5,8 +5,8 @@ import { logoIcon } from "@/shared/assets/icons";
 import { SUBJECTS } from "@/lab/data/subjects";
 
 const LabHeader = () => (
-  <header className="z-30 border-b border-border/60 bg-background/80 backdrop-blur">
-    <div className="flex h-14 items-center justify-between gap-4 px-4 md:px-6">
+  <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur">
+    <div className="container flex h-14 items-center justify-between gap-4">
       <Link to="/" className="flex items-center gap-2 font-semibold">
         <img src={logoIcon} alt="Smartlab logo" className="size-6" />
         <span>Smartlab</span>

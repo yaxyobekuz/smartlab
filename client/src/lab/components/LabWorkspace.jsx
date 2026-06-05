@@ -9,7 +9,7 @@ import Toolbar from "./Toolbar";
 import AiPanel from "./AiPanel";
 
 const LeftPanel = ({ title, description, backTo, backLabel, items, activeId, onSelect, info }) => (
-  <div className="flex h-full w-72 flex-col border-r border-border bg-card/40">
+  <div className="z-10 flex h-full w-72 flex-col border-r border-border bg-card shadow-[4px_0_16px_-4px_rgba(0,0,0,0.06)]">
     <div className="border-b border-border p-4">
       <Link
         to={backTo}
@@ -89,7 +89,7 @@ const LabWorkspace = ({
         </div>
 
         {!panelsHidden && (
-          <aside className="hidden h-full w-80 border-l border-border bg-card/40 lg:block">
+          <aside className="z-10 hidden h-full w-80 border-l border-border bg-card shadow-[-4px_0_16px_-4px_rgba(0,0,0,0.06)] lg:block">
             <AiPanel />
           </aside>
         )}
