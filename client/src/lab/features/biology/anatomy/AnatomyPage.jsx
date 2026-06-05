@@ -16,7 +16,7 @@ const AnatomyPage = () => {
   return (
     <LabWorkspace
       title={model.title}
-      description="Modelni aylantirib turli tomondan ko'ring."
+      description="Modelni aylantiring. Bir qismga sichqonchani olib borsangiz nomi chiqadi."
       backTo="/biology"
       backLabel="Biologiya"
       items={ANATOMY.map((a) => ({ id: a.slug, name: a.title }))}
@@ -27,6 +27,10 @@ const AnatomyPage = () => {
       }}
       scene={
         <Scene camera={[0, 1, 6]}>
+          {/* Soft fill from several sides so the tinted anatomy reads clearly. */}
+          <hemisphereLight args={["#ffffff", "#9ca3af", 0.9]} />
+          <directionalLight position={[4, 6, 5]} intensity={0.8} />
+          <directionalLight position={[-5, 2, -4]} intensity={0.4} />
           <AnatomyModel url={model.url} />
         </Scene>
       }
