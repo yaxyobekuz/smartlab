@@ -159,7 +159,7 @@ const AiPanel = () => {
       <div className="flex items-center gap-2 border-b border-border px-4 py-3">
         <img src={robotHead} alt="" className="size-8 rounded-lg bg-primary/10 p-1.5" />
         <div className="flex-1">
-          <p className="text-sm font-semibold">Aqlbek - AI yordamchi</p>
+          <p className="text-sm font-semibold">Mira AI - yordamchi</p>
           <p className="flex items-center gap-1 text-xs text-muted-foreground">
             <span className="size-1.5 rounded-full bg-emerald-500" /> Onlayn
           </p>
