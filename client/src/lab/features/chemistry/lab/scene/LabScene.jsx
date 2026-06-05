@@ -21,7 +21,13 @@ import Bubbles from "./Bubbles";
 import Steam from "./Steam";
 import PourDrop from "./PourDrop";
 import Fog from "./Fog";
-import { CAMERA_POSITION, CAMERA_TARGET, FLAME_Y, TUBE_X } from "./labGeometry";
+import {
+  CAMERA_POSITION,
+  CAMERA_TARGET,
+  FLAME_Y,
+  TUBE_BASE_Y,
+  TUBE_X,
+} from "./labGeometry";
 
 const Loader = () => (
   <div className="absolute inset-0 grid place-items-center text-sm text-muted-foreground">
@@ -66,7 +72,7 @@ const ReactionFlash = ({ reactionSeq }) => {
   });
 
   return (
-    <group position={[TUBE_X, 1.5, 0]}>
+    <group position={[TUBE_X, TUBE_BASE_Y + 0.9, 0]}>
       <pointLight ref={light} color="#fff3d0" distance={6} decay={2} intensity={0} />
       <mesh ref={puff} visible={false}>
         <sphereGeometry args={[1, 20, 20]} />
@@ -94,7 +100,9 @@ const Apparatus = ({
     <Burner />
     {heating && <Flame position={[TUBE_X, FLAME_Y, 0]} temperature={temperature} paused={paused} />}
     <Bubbles active={heating && fill > 0.02} fill={fill} temperature={temperature} paused={paused} />
-    <Steam active={heating && temperature > 0.25} temperature={temperature} paused={paused} />
+    {/* Steam only once there's enough liquid AND it's genuinely hot — so a fresh
+        pour doesn't puff vapour out of a near-empty tube. */}
+    <Steam active={heating && fill > 0.12 && temperature > 0.5} temperature={temperature} paused={paused} />
     <Fog active={fogging} paused={paused} />
     <PourDrop pourSeq={pourSeq} pourColor={pourColor} fill={fill} paused={paused} />
     <ReactionFlash reactionSeq={reactionSeq} />

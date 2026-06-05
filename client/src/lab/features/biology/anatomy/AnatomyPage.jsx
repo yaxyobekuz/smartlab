@@ -1,17 +1,14 @@
-// One page reused by every anatomy topic. The topic slug from the URL selects
-// which GLB model to load (myology, angiology, ...).
-import { useParams, useNavigate } from "react-router-dom";
+// Single "Odam anatomiyasi" page holding every body system. The side panel
+// switches which GLB model (myology, angiology, ...) is shown via local state.
+import { useState } from "react";
 import Scene from "@/lab/components/Scene";
 import LabWorkspace from "@/lab/components/LabWorkspace";
-import NotFoundPage from "@/lab/pages/NotFoundPage";
 import AnatomyModel from "./AnatomyModel";
 import { ANATOMY, getAnatomy } from "@/lab/data/anatomy";
 
 const AnatomyPage = () => {
-  const { topic } = useParams();
-  const navigate = useNavigate();
-  const model = getAnatomy(topic);
-  if (!model) return <NotFoundPage />;
+  const [activeSlug, setActiveSlug] = useState(ANATOMY[0].slug);
+  const model = getAnatomy(activeSlug);
 
   return (
     <LabWorkspace
@@ -21,10 +18,7 @@ const AnatomyPage = () => {
       backLabel="Biologiya"
       items={ANATOMY.map((a) => ({ id: a.slug, name: a.title }))}
       activeId={model.slug}
-      // Switching item navigates to that model's topic page.
-      onSelect={(id) => {
-        if (id !== model.slug) navigate(`/biology/${id}`);
-      }}
+      onSelect={setActiveSlug}
       scene={
         <Scene camera={[0, 1, 6]}>
           {/* Soft fill from several sides so the tinted anatomy reads clearly. */}
