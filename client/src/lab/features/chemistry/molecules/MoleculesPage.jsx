@@ -1,8 +1,11 @@
 // Molecule library: searchable category list (left) + 3D viewer with toolbar
 // (center) + PubChem info panel (right). 240 molecules from PubChem data.
 import { useRef } from "react";
+import { List, Info } from "lucide-react";
 import Scene from "@/lab/components/Scene";
 import Toolbar from "@/lab/components/Toolbar";
+import SidePanel from "@/lab/components/SidePanel";
+import WorkspaceMobileBar from "@/lab/components/WorkspaceMobileBar";
 import { SceneControlProvider } from "@/lab/components/SceneControlProvider";
 import { useSceneControl } from "@/lab/components/sceneControl";
 import useObjectState from "@/shared/hooks/useObjectState";
@@ -35,19 +38,22 @@ const DEFAULT_CID = (
 
 const MoleculesBody = () => {
   const rootRef = useRef(null);
-  const { selectedCid, search, panelsHidden, view, setField } = useObjectState({
-    selectedCid: DEFAULT_CID,
-    search: "",
-    panelsHidden: false,
-    view: "molekula",
-  });
+  const { selectedCid, search, panelsHidden, view, listOpen, infoOpen, setField, setFields } =
+    useObjectState({
+      selectedCid: DEFAULT_CID,
+      search: "",
+      panelsHidden: false,
+      view: "molekula",
+      listOpen: false,
+      infoOpen: false,
+    });
   const { inVR, cardboard, exitCardboard } = useSceneControl();
 
   const molecule = getLibraryMolecule(selectedCid) ?? MOLECULE_LIBRARY[0];
   const isState = view !== "molekula";
 
-  // Panels are hidden when manually collapsed OR while in either VR mode.
-  const panelsVisible = !panelsHidden && !cardboard && !inVR;
+  // Immersive VR modes take over the whole screen - no panels, no mobile bar.
+  const immersive = cardboard || inVR;
 
   const toggleFullscreen = () => {
     if (document.fullscreenElement) document.exitFullscreen();
@@ -55,18 +61,40 @@ const MoleculesBody = () => {
   };
 
   return (
-    <div ref={rootRef} className="flex h-full w-full bg-background">
-      {panelsVisible && (
-        <MoleculeLibrarySidebar
-          molecules={MOLECULE_LIBRARY}
-          selectedCid={molecule.cid}
-          onSelect={(cid) => setField("selectedCid", cid)}
-          search={search}
-          onSearch={(v) => setField("search", v)}
-        />
+    <div ref={rootRef} className="relative flex h-full w-full bg-background">
+      {!immersive && (
+        <SidePanel
+          side="left"
+          open={listOpen}
+          onClose={() => setField("listOpen", false)}
+          desktopHidden={panelsHidden}
+          widthClass="lg:w-72"
+          className="lg:shadow-[4px_0_16px_-4px_rgba(0,0,0,0.06)]"
+        >
+          <MoleculeLibrarySidebar
+            molecules={MOLECULE_LIBRARY}
+            selectedCid={molecule.cid}
+            onSelect={(cid) => setFields({ selectedCid: cid, listOpen: false })}
+            search={search}
+            onSearch={(v) => setField("search", v)}
+          />
+        </SidePanel>
       )}
 
       <div className="relative min-w-0 flex-1">
+        {/* Mobile: floating back + open-library / open-info buttons. */}
+        {!immersive && (
+          <WorkspaceMobileBar
+            backTo="/chemistry"
+            onOpenLeft={() => setField("listOpen", true)}
+            leftIcon={<List size={18} />}
+            leftLabel="Molekulalar ro'yxatini ochish"
+            onOpenRight={() => setField("infoOpen", true)}
+            rightIcon={<Info size={18} />}
+            rightLabel="Ma'lumot panelini ochish"
+          />
+        )}
+
         <Scene camera={[0, 0, 6.5]} bg="#0b1020">
           {isState ? (
             <MoleculeStates molecule={molecule} state={view} />
@@ -134,7 +162,18 @@ const MoleculesBody = () => {
         )}
       </div>
 
-      {panelsVisible && <MoleculeInfoPanel molecule={molecule} />}
+      {!immersive && (
+        <SidePanel
+          side="right"
+          open={infoOpen}
+          onClose={() => setField("infoOpen", false)}
+          desktopHidden={panelsHidden}
+          widthClass="lg:w-80"
+          className="lg:shadow-[-4px_0_16px_-4px_rgba(0,0,0,0.06)]"
+        >
+          <MoleculeInfoPanel molecule={molecule} />
+        </SidePanel>
+      )}
     </div>
   );
 };

@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, AdaptiveDpr } from "@react-three/drei";
-import { XR } from "@react-three/xr";
+import { XR, XROrigin, IfInSessionMode } from "@react-three/xr";
 import { useSceneControlOptional } from "./sceneControl";
 import CardboardView from "./CardboardView";
 import Locomotion from "./Locomotion";
@@ -24,7 +24,7 @@ const Scene = ({
   autoRotate = false,
   frameloop = "always",
 }) => {
-  const { paused, controlsRef, xrStore, cardboard, walk } =
+  const { paused, controlsRef, xrStore, inVR, cardboard, walk } =
     useSceneControlOptional();
 
   // In cardboard mode the gyroscope drives the camera, so disable orbit + adaptive
@@ -34,17 +34,11 @@ const Scene = ({
   const walkOn = !!walk;
   const freeControl = cardboardOn || walkOn;
 
-  const content = (
+  // OrbitControls + cardboard stereo must NOT run during an immersive WebXR
+  // session (they fight the WebXR-owned camera and blank the headset).
+  const cameraControls = (
     <>
-      {bg && <color attach="background" args={[bg]} />}
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[5, 5, 5]} intensity={1.1} />
-      <directionalLight position={[-5, -3, -5]} intensity={0.4} />
-      {children}
-
-      <CardboardView enabled={cardboardOn} />
-      <Locomotion />
-
+      <CardboardView enabled={cardboardOn && !inVR} />
       {!freeControl && frameloop === "always" && <AdaptiveDpr pixelated />}
       {!freeControl && (
         <OrbitControls
@@ -57,6 +51,32 @@ const Scene = ({
           regress={frameloop === "always"}
           {...controls}
         />
+      )}
+    </>
+  );
+
+  const content = (
+    <>
+      {bg && <color attach="background" args={[bg]} />}
+      <ambientLight intensity={0.6} />
+      <directionalLight position={[5, 5, 5]} intensity={1.1} />
+      <directionalLight position={[-5, -3, -5]} intensity={0.4} />
+      {children}
+
+      <Locomotion />
+
+      {/* XR (workspace) bo'lsa: turish nuqtasini markazlashgan modeldan biroz
+          orqaga qo'yib, kamera boshqaruvlarini sessiya tashqarisiga qulflaymiz.
+          Hero sahnada (store yo'q) XR-komponentlarsiz oddiy boshqaruv ishlaydi. */}
+      {xrStore ? (
+        <>
+          <XROrigin position={[0, -1.2, 4]} />
+          <IfInSessionMode deny={["immersive-vr", "immersive-ar"]}>
+            {cameraControls}
+          </IfInSessionMode>
+        </>
+      ) : (
+        cameraControls
       )}
     </>
   );

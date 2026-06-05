@@ -39,7 +39,7 @@ const MoleculeLibrarySidebar = ({
   const total = groups.reduce((n, [, list]) => n + list.length, 0);
 
   return (
-    <aside className="z-10 flex h-full w-72 shrink-0 flex-col border-r border-border bg-card shadow-[4px_0_16px_-4px_rgba(0,0,0,0.06)]">
+    <div className="flex h-full flex-col">
       <div className="border-b border-border p-4">
         <Link
           to="/chemistry"
@@ -109,7 +109,7 @@ const MoleculeLibrarySidebar = ({
           </div>
         ))}
       </div>
-    </aside>
+    </div>
   );
 };
 

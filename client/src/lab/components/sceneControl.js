@@ -17,6 +17,10 @@ const NOOP_CONTROL = {
   inVR: false,
   vrSupported: false,
   enterVR: () => {},
+  // Universal "Enter VR": immersive-vr -> cardboard -> walk fallback.
+  startVR: async () => "walk",
+  vrMessage: "",
+  setVrMessage: () => {},
   // Phone cardboard VR: split-screen stereo + gyroscope.
   cardboard: false,
   gyroSupported: false,

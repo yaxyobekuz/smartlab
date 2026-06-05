@@ -2,16 +2,38 @@
 // Left: info + item picker.  Center: 3D scene + bottom toolbar.  Right: AI panel.
 import { useEffect, useRef } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Headset, Glasses } from "lucide-react";
+import { ArrowLeft, Headset, PanelLeft, Sparkles } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import useObjectState from "@/shared/hooks/useObjectState";
 import { SceneControlProvider } from "./SceneControlProvider";
 import { useSceneControl } from "./sceneControl";
 import Toolbar from "./Toolbar";
 import AiPanel from "./AiPanel";
+import SidePanel from "./SidePanel";
+import WorkspaceMobileBar from "./WorkspaceMobileBar";
+
+// AI faqat nomni emas, modelning real ma'lumotini ko'rishi uchun: render-only
+// maydonlarni (rang, koordinatalar, geometriya) tashlab, ilmiy qiymatlarni qoldiramiz.
+const OMIT_FIELDS = new Set(["id", "name", "color", "pos", "atoms", "bonds", "materials", "slug"]);
+const cleanActiveData = (item) => {
+  if (!item) return undefined;
+  const out = {};
+  for (const [key, value] of Object.entries(item)) {
+    if (OMIT_FIELDS.has(key) || value == null) continue;
+    if (Array.isArray(value)) {
+      // Faqat son/matn massivlarini (masalan elektron qobiqlar [2,8,1]) qoldiramiz.
+      if (value.every((v) => typeof v === "number" || typeof v === "string"))
+        out[key] = value.join(", ");
+      continue;
+    }
+    if (typeof value === "object") continue;
+    out[key] = value;
+  }
+  return Object.keys(out).length ? out : undefined;
+};
 
 const LeftPanel = ({ title, description, backTo, backLabel, items, activeId, onSelect, info }) => (
-  <div className="z-10 flex h-full w-72 flex-col border-r border-border bg-card shadow-[4px_0_16px_-4px_rgba(0,0,0,0.06)]">
+  <div className="flex h-full flex-col">
     <div className="border-b border-border p-4">
       <Link
         to={backTo}
@@ -59,20 +81,20 @@ const WorkspaceBody = ({
   aiContext,
 }) => {
   const rootRef = useRef(null);
-  const { panelsHidden, vrDismissed, setField } = useObjectState({
+  const { panelsHidden, vrDismissed, leftOpen, aiOpen, setField } = useObjectState({
     panelsHidden: false,
     vrDismissed: false,
+    leftOpen: false,
+    aiOpen: false,
   });
   const { subject, topic } = useParams();
   const [searchParams] = useSearchParams();
   const {
     inVR,
-    vrSupported,
-    enterVR,
+    startVR,
+    vrMessage,
     cardboard,
     exitCardboard,
-    gyroSupported,
-    toggleCardboard,
     walk,
     exitWalk,
     setAiContext,
@@ -82,18 +104,26 @@ const WorkspaceBody = ({
   // Bosh sahifadagi "VR laboratoriyaga kirish" tugmasi ?vr=1 bilan keladi.
   const vrRequested = searchParams.get("vr") === "1";
 
-  // Side panels are hidden when manually collapsed OR while in any immersive/walk mode.
-  const panelsVisible = !panelsHidden && !cardboard && !inVR && !walk;
+  // Immersive/walk modes take over the whole screen - no panels, no mobile bar.
+  const immersive = cardboard || inVR || walk;
 
-  // Feed the live page context to the AI agent (subject, topic, items, active item).
+  // Feed the live page context to the AI agent: subject, topic, item list, and
+  // the full real data of the active item so answers are grounded, not invented.
   useEffect(() => {
+    const activeItem = items?.find((it) => it.id === activeId);
     setAiContext({
       context: {
         subject,
         topic,
         title,
-        items: items?.map((it) => ({ id: it.id, name: it.name })),
-        activeItem: items?.find((it) => it.id === activeId)?.name,
+        items: items?.map((it) => ({
+          id: it.id,
+          name: it.name,
+          ...(it.formula ? { formula: it.formula } : {}),
+          ...(it.symbol ? { symbol: it.symbol } : {}),
+        })),
+        activeItem: activeItem?.name,
+        activeData: cleanActiveData(activeItem),
         ...aiContext,
       },
       onSelectItem: onSelect,
@@ -112,22 +142,44 @@ const WorkspaceBody = ({
   };
 
   return (
-    <div ref={rootRef} className="flex h-full w-full bg-background">
-      {panelsVisible && (
-        <LeftPanel
-          title={title}
-          description={description}
-          backTo={backTo}
-          backLabel={backLabel}
-          items={items}
-          activeId={activeId}
-          onSelect={onSelect}
-          info={info}
-        />
+    <div ref={rootRef} className="relative flex h-full w-full bg-background">
+      {!immersive && (
+        <SidePanel
+          side="left"
+          open={leftOpen}
+          onClose={() => setField("leftOpen", false)}
+          desktopHidden={panelsHidden}
+          widthClass="lg:w-72"
+          className="lg:shadow-[4px_0_16px_-4px_rgba(0,0,0,0.06)]"
+        >
+          <LeftPanel
+            title={title}
+            description={description}
+            backTo={backTo}
+            backLabel={backLabel}
+            items={items}
+            activeId={activeId}
+            onSelect={onSelect}
+            info={info}
+          />
+        </SidePanel>
       )}
 
       <div className="relative min-w-0 flex-1">
         {scene}
+
+        {/* Mobile: floating back + panel-open buttons (panels are drawers here). */}
+        {!immersive && (
+          <WorkspaceMobileBar
+            backTo={backTo}
+            onOpenLeft={() => setField("leftOpen", true)}
+            leftIcon={<PanelLeft size={18} />}
+            leftLabel="Ma'lumot panelini ochish"
+            onOpenRight={() => setField("aiOpen", true)}
+            rightIcon={<Sparkles size={18} />}
+            rightLabel="Mira AI ni ochish"
+          />
+        )}
 
         {cardboard ? (
           <>
@@ -166,46 +218,31 @@ const WorkspaceBody = ({
           </div>
         )}
 
-        {/* VR ko'zoynakdan kelinganda: WebXR (Quest) yoki giroskop (telefon). */}
+        {/* VR ko'zoynakdan kelinganda yagona tugma: qurilmaga qarab immersive-vr
+            (headset), cardboard (telefon) yoki sayohat (kompyuter) avtomatik tanlanadi. */}
         {vrRequested && !inVR && !cardboard && !vrDismissed && (
           <div className="absolute inset-0 z-40 grid place-items-center bg-background/80 p-6 backdrop-blur">
             <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 text-center shadow-xl">
               <div className="mx-auto grid size-12 place-items-center rounded-xl bg-primary/10 text-primary">
-                {vrSupported ? <Headset size={24} /> : <Glasses size={24} />}
+                <Headset size={24} />
               </div>
               <h2 className="mt-3 text-lg font-semibold">VR laboratoriya</h2>
-              {vrSupported ? (
-                <>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Ko'zoynakni kiying va kirish tugmasini bosing. Kontroller
-                    bilan reaktivlarni tanlab, tajriba o'tkazishingiz mumkin.
-                  </p>
-                  <button
-                    onClick={enterVR}
-                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-                  >
-                    <Headset size={16} /> VR rejimiga kirish
-                  </button>
-                </>
-              ) : gyroSupported ? (
-                <>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Telefonni ko'zoynakka joylang. Boshingizni burib atrofga
-                    qarang - telefonni ko'tarsangiz tepaga, tushirsangiz pastga
-                    qaraysiz. Ekranni bosib turib oldinga yuriladi.
-                  </p>
-                  <button
-                    onClick={toggleCardboard}
-                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-                  >
-                    <Glasses size={16} /> Giroskop VR rejimiga kirish
-                  </button>
-                </>
-              ) : (
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Bu qurilma VR'ni qo'llab-quvvatlamaydi. Laboratoriyani oddiy
-                  rejimda davom ettiring.
-                </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Ko'zoynak ulansa - immersiv VR; telefon bo'lsa ko'zoynakka joylab
+                giroskop bilan qarang; kompyuterda sudrab qarash va WASD bilan yuriladi.
+              </p>
+              <button
+                onClick={async () => {
+                  const mode = await startVR();
+                  // Kompyuterda (headset/gyro yo'q) sayohat rejimiga tushdi - oynani yopamiz.
+                  if (mode === "walk") setField("vrDismissed", true);
+                }}
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                <Headset size={16} /> VR rejimiga kirish
+              </button>
+              {vrMessage && (
+                <p className="mt-2 text-xs text-destructive">{vrMessage}</p>
               )}
               <button
                 onClick={() => setField("vrDismissed", true)}
@@ -218,10 +255,17 @@ const WorkspaceBody = ({
         )}
       </div>
 
-      {panelsVisible && (
-        <aside className="z-10 hidden h-full w-80 border-l border-border bg-card shadow-[-4px_0_16px_-4px_rgba(0,0,0,0.06)] lg:block">
+      {!immersive && (
+        <SidePanel
+          side="right"
+          open={aiOpen}
+          onClose={() => setField("aiOpen", false)}
+          desktopHidden={panelsHidden}
+          widthClass="lg:w-80"
+          className="lg:shadow-[-4px_0_16px_-4px_rgba(0,0,0,0.06)]"
+        >
           <AiPanel />
-        </aside>
+        </SidePanel>
       )}
     </div>
   );

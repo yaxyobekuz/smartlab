@@ -11,7 +11,7 @@ import {
   Lightformer,
   ContactShadows,
 } from "@react-three/drei";
-import { XR, XROrigin } from "@react-three/xr";
+import { XR, XROrigin, IfInSessionMode } from "@react-three/xr";
 import { useSceneControlOptional } from "@/lab/components/sceneControl";
 import CardboardView from "@/lab/components/CardboardView";
 import Locomotion from "@/lab/components/Locomotion";
@@ -118,26 +118,33 @@ const LabScene = ({ reagents, onPour, onToggleHeat, onClear, ...display }) => {
         color="#0a1018"
       />
 
-      {/* Phone cardboard look (split-screen + gyroscope) and desktop/phone walk. */}
-      <CardboardView enabled={!!cardboard} />
+      {/* Desktop/phone walk (XR stik bilan harakat alohida <XRLocomotion> da). */}
       <Locomotion />
 
-      {/* VRda boshni headset boshqaradi; turish nuqtasini oldinga qo'yamiz. */}
-      {inVR && <XROrigin ref={originRef} position={[0, 0, 4.8]} />}
+      {/* Turish nuqtasi HAR DOIM mavjud: sessiya boshlanishi bilan WebXR kamerasi
+          shu guruhga ulanadi. inVR holatini kutsak, kamera (0,0,0) da qolib,
+          probiraga emas, bo'shliqqa qarab ekran bo'sh ko'rinardi (asosiy bug). */}
+      <XROrigin ref={originRef} position={[0, 0, 4.8]} />
 
-      {!freeControl && (
-        <OrbitControls
-          ref={controlsRef}
-          makeDefault
-          enablePan={false}
-          enableDamping
-          dampingFactor={0.08}
-          target={CAMERA_TARGET}
-          minDistance={3}
-          maxDistance={13}
-          maxPolarAngle={Math.PI * 0.52}
-        />
-      )}
+      {/* Immersiv sessiyada kamera WebXR ixtiyorida bo'ladi - OrbitControls va
+          cardboard stereo unga qarshi ishlab ekranni "buzmasligi" uchun ularni
+          sessiya tashqarisiga qulflaymiz (react-three/xr rasmiy tavsiyasi). */}
+      <IfInSessionMode deny={["immersive-vr", "immersive-ar"]}>
+        <CardboardView enabled={!!cardboard && !inVR} />
+        {!freeControl && (
+          <OrbitControls
+            ref={controlsRef}
+            makeDefault
+            enablePan={false}
+            enableDamping
+            dampingFactor={0.08}
+            target={CAMERA_TARGET}
+            minDistance={3}
+            maxDistance={13}
+            maxPolarAngle={Math.PI * 0.52}
+          />
+        )}
+      </IfInSessionMode>
     </>
   );
 

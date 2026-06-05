@@ -9,20 +9,28 @@ import { xrStore } from "./xrStore";
 const ZOOM_STEP = 1.2; // multiply/divide camera distance per zoom step
 
 // Phone cardboard VR is feasible when the device exposes orientation events.
-// (Touch + a coarse pointer ~ a phone; DeviceOrientationEvent ~ a gyroscope.)
+// We DON'T require pointer:coarse (it wrongly excludes phones with a paired
+// stylus/mouse and tablets); a touch-capable device with DeviceOrientationEvent
+// is enough to OFFER the button - a live event is verified at toggle time.
 const detectGyro = () =>
   typeof window !== "undefined" &&
   "DeviceOrientationEvent" in window &&
-  window.matchMedia?.("(pointer: coarse)").matches;
+  ("ontouchstart" in window ||
+    navigator.maxTouchPoints > 0 ||
+    window.matchMedia?.("(pointer: coarse)").matches);
 
 export const SceneControlProvider = ({ children }) => {
   const navigate = useNavigate();
   const [paused, setPaused] = useState(false);
-  const [inVR, setInVR] = useState(false);
+  // Seed from the live store so a session that is already running (e.g. entered
+  // before this provider mounted) is reflected immediately, not a render late.
+  const [inVR, setInVR] = useState(() => xrStore.getState().session != null);
   const [vrSupported, setVrSupported] = useState(false);
   const [cardboard, setCardboard] = useState(false);
   const [walk, setWalk] = useState(false);
   const [gyroSupported] = useState(detectGyro);
+  // Short Uzbek note shown when VR can't start / falls back to another mode.
+  const [vrMessage, setVrMessage] = useState("");
   const controlsRef = useRef(null);
 
   // What the user is looking at right now - fed to the AI as live context.
@@ -56,13 +64,18 @@ export const SceneControlProvider = ({ children }) => {
     };
   }, []);
 
-  // Track whether an XR session is currently running.
-  useEffect(
-    () => xrStore.subscribe((s) => setInVR(s.session != null)),
-    [],
-  );
+  // Track whether an XR session is running. The initial value is already seeded
+  // from xrStore.getState() above, so here we only subscribe to future changes.
+  useEffect(() => xrStore.subscribe((s) => setInVR(s.session != null)), []);
 
-  const enterVR = useCallback(() => xrStore.enterVR(), []);
+  // Headset-only path; never throws (rejection swallowed). Returns the session.
+  const enterVR = useCallback(async () => {
+    try {
+      return await xrStore.enterVR();
+    } catch {
+      return null;
+    }
+  }, []);
 
   // iOS 13+ needs an explicit gesture-triggered permission for gyroscope.
   const requestGyroPermission = useCallback(async () => {
@@ -84,8 +97,46 @@ export const SceneControlProvider = ({ children }) => {
       return;
     }
     const ok = await requestGyroPermission();
-    if (ok) setCardboard(true);
+    if (ok) {
+      setWalk(false);
+      setCardboard(true);
+    } else {
+      setVrMessage("Giroskopga ruxsat berilmadi");
+    }
   }, [cardboard, requestGyroPermission]);
+
+  // ONE universal "Enter VR": real headset (immersive-vr) -> phone cardboard
+  // (stereo + gyro) -> desktop magic-window (drag-look + WASD). Always does
+  // something useful and surfaces a reason in Uzbek instead of failing silently.
+  const startVR = useCallback(async () => {
+    setVrMessage("");
+    // 1) Real headset / emulator.
+    if (window.isSecureContext && navigator.xr) {
+      try {
+        if (await navigator.xr.isSessionSupported("immersive-vr")) {
+          const session = await enterVR();
+          if (session) return "vr";
+        }
+      } catch {
+        // fall through to cardboard / walk
+      }
+    }
+    // 2) Phone cardboard (any device with the orientation API).
+    if ("DeviceOrientationEvent" in window) {
+      const ok = await requestGyroPermission();
+      if (ok) {
+        setWalk(false);
+        setCardboard(true);
+        return "cardboard";
+      }
+      setVrMessage("Giroskopga ruxsat berilmadi");
+    }
+    // 3) Desktop / no gyro: magic-window walk so the button always does something.
+    if (!window.isSecureContext) setVrMessage("VR uchun HTTPS ulanish kerak");
+    setCardboard(false);
+    setWalk(true);
+    return "walk";
+  }, [enterVR, requestGyroPermission]);
 
   // Desktop first-person walk mode (mutually exclusive with cardboard).
   const exitWalk = useCallback(() => setWalk(false), []);
@@ -180,6 +231,9 @@ export const SceneControlProvider = ({ children }) => {
       inVR,
       vrSupported,
       enterVR,
+      startVR,
+      vrMessage,
+      setVrMessage,
       cardboard,
       gyroSupported,
       toggleCardboard,
@@ -201,6 +255,8 @@ export const SceneControlProvider = ({ children }) => {
       inVR,
       vrSupported,
       enterVR,
+      startVR,
+      vrMessage,
       cardboard,
       gyroSupported,
       toggleCardboard,

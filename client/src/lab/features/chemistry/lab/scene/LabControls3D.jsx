@@ -1,6 +1,7 @@
 // Sahna ichidagi 3D boshqaruv paneli - VR kontrolleri nuri bilan (yoki desktopda
 // sichqoncha bilan) bosib ishlatiladi. Reaktiv shishalarini idishga quyish,
-// isitish (tortma kalit) va tozalash (cho'tkali 3D tugma) shu yerdan boshqariladi.
+// isitish (tortma richag) va tozalash (yuqoriga qaragan cho'tkali tugma) shu
+// yerdan boshqariladi. Har shishaning nomi yuzasiga oq qog'oz yorliqqa yozilgan.
 // Pointer (onClick) hodisalari @react-three/xr da kontroller "select" bilan ishlaydi.
 import { useRef, useState } from "react";
 import { Text, RoundedBox } from "@react-three/drei";
@@ -30,6 +31,32 @@ const Label = ({ children, y = -0.36, size = 0.1, color = "#e6eefc" }) => (
   >
     {children}
   </Text>
+);
+
+// Shisha yuzasiga yopishtirilgan oq qog'oz yorliq - ustida reaktiv nomi qora
+// siyohda yozilgan. Uzun nomlar bir necha qatorga bo'linib joylashadi.
+const PaperLabel = ({ name }) => (
+  <group position={[0, -0.02, 0.156]}>
+    {/* oq qog'oz */}
+    <mesh>
+      <boxGeometry args={[0.28, 0.26, 0.006]} />
+      <meshStandardMaterial color="#f7f5ee" roughness={0.92} metalness={0} />
+    </mesh>
+    {/* nom */}
+    <Text
+      position={[0, 0, 0.007]}
+      fontSize={0.046}
+      color="#1f2937"
+      anchorX="center"
+      anchorY="middle"
+      maxWidth={0.25}
+      textAlign="center"
+      lineHeight={1.05}
+      overflowWrap="break-word"
+    >
+      {name}
+    </Text>
+  </group>
 );
 
 // Bitta reaktiv shishasi: bosilganda idishga quyiladi.
@@ -75,27 +102,33 @@ const Bottle = ({ reagent, x, onPour }) => {
         <cylinderGeometry args={[0.1, 0.1, 0.08, 24]} />
         <meshStandardMaterial color="#3b4252" roughness={0.6} />
       </mesh>
-      <Label>{reagent.name}</Label>
+      <PaperLabel name={reagent.name} />
     </group>
   );
 };
 
-// Isitishni yoqib/o'chiradigan tortma kalit: tugmacha chap (o'chiq) bilan o'ng
-// (yoniq) orasida suriladi, yo'lakcha esa kulrangdan to'q sariqqa o'tadi.
+// Isitishni yoqib/o'chiradigan tortma richag: tutqichidan tortib ko'tarilganda
+// yoniq holatga (oldinga, to'q sariq) o'tadi, pastga surilganda o'chadi; asos
+// plitasi kulrangdan to'q sariqqa o'zgarib yonib turadi.
 const HeatSwitch = ({ x, on, onToggle }) => {
   const [hover, setHover] = useState(false);
-  const knob = useRef(null);
-  const track = useRef(null);
+  const lever = useRef(null);
+  const base = useRef(null);
 
   useFrame((_, delta) => {
     const k = Math.min(1, delta * 12);
-    if (knob.current)
-      knob.current.position.x = THREE.MathUtils.lerp(knob.current.position.x, on ? 0.13 : -0.13, k);
-    if (track.current) {
-      track.current.color.lerp(on ? HEAT_ON : HEAT_OFF, k);
-      track.current.emissive.lerp(on ? HEAT_ON : GLOW_OFF, k);
-      track.current.emissiveIntensity = THREE.MathUtils.lerp(
-        track.current.emissiveIntensity,
+    // Richag yoqilganda oldinga (kuzatuvchi tomon) tortiladi, o'chiqda orqaga.
+    if (lever.current)
+      lever.current.rotation.x = THREE.MathUtils.lerp(
+        lever.current.rotation.x,
+        on ? 0.7 : -0.55,
+        k,
+      );
+    if (base.current) {
+      base.current.color.lerp(on ? HEAT_ON : HEAT_OFF, k);
+      base.current.emissive.lerp(on ? HEAT_ON : GLOW_OFF, k);
+      base.current.emissiveIntensity = THREE.MathUtils.lerp(
+        base.current.emissiveIntensity,
         on ? 0.6 : 0.05,
         k,
       );
@@ -116,16 +149,33 @@ const HeatSwitch = ({ x, on, onToggle }) => {
         onToggle?.();
       }}
     >
-      {/* yo'lakcha */}
-      <RoundedBox args={[0.52, 0.24, 0.16]} radius={0.11} smoothness={4}>
-        <meshStandardMaterial ref={track} color="#475569" roughness={0.5} metalness={0.1} />
+      {/* asos plitasi (kalit korpusi) */}
+      <RoundedBox args={[0.34, 0.12, 0.42]} radius={0.05} smoothness={4} position={[0, -0.17, 0]}>
+        <meshStandardMaterial ref={base} color="#475569" roughness={0.5} metalness={0.2} />
       </RoundedBox>
-      {/* tugmacha */}
-      <mesh ref={knob} position={[on ? 0.13 : -0.13, 0, 0.08]}>
-        <sphereGeometry args={[0.1, 24, 24]} />
-        <meshStandardMaterial color="#f8fafc" roughness={0.25} metalness={0.05} />
+      {/* sharnir bolti - richag shu o'q atrofida aylanadi */}
+      <mesh position={[0, -0.12, 0.13]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.05, 0.05, 0.18, 16]} />
+        <meshStandardMaterial color="#1e293b" roughness={0.4} metalness={0.7} />
       </mesh>
-      <Label y={-0.3}>Isitish</Label>
+      {/* richag: dasta + tutqich */}
+      <group ref={lever} position={[0, -0.12, 0.13]} rotation={[on ? 0.7 : -0.55, 0, 0]}>
+        <mesh position={[0, 0.18, 0]}>
+          <cylinderGeometry args={[0.035, 0.045, 0.36, 16]} />
+          <meshStandardMaterial color="#cbd5e1" roughness={0.3} metalness={0.6} />
+        </mesh>
+        <mesh position={[0, 0.4, 0]}>
+          <sphereGeometry args={[0.078, 24, 24]} />
+          <meshStandardMaterial
+            color={on ? "#f97316" : "#ef4444"}
+            roughness={0.25}
+            metalness={0.1}
+            emissive={on ? "#f97316" : "#7f1d1d"}
+            emissiveIntensity={on ? 0.5 : 0.15}
+          />
+        </mesh>
+      </group>
+      <Label y={-0.36}>Isitish</Label>
     </group>
   );
 };
@@ -151,7 +201,8 @@ const Broom = (props) => (
   </group>
 );
 
-// Tozalash tugmasi: bosilganda ichkariga botadigan 3D tugma, ustida supurgi.
+// Tozalash tugmasi: yuqoriga qaragan, bosilganda pastga botadigan 3D tugma,
+// ustida supurgi. Korpus + qopqoq X o'qi bo'ylab ag'darilib tepaga qaratilgan.
 const CleanButton = ({ x, onClick }) => {
   const [hover, setHover] = useState(false);
   const [pressed, setPressed] = useState(false);
@@ -188,30 +239,37 @@ const CleanButton = ({ x, onClick }) => {
         onClick?.();
       }}
     >
-      {/* uy (housing) */}
-      <RoundedBox args={[0.42, 0.42, 0.14]} radius={0.07} smoothness={4} position={[0, 0, -0.05]}>
-        <meshStandardMaterial color="#16202f" roughness={0.7} metalness={0.2} />
-      </RoundedBox>
-      {/* boshatadigan qopqoq + supurgi */}
-      <group ref={cap} position={[0, 0, 0.08]}>
-        <RoundedBox args={[0.34, 0.34, 0.12]} radius={0.06} smoothness={4}>
-          <meshStandardMaterial
-            color={hover ? "#14b8a6" : "#0d9488"}
-            roughness={0.4}
-            metalness={0.1}
-            emissive="#0f766e"
-            emissiveIntensity={hover ? 0.4 : 0.15}
-          />
+      {/* tepaga qaratish uchun korpus+qopqoq -90° X o'qi bo'ylab ag'dariladi:
+          mahalliy +Z dunyo +Y ga (yuqoriga) aylanadi, bosish esa pastga ketadi. */}
+      <group rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.12, 0]}>
+        {/* uy (housing) */}
+        <RoundedBox args={[0.42, 0.42, 0.14]} radius={0.07} smoothness={4} position={[0, 0, -0.05]}>
+          <meshStandardMaterial color="#16202f" roughness={0.7} metalness={0.2} />
         </RoundedBox>
-        <Broom position={[0, 0, 0.09]} scale={0.85} />
+        {/* bosiladigan qopqoq + supurgi */}
+        <group ref={cap} position={[0, 0, 0.08]}>
+          <RoundedBox args={[0.34, 0.34, 0.12]} radius={0.06} smoothness={4}>
+            <meshStandardMaterial
+              color={hover ? "#14b8a6" : "#0d9488"}
+              roughness={0.4}
+              metalness={0.1}
+              emissive="#0f766e"
+              emissiveIntensity={hover ? 0.4 : 0.15}
+            />
+          </RoundedBox>
+          <Broom position={[0, 0, 0.09]} scale={0.85} />
+        </group>
       </group>
-      <Label y={-0.3}>Tozalash</Label>
+      <Label y={-0.36}>Tozalash</Label>
     </group>
   );
 };
 
 const LabControls3D = ({ reagents = [], onPour, heating, onToggleHeat, onClear }) => {
   const n = reagents.length;
+  // Bottles are centred. With many of them, tighten the gap so the row stays
+  // within ±1.7 and never collides with the heat switch (-2.0) / clean (+2.0).
+  const step = n > 1 ? Math.min(STEP, 3.4 / (n - 1)) : STEP;
   return (
     <group>
       {/* javon taxtasi */}
@@ -224,7 +282,7 @@ const LabControls3D = ({ reagents = [], onPour, heating, onToggleHeat, onClear }
         <Bottle
           key={r.id}
           reagent={r}
-          x={(i - (n - 1) / 2) * STEP}
+          x={(i - (n - 1) / 2) * step}
           onPour={onPour}
         />
       ))}

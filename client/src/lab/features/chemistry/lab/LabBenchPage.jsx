@@ -20,8 +20,25 @@ import { REACTION_STYLES } from "@/lab/data/reactions";
 const SUBSTANCE_BY_ID = Object.fromEntries(SUBSTANCES.map((s) => [s.id, s]));
 const REAGENTS = [{ key: "compounds", label: "Reaktivlar", items: COMPOUND_SUBSTANCES }];
 
+// AI yordamchiga beriladigan mavjud reaktiv/element katalogi (statik).
+const AI_CATALOG = SUBSTANCES.map((s) => ({ name: s.name, formula: s.formula }));
+
+const tempLabel = (t) =>
+  t > 0.85 ? "qaynash haroratiga yaqin" : t > 0.2 ? "isitilmoqda" : "xona haroratida";
+
 // Sahna ichidagi 3D javon (VR) uchun tanlangan rang-barang reaktivlar.
-const VR_REAGENTS = ["cmp-h2o", "cmp-cuso4", "cmp-kmno4", "cmp-fecl3", "cmp-h2so4", "cmp-nh3"]
+// Quruq muz + suv -> tuman; vodorod + kislorod -> suv hosil qilish uchun ham bor.
+const VR_REAGENTS = [
+  "cmp-h2o",
+  "cmp-cuso4",
+  "cmp-kmno4",
+  "cmp-fecl3",
+  "cmp-h2so4",
+  "cmp-nh3",
+  "cmp-dryice",
+  "el-H",
+  "el-O",
+]
   .map((id) => SUBSTANCE_BY_ID[id])
   .filter(Boolean);
 
@@ -77,6 +94,33 @@ const LabBenchPage = () => {
     if (s) bench.add(s);
   };
 
+  // AI yordamchiga laboratoriyaning jonli holatini beramiz: nima quyilgan,
+  // aniqlangan modda, reaksiya va harorat. Harorat 80ms da silliqlanadi - shuning
+  // uchun raqam emas, qo'pol "label" dep sifatida olinadi (kontekst churn bo'lmaydi).
+  const temperatureLabel = tempLabel(bench.temperature);
+  const labAiContext = useMemo(
+    () => ({
+      state: {
+        poured: bench.poured.map((s) => s.name),
+        composition: bench.composition,
+        product: bench.product?.name || null,
+        productFormula: bench.product?.formula || null,
+        heating: bench.heating,
+        temperatureLabel,
+        lastReaction: bench.reactionEffect?.title || null,
+      },
+      catalog: AI_CATALOG,
+    }),
+    [
+      bench.poured,
+      bench.composition,
+      bench.product,
+      bench.heating,
+      bench.reactionEffect,
+      temperatureLabel,
+    ],
+  );
+
   return (
     <LabWorkspace
       title="Interaktiv laboratoriya"
@@ -86,6 +130,7 @@ const LabBenchPage = () => {
       items={quickItems}
       activeId={null}
       onSelect={pickById}
+      aiContext={labAiContext}
       scene={
         <div className="relative h-full w-full">
           <LabScene

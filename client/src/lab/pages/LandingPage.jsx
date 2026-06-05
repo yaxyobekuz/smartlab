@@ -2,7 +2,6 @@ import { lazy, Suspense } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Headset } from "lucide-react";
 import { SUBJECTS } from "@/lab/data/subjects";
-import { xrStore } from "@/lab/components/xrStore";
 
 // Lazy so Three.js stays out of the initial bundle.
 const HeroScene = lazy(() => import("@/lab/components/HeroScene"));
@@ -10,17 +9,10 @@ const HeroScene = lazy(() => import("@/lab/components/HeroScene"));
 const LandingPage = () => {
   const navigate = useNavigate();
 
-  // VR ko'zoynak: sessiyani shu bosish (gesture) ichida boshlaymiz va darhol
-  // laboratoriyaga o'tamiz. Sessiya boshlanmasa, lab sahifasidagi overlay bir
-  // bosishda kirishni taklif qiladi.
-  const enterLabVR = () => {
-    try {
-      xrStore.enterVR()?.catch(() => {});
-    } catch {
-      // WebXR yo'q qurilma - lab sahifasidagi overlay yo'l-yo'riq beradi.
-    }
-    navigate("/chemistry/lab?vr=1");
-  };
+  // VR: shunchaki laboratoriyaga ?vr=1 bilan o'tamiz. Sessiyani lab sahifasidagi
+  // overlay (mounted <XR> ichida, o'z bosish-gesture'ida) boshlaydi. Bu yerda
+  // enterVR() chaqirsak, Canvas hali mavjud emasligi uchun u baribir rad etiladi.
+  const enterLabVR = () => navigate("/chemistry/lab?vr=1");
 
   return (
   <div>

@@ -28,7 +28,7 @@ const MoleculeInfoPanel = ({ molecule }) => {
     molecule.iupacName.toLowerCase() !== molecule.nameEn.toLowerCase();
 
   return (
-    <aside className="z-10 hidden h-full w-80 shrink-0 flex-col overflow-y-auto border-l border-border bg-card p-5 shadow-[-4px_0_16px_-4px_rgba(0,0,0,0.06)] lg:flex">
+    <div className="flex h-full flex-col overflow-y-auto p-5">
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
           {molecule.categoryLabel}
@@ -91,7 +91,7 @@ const MoleculeInfoPanel = ({ molecule }) => {
         PubChem'da ko'rish
         <ExternalLink size={16} />
       </a>
-    </aside>
+    </div>
   );
 };
 

@@ -88,7 +88,9 @@ const Locomotion = () => {
   // Telefon cardboard: ekranni bosib turib oldinga yurish.
   useEffect(() => {
     if (!cardboard || inVR) return;
-    const onDown = () => {
+    const onDown = (ev) => {
+      // Overlay tugmalariga (masalan "Chiqish") bosish kamerani surmasin.
+      if (ev.target?.closest?.("button")) return;
       holding.current = true;
     };
     const onUp = () => {
@@ -97,10 +99,15 @@ const Locomotion = () => {
     window.addEventListener("pointerdown", onDown);
     window.addEventListener("pointerup", onUp);
     window.addEventListener("pointercancel", onUp);
+    // Telefon ko'zoynakdan olinsa yoki fokus yo'qolsa - yurish tiqilib qolmasin.
+    window.addEventListener("blur", onUp);
+    document.addEventListener("visibilitychange", onUp);
     return () => {
       window.removeEventListener("pointerdown", onDown);
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", onUp);
+      window.removeEventListener("blur", onUp);
+      document.removeEventListener("visibilitychange", onUp);
       holding.current = false;
     };
   }, [cardboard, inVR]);

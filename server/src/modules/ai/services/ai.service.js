@@ -11,8 +11,62 @@ const getClient = () => {
 
 export const isConfigured = () => Boolean(env.OPENAI_API_KEY);
 
-// Foydalanuvchining joriy holatini (qaysi mavzu, qaysi item, oxirgi amallari)
-// agentga matn sifatida beradi - shu orqali agent "kuzatadi" va proaktiv bo'ladi.
+// activeData kalitlari uchun o'zbekcha yorliqlar (qolganlari xom kalit nomida).
+const FIELD_LABELS = {
+  formula: "Formula",
+  weight: "Molyar massa",
+  category: "Kategoriya",
+  categoryLabel: "Kategoriya",
+  state: "Holat",
+  nameEn: "Inglizcha nomi",
+  iupacName: "IUPAC nomi",
+  symbol: "Belgi",
+  number: "Tartib raqami",
+  protons: "Protonlar soni",
+  neutrons: "Neytronlar soni",
+  shells: "Elektron qobiqlar",
+  about: "Tavsif",
+  distance: "Quyoshdan masofa (shartli)",
+  speed: "Aylanish tezligi (shartli)",
+  size: "Nisbiy o'lcham",
+  amplitude: "Amplituda",
+  frequency: "Chastota",
+  type: "Turi",
+};
+
+// Tanlangan modelning real ma'lumotini "• Yorliq: qiymat" qatorlariga aylantiradi.
+const renderActiveData = (data) =>
+  Object.entries(data).map(
+    ([k, v]) => `  • ${FIELD_LABELS[k] || k}: ${v}`,
+  );
+
+// Kimyo laboratoriyasining jonli holatini o'qiladigan satrlarga aylantiradi.
+const renderLabState = (st) => {
+  const out = [];
+  if (Array.isArray(st.poured) && st.poured.length)
+    out.push(`Idishga quyilgan: ${st.poured.join(", ")}`);
+  else out.push("Idish hozir bo'sh");
+  if (st.composition) {
+    const comp = Object.entries(st.composition)
+      .filter(([, n]) => n > 0)
+      .map(([el, n]) => `${el}×${n}`)
+      .join(", ");
+    if (comp) out.push(`Tarkib (atomlar): ${comp}`);
+  }
+  if (st.product)
+    out.push(
+      `Aralashmadan aniqlangan modda: ${st.product}${st.productFormula ? ` (${st.productFormula})` : ""}`,
+    );
+  if (st.lastReaction) out.push(`Oxirgi reaksiya: ${st.lastReaction}`);
+  if (st.temperatureLabel) out.push(`Harorat: ${st.temperatureLabel}`);
+  else if (typeof st.heating === "boolean")
+    out.push(`Isitish: ${st.heating ? "yoqilgan" : "o'chiq"}`);
+  return out;
+};
+
+// Foydalanuvchining joriy holatini (qaysi mavzu, qaysi item, real ma'lumotlari,
+// laboratoriya holati va oxirgi amallari) agentga matn sifatida beradi - shu
+// orqali agent "kuzatadi", to'qimasdan aniq javob beradi va proaktiv bo'ladi.
 const buildContextMessage = (ctx = {}) => {
   if (!ctx || Object.keys(ctx).length === 0) return null;
   const lines = [];
@@ -20,13 +74,36 @@ const buildContextMessage = (ctx = {}) => {
   if (ctx.topic) lines.push(`Mavzu: ${ctx.topic}`);
   if (ctx.title) lines.push(`Sahifa: ${ctx.title}`);
   if (ctx.activeItem) lines.push(`Hozir tanlangan model: ${ctx.activeItem}`);
+
+  if (ctx.activeData && Object.keys(ctx.activeData).length) {
+    lines.push("Tanlangan model haqida real ma'lumotlar (shularga asoslan):");
+    lines.push(...renderActiveData(ctx.activeData));
+  }
+
   if (Array.isArray(ctx.items) && ctx.items.length) {
     const list = ctx.items
-      .slice(0, 30)
-      .map((it) => `${it.id} (${it.name})`)
+      .slice(0, 40)
+      .map((it) => (it.formula ? `${it.name} (${it.formula})` : it.name))
       .join(", ");
     lines.push(`Joriy mavzudagi mavjud modellar: ${list}`);
   }
+
+  if (ctx.state && Object.keys(ctx.state).length) {
+    const stLines = renderLabState(ctx.state);
+    if (stLines.length)
+      lines.push(
+        `[LABORATORIYA HOLATI]\n${stLines.map((s) => `  • ${s}`).join("\n")}`,
+      );
+  }
+
+  if (Array.isArray(ctx.catalog) && ctx.catalog.length) {
+    const list = ctx.catalog
+      .slice(0, 40)
+      .map((c) => (c.formula ? `${c.name} (${c.formula})` : c.name))
+      .join(", ");
+    lines.push(`Mavjud reaktiv va elementlar: ${list}`);
+  }
+
   if (Array.isArray(ctx.recentActions) && ctx.recentActions.length) {
     lines.push(`Foydalanuvchining oxirgi amallari: ${ctx.recentActions.join("; ")}`);
   }
