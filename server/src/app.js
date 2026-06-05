@@ -24,7 +24,16 @@ app.use(
     credentials: true,
   }),
 );
-app.use(compression());
+// SSE (AI chat) streamini siqib buferlamasligi uchun event-stream'ni o'tkazib yuboramiz.
+app.use(
+  compression({
+    filter: (req, res) => {
+      if (res.getHeader("Content-Type")?.toString().includes("text/event-stream"))
+        return false;
+      return compression.filter(req, res);
+    },
+  }),
+);
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(env.COOKIE_SECRET));

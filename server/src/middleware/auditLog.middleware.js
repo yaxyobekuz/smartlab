@@ -10,6 +10,8 @@ const TRACKED_METHODS = new Set(["POST", "PATCH", "PUT", "DELETE"]);
 
 const auditLog = (req, res, next) => {
   if (!TRACKED_METHODS.has(req.method)) return next();
+  // AI chat - tez-tez va katta body'li, audit log'ga yozmaymiz.
+  if (req.path.startsWith("/ai/")) return next();
   const startedAt = Date.now();
 
   res.on("finish", () => {

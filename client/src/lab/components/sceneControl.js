@@ -16,6 +16,12 @@ const NOOP_CONTROL = {
   inVR: false,
   vrSupported: false,
   enterVR: () => {},
+  // AI yordamchi uchun: joriy kontekst, uni o'rnatish va agent aksiyalarini bajarish.
+  aiContext: {},
+  setAiContext: () => {},
+  runAiAction: () => false,
+  recentActions: { current: [] },
+  logAction: () => {},
 };
 
 // Throws if no provider - use where the toolbar is guaranteed (workspace).

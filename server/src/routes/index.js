@@ -2,6 +2,7 @@ import { Router } from "express";
 import authRouter from "../modules/auth/auth.routes.js";
 import usersRouter from "../modules/users/users.routes.js";
 import activityLogsRouter from "../modules/activityLogs/activityLogs.routes.js";
+import aiRouter from "../modules/ai/ai.routes.js";
 
 const router = Router();
 
@@ -12,5 +13,6 @@ router.get("/health", (_req, res) =>
 router.use("/auth", authRouter);
 router.use("/users", usersRouter);
 router.use("/activity-logs", activityLogsRouter);
+router.use("/ai", aiRouter);
 
 export default router;

@@ -17,3 +17,12 @@ export const authLimiter = rateLimit({
   legacyHeaders: false,
   message: { success: false, message: "Juda ko'p urinish, biroz kuting" },
 });
+
+// AI chat - qimmat, shuning uchun daqiqada cheklangan so'rov.
+export const aiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: "AI so'rovlari ko'p, biroz kuting" },
+});

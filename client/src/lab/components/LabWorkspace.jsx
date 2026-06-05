@@ -1,7 +1,7 @@
 // Figma-style full-screen workspace for every topic.
 // Left: info + item picker.  Center: 3D scene + bottom toolbar.  Right: AI panel.
-import { useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { SceneControlProvider } from "./SceneControlProvider";
@@ -55,13 +55,36 @@ const WorkspaceBody = ({
   onSelect,
   scene,
   info,
+  aiContext,
 }) => {
   const rootRef = useRef(null);
   const [panelsHidden, setPanelsHidden] = useState(false);
-  const { inVR } = useSceneControl();
+  const { subject, topic } = useParams();
+  const { inVR, setAiContext, logAction } = useSceneControl();
 
   // Side panels are hidden when manually collapsed OR while in VR.
   const panelsVisible = !panelsHidden && !inVR;
+
+  // Feed the live page context to the AI agent (subject, topic, items, active item).
+  useEffect(() => {
+    setAiContext({
+      context: {
+        subject,
+        topic,
+        title,
+        items: items?.map((it) => ({ id: it.id, name: it.name })),
+        activeItem: items?.find((it) => it.id === activeId)?.name,
+        ...aiContext,
+      },
+      onSelectItem: onSelect,
+    });
+  }, [subject, topic, title, items, activeId, aiContext, onSelect, setAiContext]);
+
+  // Note in the action journal which item the user is viewing.
+  useEffect(() => {
+    const name = items?.find((it) => it.id === activeId)?.name;
+    if (name) logAction(`"${name}" modelini ko'rdi`);
+  }, [activeId, items, logAction]);
 
   const toggleFullscreen = () => {
     if (document.fullscreenElement) document.exitFullscreen();
