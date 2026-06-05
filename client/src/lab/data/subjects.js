@@ -17,6 +17,12 @@ export const SUBJECTS = [
         icon: "🧬",
       },
       {
+        slug: "lab",
+        title: "Interaktiv laboratoriya",
+        short: "Element va reaktivlarni idishga quyib reaksiyalarni kuzating.",
+        icon: "⚗️",
+      },
+      {
         slug: "atoms",
         title: "Atomlar",
         short: "Yadro va elektron orbitalarini kuzating.",

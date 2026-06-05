@@ -8,6 +8,9 @@ const PAGES = {
   "chemistry/molecules": lazy(() =>
     import("@/lab/features/chemistry/molecules/MoleculesPage"),
   ),
+  "chemistry/lab": lazy(() =>
+    import("@/lab/features/chemistry/lab/LabBenchPage"),
+  ),
   "chemistry/atoms": lazy(() =>
     import("@/lab/features/chemistry/atoms/AtomsPage"),
   ),
