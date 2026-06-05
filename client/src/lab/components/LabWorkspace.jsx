@@ -1,9 +1,10 @@
 // Figma-style full-screen workspace for every topic.
 // Left: info + item picker.  Center: 3D scene + bottom toolbar.  Right: AI panel.
-import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
+import { ArrowLeft, Headset, Glasses } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
+import useObjectState from "@/shared/hooks/useObjectState";
 import { SceneControlProvider } from "./SceneControlProvider";
 import { useSceneControl } from "./sceneControl";
 import Toolbar from "./Toolbar";
@@ -58,13 +59,31 @@ const WorkspaceBody = ({
   aiContext,
 }) => {
   const rootRef = useRef(null);
-  const [panelsHidden, setPanelsHidden] = useState(false);
+  const { panelsHidden, vrDismissed, setField } = useObjectState({
+    panelsHidden: false,
+    vrDismissed: false,
+  });
   const { subject, topic } = useParams();
-  const { cardboard, exitCardboard, setAiContext, logAction } =
-    useSceneControl();
+  const [searchParams] = useSearchParams();
+  const {
+    inVR,
+    vrSupported,
+    enterVR,
+    cardboard,
+    exitCardboard,
+    gyroSupported,
+    toggleCardboard,
+    walk,
+    exitWalk,
+    setAiContext,
+    logAction,
+  } = useSceneControl();
 
-  // Side panels are hidden when manually collapsed OR while in cardboard VR.
-  const panelsVisible = !panelsHidden && !cardboard;
+  // Bosh sahifadagi "VR laboratoriyaga kirish" tugmasi ?vr=1 bilan keladi.
+  const vrRequested = searchParams.get("vr") === "1";
+
+  // Side panels are hidden when manually collapsed OR while in any immersive/walk mode.
+  const panelsVisible = !panelsHidden && !cardboard && !inVR && !walk;
 
   // Feed the live page context to the AI agent (subject, topic, items, active item).
   useEffect(() => {
@@ -122,11 +141,80 @@ const WorkspaceBody = ({
             </button>
           </>
         ) : (
-          <Toolbar
-            panelsHidden={panelsHidden}
-            onTogglePanels={() => setPanelsHidden((v) => !v)}
-            onToggleFullscreen={toggleFullscreen}
-          />
+          // Toolbar is hidden during a WebXR session; the headset drives the view.
+          !inVR && (
+            <Toolbar
+              panelsHidden={panelsHidden}
+              onTogglePanels={() => setField("panelsHidden", !panelsHidden)}
+              onToggleFullscreen={toggleFullscreen}
+            />
+          )
+        )}
+
+        {/* Sayohat (walk) rejimi yo'riqnomasi */}
+        {walk && !inVR && (
+          <div className="pointer-events-none absolute inset-x-0 top-4 z-20 flex justify-center px-4">
+            <div className="pointer-events-auto flex items-center gap-3 rounded-full border border-border bg-background/90 px-4 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur">
+              <span>Sudrab qarang · WASD bilan yuring</span>
+              <button
+                onClick={exitWalk}
+                className="rounded-full bg-secondary px-2.5 py-0.5 text-foreground hover:bg-secondary/70"
+              >
+                Chiqish
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* VR ko'zoynakdan kelinganda: WebXR (Quest) yoki giroskop (telefon). */}
+        {vrRequested && !inVR && !cardboard && !vrDismissed && (
+          <div className="absolute inset-0 z-40 grid place-items-center bg-background/80 p-6 backdrop-blur">
+            <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 text-center shadow-xl">
+              <div className="mx-auto grid size-12 place-items-center rounded-xl bg-primary/10 text-primary">
+                {vrSupported ? <Headset size={24} /> : <Glasses size={24} />}
+              </div>
+              <h2 className="mt-3 text-lg font-semibold">VR laboratoriya</h2>
+              {vrSupported ? (
+                <>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Ko'zoynakni kiying va kirish tugmasini bosing. Kontroller
+                    bilan reaktivlarni tanlab, tajriba o'tkazishingiz mumkin.
+                  </p>
+                  <button
+                    onClick={enterVR}
+                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                  >
+                    <Headset size={16} /> VR rejimiga kirish
+                  </button>
+                </>
+              ) : gyroSupported ? (
+                <>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Telefonni ko'zoynakka joylang. Boshingizni burib atrofga
+                    qarang — telefonni ko'tarsangiz tepaga, tushirsangiz pastga
+                    qaraysiz. Ekranni bosib turib oldinga yuriladi.
+                  </p>
+                  <button
+                    onClick={toggleCardboard}
+                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                  >
+                    <Glasses size={16} /> Giroskop VR rejimiga kirish
+                  </button>
+                </>
+              ) : (
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Bu qurilma VR'ni qo'llab-quvvatlamaydi. Laboratoriyani oddiy
+                  rejimda davom ettiring.
+                </p>
+              )}
+              <button
+                onClick={() => setField("vrDismissed", true)}
+                className="mt-3 text-xs text-muted-foreground hover:text-foreground"
+              >
+                Oddiy rejimda davom etish
+              </button>
+            </div>
+          </div>
         )}
       </div>
 

@@ -9,6 +9,8 @@ import {
   Plus,
   Minus,
   Glasses,
+  Headset,
+  Footprints,
 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { useSceneControl } from "./sceneControl";
@@ -35,8 +37,12 @@ const Toolbar = ({ onToggleFullscreen, onTogglePanels, panelsHidden }) => {
     reset,
     zoomIn,
     zoomOut,
+    vrSupported,
+    enterVR,
     gyroSupported,
     toggleCardboard,
+    walk,
+    toggleWalk,
   } = useSceneControl();
 
   // Keyboard zoom: +/= zooms in, -/_ zooms out (ignored while typing in a field).
@@ -95,13 +101,25 @@ const Toolbar = ({ onToggleFullscreen, onTogglePanels, panelsHidden }) => {
           <Maximize2 size={18} />
         </ToolButton>
 
+        <div className="mx-1 h-5 w-px bg-border" />
+
+        {/* Sayohat: kompyuterda WASD + sichqoncha bilan yurish. */}
+        {!gyroSupported && (
+          <ToolButton label="Sayohat rejimi (WASD)" active={walk} onClick={toggleWalk}>
+            <Footprints size={18} />
+          </ToolButton>
+        )}
+
+        {vrSupported && (
+          <ToolButton label="VR rejimi" onClick={enterVR}>
+            <Headset size={18} />
+          </ToolButton>
+        )}
+
         {gyroSupported && (
-          <>
-            <div className="mx-1 h-5 w-px bg-border" />
-            <ToolButton label="VR rejimi (cardboard)" onClick={toggleCardboard}>
-              <Glasses size={18} />
-            </ToolButton>
-          </>
+          <ToolButton label="VR rejimi (cardboard)" onClick={toggleCardboard}>
+            <Glasses size={18} />
+          </ToolButton>
         )}
       </div>
     </div>

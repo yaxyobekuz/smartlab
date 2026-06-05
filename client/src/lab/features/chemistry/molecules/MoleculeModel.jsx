@@ -111,7 +111,8 @@ const MoleculeModel = ({ molecule }) => {
   const scale = useMemo(() => {
     let r = 0;
     for (const a of molecule.atoms) r = Math.max(r, Math.hypot(...a.pos));
-    return Math.max(0.7, Math.min(3.2, TARGET_RADIUS / (r || 1)));
+    // Lower floor lets large molecules (vitamins, sugars, B12) shrink to fit.
+    return Math.max(0.12, Math.min(3.2, TARGET_RADIUS / (r || 1)));
   }, [molecule]);
 
   usePausableFrame((_, delta) => {

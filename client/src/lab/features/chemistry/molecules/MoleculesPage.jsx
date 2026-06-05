@@ -1,98 +1,148 @@
-import { useMemo, useState } from "react";
+// Molecule library: searchable category list (left) + 3D viewer with toolbar
+// (center) + PubChem info panel (right). 240 molecules from PubChem data.
+import { useRef } from "react";
 import Scene from "@/lab/components/Scene";
-import LabWorkspace from "@/lab/components/LabWorkspace";
-import FormulaText from "@/lab/components/FormulaText";
+import Toolbar from "@/lab/components/Toolbar";
+import { SceneControlProvider } from "@/lab/components/SceneControlProvider";
+import { useSceneControl } from "@/lab/components/sceneControl";
+import useObjectState from "@/shared/hooks/useObjectState";
+import { cn } from "@/shared/utils/cn";
 import MoleculeModel from "./MoleculeModel";
-import { MOLECULES, getMolecule, getElementMeta } from "@/lab/data/molecules";
+import MoleculeStates from "./MoleculeStates";
+import MoleculeLibrarySidebar from "./MoleculeLibrarySidebar";
+import MoleculeInfoPanel from "./MoleculeInfoPanel";
+import { MOLECULE_LIBRARY, getLibraryMolecule } from "@/lab/data/moleculeLibrary";
 
-const STATE_LABEL = { gaz: "Gaz", suyuq: "Suyuq", qattiq: "Qattiq" };
+// Ko'rinish: molekula modeli yoki uchta agregat holat (zarrachalar animatsiyasi).
+const VIEWS = [
+  { id: "molekula", label: "Molekula" },
+  { id: "qattiq", label: "Qattiq" },
+  { id: "suyuq", label: "Suyuq" },
+  { id: "gaz", label: "Gaz" },
+];
 
-const Stat = ({ label, value }) => (
-  <div className="rounded-xl border border-border bg-secondary/40 px-3 py-2">
-    <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
-      {label}
-    </div>
-    <div className="mt-0.5 text-sm font-medium">{value}</div>
-  </div>
-);
+const STATE_HINT = {
+  qattiq: "Zarrachalar panjara bo'lib qotgan va joyida tebranadi.",
+  suyuq: "Zarrachalar zich, lekin bir-birining ustidan oqib turadi.",
+  gaz: "Zarrachalar tez uchadi va idish devorlaridan sakraydi.",
+};
 
-const MoleculesPage = () => {
-  const [activeId, setActiveId] = useState(MOLECULES[0].id);
-  const molecule = getMolecule(activeId);
+// Open on a recognizable molecule if present, else the first in the dataset.
+const DEFAULT_CID = (
+  MOLECULE_LIBRARY.find((m) => m.nameEn.toLowerCase() === "caffeine") ??
+  MOLECULE_LIBRARY[0]
+).cid;
 
-  // Unique elements present, for a small colour legend.
-  const legend = useMemo(() => {
-    const seen = [];
-    for (const a of molecule.atoms) if (!seen.includes(a.el)) seen.push(a.el);
-    return seen.map((sym) => ({ sym, ...getElementMeta(sym) }));
-  }, [molecule]);
+const MoleculesBody = () => {
+  const rootRef = useRef(null);
+  const { selectedCid, search, panelsHidden, view, setField } = useObjectState({
+    selectedCid: DEFAULT_CID,
+    search: "",
+    panelsHidden: false,
+    view: "molekula",
+  });
+  const { inVR, cardboard, exitCardboard } = useSceneControl();
+
+  const molecule = getLibraryMolecule(selectedCid) ?? MOLECULE_LIBRARY[0];
+  const isState = view !== "molekula";
+
+  // Panels are hidden when manually collapsed OR while in either VR mode.
+  const panelsVisible = !panelsHidden && !cardboard && !inVR;
+
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else rootRef.current?.requestFullscreen?.();
+  };
 
   return (
-    <LabWorkspace
-      title="Molekulalar"
-      description="Molekulani sichqoncha bilan aylantiring, atom ustiga olib boring."
-      backTo="/chemistry"
-      backLabel="Kimyo"
-      items={MOLECULES}
-      activeId={activeId}
-      onSelect={setActiveId}
-      scene={
-        <Scene camera={[0, 0, 6]} bg="#0b1020">
-          <MoleculeModel molecule={molecule} />
+    <div ref={rootRef} className="flex h-full w-full bg-background">
+      {panelsVisible && (
+        <MoleculeLibrarySidebar
+          molecules={MOLECULE_LIBRARY}
+          selectedCid={molecule.cid}
+          onSelect={(cid) => setField("selectedCid", cid)}
+          search={search}
+          onSearch={(v) => setField("search", v)}
+        />
+      )}
+
+      <div className="relative min-w-0 flex-1">
+        <Scene camera={[0, 0, 6.5]} bg="#0b1020">
+          {isState ? (
+            <MoleculeStates molecule={molecule} state={view} />
+          ) : (
+            <MoleculeModel molecule={molecule} />
+          )}
         </Scene>
-      }
-      info={
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-              {molecule.category}
-            </span>
-            <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-              {STATE_LABEL[molecule.state]}
-            </span>
-          </div>
 
-          <div>
-            <h2 className="text-xl font-semibold">{molecule.name}</h2>
-            <FormulaText
-              formula={molecule.formula}
-              className="text-2xl font-light text-primary"
+        {/* Ko'rinish almashtirgich: molekula yoki agregat holat */}
+        {!inVR && !cardboard && (
+          <div className="pointer-events-none absolute inset-x-0 top-4 z-20 flex flex-col items-center gap-1.5">
+            <div className="pointer-events-auto flex items-center gap-1 rounded-xl border border-border bg-background/90 p-1 shadow-lg backdrop-blur">
+              {VIEWS.map((v) => {
+                const natural = v.id !== "molekula" && v.id === molecule.state;
+                return (
+                  <button
+                    key={v.id}
+                    onClick={() => setField("view", v.id)}
+                    className={cn(
+                      "relative rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+                      view === v.id
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-secondary hover:text-foreground",
+                    )}
+                  >
+                    {v.label}
+                    {natural && (
+                      <span
+                        className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-emerald-400"
+                        title="Xona haroratidagi holat"
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            {isState && (
+              <span className="pointer-events-auto rounded-md bg-background/80 px-2.5 py-1 text-[11px] text-muted-foreground shadow-sm backdrop-blur">
+                {STATE_HINT[view]}
+              </span>
+            )}
+          </div>
+        )}
+
+        {cardboard ? (
+          <>
+            {/* Center seam to help align the phone in the headset. */}
+            <div className="pointer-events-none absolute inset-y-0 left-1/2 z-20 w-px -translate-x-1/2 bg-white/40" />
+            <button
+              onClick={exitCardboard}
+              className="absolute right-3 top-3 z-30 rounded-lg bg-background/90 px-3 py-1.5 text-sm font-medium shadow-md backdrop-blur"
+            >
+              Chiqish
+            </button>
+          </>
+        ) : (
+          // Toolbar is hidden during a WebXR session; the headset drives the view.
+          !inVR && (
+            <Toolbar
+              panelsHidden={panelsHidden}
+              onTogglePanels={() => setField("panelsHidden", !panelsHidden)}
+              onToggleFullscreen={toggleFullscreen}
             />
-          </div>
+          )
+        )}
+      </div>
 
-          <p className="text-sm text-muted-foreground">{molecule.about}</p>
-
-          <div className="grid grid-cols-2 gap-2">
-            <Stat label="Molekulyar massa" value={`${molecule.weight} g/mol`} />
-            <Stat label="Atomlar" value={molecule.atoms.length} />
-            <Stat label="Bog'lar" value={molecule.bonds.length} />
-            <Stat label="Elementlar" value={legend.length} />
-          </div>
-
-          <div>
-            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Elementlar
-            </h3>
-            <ul className="mt-2 flex flex-wrap gap-2">
-              {legend.map((el) => (
-                <li
-                  key={el.sym}
-                  className="flex items-center gap-1.5 rounded-lg border border-border bg-secondary/40 px-2 py-1 text-xs"
-                >
-                  <span
-                    className="h-3 w-3 rounded-full ring-1 ring-black/10"
-                    style={{ backgroundColor: el.color }}
-                  />
-                  <span className="font-medium">{el.sym}</span>
-                  <span className="text-muted-foreground">{el.name}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      }
-    />
+      {panelsVisible && <MoleculeInfoPanel molecule={molecule} />}
+    </div>
   );
 };
+
+const MoleculesPage = () => (
+  <SceneControlProvider>
+    <MoleculesBody />
+  </SceneControlProvider>
+);
 
 export default MoleculesPage;

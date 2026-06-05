@@ -20,6 +20,11 @@ import { REACTION_STYLES } from "@/lab/data/reactions";
 const SUBSTANCE_BY_ID = Object.fromEntries(SUBSTANCES.map((s) => [s.id, s]));
 const REAGENTS = [{ key: "compounds", label: "Reaktivlar", items: COMPOUND_SUBSTANCES }];
 
+// Sahna ichidagi 3D javon (VR) uchun tanlangan rang-barang reaktivlar.
+const VR_REAGENTS = ["cmp-h2o", "cmp-cuso4", "cmp-kmno4", "cmp-fecl3", "cmp-h2so4", "cmp-nh3"]
+  .map((id) => SUBSTANCE_BY_ID[id])
+  .filter(Boolean);
+
 const ActionButton = ({ label, active, disabled, onClick, children }) => (
   <button
     type="button"
@@ -89,9 +94,14 @@ const LabBenchPage = () => {
             heating={bench.heating}
             temperature={bench.temperature}
             reactionSeq={bench.reactionSeq}
+            reactionKind={bench.reactionEffect?.kind}
             pourSeq={bench.pourSeq}
             pourColor={bench.pourColor}
             fogging={bench.fogging}
+            reagents={VR_REAGENTS}
+            onPour={bench.add}
+            onToggleHeat={bench.toggleHeat}
+            onClear={bench.clear}
           />
 
           {/* Reaction headline */}

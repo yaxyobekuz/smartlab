@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SceneControlContext } from "./sceneControl";
+import { xrStore } from "./xrStore";
 
 const ZOOM_STEP = 1.2; // multiply/divide camera distance per zoom step
 
@@ -17,7 +18,10 @@ const detectGyro = () =>
 export const SceneControlProvider = ({ children }) => {
   const navigate = useNavigate();
   const [paused, setPaused] = useState(false);
+  const [inVR, setInVR] = useState(false);
+  const [vrSupported, setVrSupported] = useState(false);
   const [cardboard, setCardboard] = useState(false);
+  const [walk, setWalk] = useState(false);
   const [gyroSupported] = useState(detectGyro);
   const controlsRef = useRef(null);
 
@@ -39,6 +43,26 @@ export const SceneControlProvider = ({ children }) => {
     buf.push(text);
     if (buf.length > 12) buf.shift();
   }, []);
+
+  // Feature-detect immersive-vr so we only show the button on capable devices.
+  useEffect(() => {
+    let active = true;
+    navigator.xr
+      ?.isSessionSupported?.("immersive-vr")
+      .then((ok) => active && setVrSupported(!!ok))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Track whether an XR session is currently running.
+  useEffect(
+    () => xrStore.subscribe((s) => setInVR(s.session != null)),
+    [],
+  );
+
+  const enterVR = useCallback(() => xrStore.enterVR(), []);
 
   // iOS 13+ needs an explicit gesture-triggered permission for gyroscope.
   const requestGyroPermission = useCallback(async () => {
@@ -62,6 +86,21 @@ export const SceneControlProvider = ({ children }) => {
     const ok = await requestGyroPermission();
     if (ok) setCardboard(true);
   }, [cardboard, requestGyroPermission]);
+
+  // Desktop first-person walk mode (mutually exclusive with cardboard).
+  const exitWalk = useCallback(() => setWalk(false), []);
+  const toggleWalk = useCallback(() => {
+    setCardboard(false);
+    setWalk((w) => !w);
+  }, []);
+
+  // Esc leaves walk mode.
+  useEffect(() => {
+    if (!walk) return;
+    const onKey = (e) => e.key === "Escape" && setWalk(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [walk]);
 
   const togglePause = () => setPaused((p) => !p);
   const reset = useCallback(() => controlsRef.current?.reset(), []);
@@ -137,10 +176,17 @@ export const SceneControlProvider = ({ children }) => {
       zoomIn,
       zoomOut,
       controlsRef,
+      xrStore,
+      inVR,
+      vrSupported,
+      enterVR,
       cardboard,
       gyroSupported,
       toggleCardboard,
       exitCardboard,
+      walk,
+      toggleWalk,
+      exitWalk,
       aiContext,
       setAiContext,
       runAiAction,
@@ -152,10 +198,16 @@ export const SceneControlProvider = ({ children }) => {
       reset,
       zoomIn,
       zoomOut,
+      inVR,
+      vrSupported,
+      enterVR,
       cardboard,
       gyroSupported,
       toggleCardboard,
       exitCardboard,
+      walk,
+      toggleWalk,
+      exitWalk,
       aiContext,
       setAiContext,
       runAiAction,

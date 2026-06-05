@@ -12,11 +12,20 @@ const NOOP_CONTROL = {
   zoomIn: () => {},
   zoomOut: () => {},
   controlsRef: { current: null },
+  // WebXR VR: immersive-vr session via a headset.
+  xrStore: null,
+  inVR: false,
+  vrSupported: false,
+  enterVR: () => {},
   // Phone cardboard VR: split-screen stereo + gyroscope.
   cardboard: false,
   gyroSupported: false,
   toggleCardboard: () => {},
   exitCardboard: () => {},
+  // Desktop first-person "walk" mode: drag-look + WASD locomotion.
+  walk: false,
+  toggleWalk: () => {},
+  exitWalk: () => {},
   // AI yordamchi uchun: joriy kontekst, uni o'rnatish va agent aksiyalarini bajarish.
   aiContext: {},
   setAiContext: () => {},

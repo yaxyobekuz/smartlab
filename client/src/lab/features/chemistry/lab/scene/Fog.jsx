@@ -4,6 +4,8 @@
 // spreads). One InstancedMesh holds ~110 soft puffs (a single draw call); each
 // puff loops through its own life — born tiny at the mouth, swelling as it
 // cascades and spreads, fading to nothing at the far edge so it recycles.
+// The whole cloud incubates briefly then eases in, so adding dry ice never pops
+// fog out instantly — it creeps up the way real sublimation does.
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -15,12 +17,19 @@ const RISE = 0.4; // how far it billows above the rim
 const GROUND = 0.06; // settle height on the bench
 const SPREAD = 2.7; // how far the blanket rolls across the bench
 const GOLDEN = 2.399963; // golden angle, for an even radial spread
+const DELAY = 1.2; // dry ice sinks in before anything happens (seconds)
+const RAMP = 3.2; // fog then swells in slowly, not all at once (seconds)
+const FADE = 1; // how fast it clears when the mixture is reset (seconds)
 
 const frac = (n) => n - Math.floor(n);
 
 const Fog = ({ active, paused = false }) => {
   const ref = useRef(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
+  // Eased fog strength + a countdown so the reaction never pops in at full force.
+  const intensity = useRef(0);
+  const delay = useRef(0);
+  const wasActive = useRef(false);
   const seeds = useMemo(
     () =>
       Array.from({ length: COUNT }, (_, i) => ({
@@ -46,9 +55,23 @@ const Fog = ({ active, paused = false }) => {
     ref.current.instanceMatrix.needsUpdate = true;
   }, [dummy]);
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     if (paused || !ref.current) return;
     const t = state.clock.elapsedTime;
+
+    // On the rising edge start the incubation delay; afterwards ease the fog in
+    // slowly. When the mixture is cleared, let it drift back down to nothing.
+    if (active && !wasActive.current) delay.current = DELAY;
+    wasActive.current = active;
+    if (active) {
+      if (delay.current > 0) delay.current -= delta;
+      else intensity.current = Math.min(1, intensity.current + delta / RAMP);
+    } else {
+      delay.current = 0;
+      intensity.current = Math.max(0, intensity.current - delta / FADE);
+    }
+    const strength = intensity.current * intensity.current; // ease-in curve
+
     for (let i = 0; i < COUNT; i++) {
       const s = seeds[i];
       const p = frac(t * s.speed + s.phase);
@@ -72,7 +95,7 @@ const Fog = ({ active, paused = false }) => {
 
       const a = s.angle + s.swirl * p;
       dummy.position.set(TUBE_X + Math.cos(a) * r, y, Math.sin(a) * r);
-      dummy.scale.setScalar(active ? size * fade : 0);
+      dummy.scale.setScalar(size * fade * strength);
       dummy.updateMatrix();
       ref.current.setMatrixAt(i, dummy.matrix);
     }

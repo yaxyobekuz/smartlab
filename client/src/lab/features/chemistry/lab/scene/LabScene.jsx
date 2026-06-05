@@ -4,14 +4,20 @@
 // glass reflections, plus soft contact shadows for grounding. Camera/animation
 // pause + reset are wired to the workspace toolbar via SceneControl.
 import { Suspense, useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import {
   OrbitControls,
   Environment,
   Lightformer,
   ContactShadows,
 } from "@react-three/drei";
+import { XR, XROrigin } from "@react-three/xr";
 import { useSceneControlOptional } from "@/lab/components/sceneControl";
+import CardboardView from "@/lab/components/CardboardView";
+import Locomotion from "@/lab/components/Locomotion";
+import XRLocomotion from "@/lab/components/XRLocomotion";
+import ReactionBurst from "./ReactionBurst";
+import LabControls3D from "./LabControls3D";
 import RetortStand from "./RetortStand";
 import Clamp from "./Clamp";
 import TestTube from "./TestTube";
@@ -25,7 +31,6 @@ import {
   CAMERA_POSITION,
   CAMERA_TARGET,
   FLAME_Y,
-  TUBE_BASE_Y,
   TUBE_X,
 } from "./labGeometry";
 
@@ -47,47 +52,13 @@ const StudioEnv = () => (
   </Environment>
 );
 
-// A brief, contained pop when a strong reaction fires (keyed on reactionSeq).
-const ReactionFlash = ({ reactionSeq }) => {
-  const light = useRef(null);
-  const puff = useRef(null);
-  const mat = useRef(null);
-  const energy = useRef(0);
-  const last = useRef(reactionSeq);
-
-  useFrame((_, delta) => {
-    if (reactionSeq !== last.current) {
-      last.current = reactionSeq;
-      energy.current = 1;
-    }
-    energy.current = Math.max(0, energy.current - delta * 1.8);
-    const e = energy.current;
-    if (light.current) light.current.intensity = e * 7;
-    if (puff.current) {
-      const s = 0.2 + (1 - e) * 0.9;
-      puff.current.scale.setScalar(s * (e > 0 ? 1 : 0));
-      puff.current.visible = e > 0.01;
-    }
-    if (mat.current) mat.current.opacity = e * 0.5;
-  });
-
-  return (
-    <group position={[TUBE_X, TUBE_BASE_Y + 0.9, 0]}>
-      <pointLight ref={light} color="#fff3d0" distance={6} decay={2} intensity={0} />
-      <mesh ref={puff} visible={false}>
-        <sphereGeometry args={[1, 20, 20]} />
-        <meshBasicMaterial ref={mat} color="#fff6e0" transparent opacity={0} depthWrite={false} />
-      </mesh>
-    </group>
-  );
-};
-
 const Apparatus = ({
   liquidColor,
   fill,
   heating,
   temperature,
   reactionSeq,
+  reactionKind,
   pourSeq,
   pourColor,
   fogging,
@@ -105,45 +76,85 @@ const Apparatus = ({
     <Steam active={heating && fill > 0.12 && temperature > 0.5} temperature={temperature} paused={paused} />
     <Fog active={fogging} paused={paused} />
     <PourDrop pourSeq={pourSeq} pourColor={pourColor} fill={fill} paused={paused} />
-    <ReactionFlash reactionSeq={reactionSeq} />
+    <ReactionBurst reactionSeq={reactionSeq} kind={reactionKind} />
   </group>
 );
 
-const LabScene = (props) => {
-  const { paused, controlsRef } = useSceneControlOptional();
+// reagents/onPour/onToggleHeat/onClear drive the in-scene 3D controls (VR + mouse);
+// the rest of the props are display state passed through to the apparatus.
+const LabScene = ({ reagents, onPour, onToggleHeat, onClear, ...display }) => {
+  const { paused, controlsRef, xrStore, inVR, cardboard, walk } =
+    useSceneControlOptional();
+  const originRef = useRef(null);
+
+  // OrbitControls only in plain mode; VR/cardboard/walk drive the camera themselves.
+  const freeControl = inVR || cardboard || walk;
+
+  const content = (
+    <>
+      <color attach="background" args={["#0e1626"]} />
+      <StudioEnv />
+      <ambientLight intensity={0.4} />
+      <directionalLight position={[4, 7, 4]} intensity={1.1} />
+      <directionalLight position={[-5, 3, -4]} intensity={0.4} color="#bcd2ff" />
+
+      <Apparatus {...display} paused={paused} />
+
+      <LabControls3D
+        reagents={reagents}
+        onPour={onPour}
+        heating={display.heating}
+        onToggleHeat={onToggleHeat}
+        onClear={onClear}
+      />
+
+      <ContactShadows
+        position={[0, 0.005, 0]}
+        opacity={0.55}
+        blur={2.6}
+        far={6}
+        scale={11}
+        resolution={1024}
+        color="#0a1018"
+      />
+
+      {/* Phone cardboard look (split-screen + gyroscope) and desktop/phone walk. */}
+      <CardboardView enabled={!!cardboard} />
+      <Locomotion />
+
+      {/* VRda boshni headset boshqaradi; turish nuqtasini oldinga qo'yamiz. */}
+      {inVR && <XROrigin ref={originRef} position={[0, 0, 4.8]} />}
+
+      {!freeControl && (
+        <OrbitControls
+          ref={controlsRef}
+          makeDefault
+          enablePan={false}
+          enableDamping
+          dampingFactor={0.08}
+          target={CAMERA_TARGET}
+          minDistance={3}
+          maxDistance={13}
+          maxPolarAngle={Math.PI * 0.52}
+        />
+      )}
+    </>
+  );
 
   return (
     <div className="relative h-full w-full">
       <Suspense fallback={<Loader />}>
         <Canvas dpr={[1, 2]} gl={{ antialias: true }} camera={{ position: CAMERA_POSITION, fov: 42 }}>
-          <color attach="background" args={["#0e1626"]} />
-          <StudioEnv />
-          <ambientLight intensity={0.4} />
-          <directionalLight position={[4, 7, 4]} intensity={1.1} />
-          <directionalLight position={[-5, 3, -4]} intensity={0.4} color="#bcd2ff" />
-
-          <Apparatus {...props} paused={paused} />
-
-          <ContactShadows
-            position={[0, 0.005, 0]}
-            opacity={0.55}
-            blur={2.6}
-            far={6}
-            scale={11}
-            resolution={1024}
-            color="#0a1018"
-          />
-          <OrbitControls
-            ref={controlsRef}
-            makeDefault
-            enablePan={false}
-            enableDamping
-            dampingFactor={0.08}
-            target={CAMERA_TARGET}
-            minDistance={3}
-            maxDistance={13}
-            maxPolarAngle={Math.PI * 0.52}
-          />
+          {/* Wrap in <XR> so the lab can run a WebXR immersive-vr session;
+              XRLocomotion (thumbstick) must live inside <XR>. */}
+          {xrStore ? (
+            <XR store={xrStore}>
+              {content}
+              <XRLocomotion originRef={originRef} />
+            </XR>
+          ) : (
+            content
+          )}
         </Canvas>
       </Suspense>
     </div>

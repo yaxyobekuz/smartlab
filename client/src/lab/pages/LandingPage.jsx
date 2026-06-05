@@ -1,12 +1,28 @@
 import { lazy, Suspense } from "react";
-import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowRight, Headset } from "lucide-react";
 import { SUBJECTS } from "@/lab/data/subjects";
+import { xrStore } from "@/lab/components/xrStore";
 
 // Lazy so Three.js stays out of the initial bundle.
 const HeroScene = lazy(() => import("@/lab/components/HeroScene"));
 
-const LandingPage = () => (
+const LandingPage = () => {
+  const navigate = useNavigate();
+
+  // VR ko'zoynak: sessiyani shu bosish (gesture) ichida boshlaymiz va darhol
+  // laboratoriyaga o'tamiz. Sessiya boshlanmasa, lab sahifasidagi overlay bir
+  // bosishda kirishni taklif qiladi.
+  const enterLabVR = () => {
+    try {
+      xrStore.enterVR()?.catch(() => {});
+    } catch {
+      // WebXR yo'q qurilma — lab sahifasidagi overlay yo'l-yo'riq beradi.
+    }
+    navigate("/chemistry/lab?vr=1");
+  };
+
+  return (
   <div>
     <section className="container grid items-center gap-8 py-12 md:grid-cols-2 md:py-16">
       <div>
@@ -20,12 +36,21 @@ const LandingPage = () => (
           Smartlab - kimyo, biologiya va fizika hodisalarini aylantirib, bosib
           va o'rganib ko'rishingiz mumkin bo'lgan virtual laboratoriya.
         </p>
-        <Link
-          to={`/${SUBJECTS[0].slug}`}
-          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-        >
-          Laboratoriyani ochish <ArrowRight size={16} />
-        </Link>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link
+            to={`/${SUBJECTS[0].slug}`}
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+          >
+            Laboratoriyani ochish <ArrowRight size={16} />
+          </Link>
+          <button
+            type="button"
+            onClick={enterLabVR}
+            className="inline-flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/5 px-5 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+          >
+            <Headset size={16} /> VR laboratoriyaga kirish
+          </button>
+        </div>
       </div>
 
       <div className="h-72 md:h-96">
@@ -67,6 +92,7 @@ const LandingPage = () => (
       </div>
     </section>
   </div>
-);
+  );
+};
 
 export default LandingPage;

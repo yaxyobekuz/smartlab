@@ -22,6 +22,10 @@ const EL = {
   P: { color: "#ff8000", radius: 0.47, name: "Fosfor" },
   Br: { color: "#a62929", radius: 0.5, name: "Brom" },
   I: { color: "#940094", radius: 0.55, name: "Yod" },
+  B: { color: "#ffb5b5", radius: 0.42, name: "Bor" },
+  F: { color: "#90e050", radius: 0.34, name: "Ftor" },
+  Si: { color: "#f0c8a0", radius: 0.5, name: "Kremniy" },
+  Co: { color: "#f090a0", radius: 0.5, name: "Kobalt" },
 };
 
 export const ELEMENTS = EL;
@@ -355,6 +359,38 @@ export const MOLECULES = [
 ];
 
 export const getMolecule = (id) => MOLECULES.find((m) => m.id === id) || null;
+
+// Erish (mp) va qaynash (bp) haroratlari, °C — moddaning xona haroratidagi
+// holatini (qattiq/suyuq/gaz) tushuntirish uchun. `sub: true` — sublimatsiya.
+export const PHASE_POINTS = {
+  water: { mp: 0, bp: 100 },
+  co2: { mp: -78, bp: -78, sub: true },
+  methane: { mp: -182, bp: -162 },
+  ammonia: { mp: -78, bp: -33 },
+  hydrogen: { mp: -259, bp: -253 },
+  oxygen: { mp: -219, bp: -183 },
+  nitrogen: { mp: -210, bp: -196 },
+  hcl: { mp: -114, bp: -85 },
+  nacl: { mp: 801, bp: 1465 },
+  h2o2: { mp: 0, bp: 150 },
+  ozone: { mp: -193, bp: -112 },
+  so2: { mp: -72, bp: -10 },
+  co: { mp: -205, bp: -191 },
+  ethanol: { mp: -114, bp: 78 },
+  "acetic-acid": { mp: 17, bp: 118 },
+  benzene: { mp: 6, bp: 80 },
+};
+
+export const getPhasePoints = (id) => PHASE_POINTS[id] ?? null;
+
+// Xona haroratidagi (~20°C) holat: mp dan past bo'lsa qattiq, bp dan baland gaz.
+export const stateAtRoom = (id) => {
+  const p = PHASE_POINTS[id];
+  if (!p) return null;
+  if (20 < p.mp) return "qattiq";
+  if (20 >= p.bp) return "gaz";
+  return "suyuq";
+};
 
 // --- Formula / composition helpers (element multiset math) ---
 
