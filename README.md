@@ -5,7 +5,7 @@ fizika mavzularini brauzerda aylantirib, yaqindan ko'rib o'rganish mumkin. Loyih
 **Mira AI** yordamchisi va **Cardboard (gyroskop) VR** rejimi ham qo'shilgan.
 
 Texnik jihatdan bu **monorepo**: `React (Vite)` frontend + `Express + MongoDB` backend.
-
+Loyiha Prezentatsiyasi - https://gamma.app/docs/Istalgan-joyda-istalgan-vaqtdaxavfsiz-laboratoriya-tajribalari-a8jaj92f50sh3cd
 ---
 
 ## ✨ Asosiy imkoniyatlar
