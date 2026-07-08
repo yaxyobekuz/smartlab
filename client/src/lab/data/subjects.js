@@ -78,6 +78,21 @@ export const SUBJECTS = [
       },
     ],
   },
+  {
+    slug: "electronics",
+    title: "Elektron mehanika",
+    short: "Platalar va sxemalar - Arduino bilan LED va motorlarni boshqaring.",
+    icon: "🔌",
+    color: "#7c3aed",
+    topics: [
+      {
+        slug: "arduino",
+        title: "Arduino",
+        short: "LED miltillashi, RGB, servo va tugmani 3D platada sinab ko'ring.",
+        icon: "🤖",
+      },
+    ],
+  },
 ];
 
 export const getSubject = (slug) =>

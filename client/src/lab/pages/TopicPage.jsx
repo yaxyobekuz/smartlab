@@ -24,6 +24,9 @@ const PAGES = {
     import("@/lab/features/physics/solar-system/SolarSystemPage"),
   ),
   "physics/wave": lazy(() => import("@/lab/features/physics/wave/WavePage")),
+  "electronics/arduino": lazy(() =>
+    import("@/lab/features/electronics/arduino/ArduinoPage"),
+  ),
 };
 
 const Fallback = () => (
