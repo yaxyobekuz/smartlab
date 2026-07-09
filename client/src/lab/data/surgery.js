@@ -1,12 +1,14 @@
 // Virtual dissection layers, reusing the same Z-Anatomy GLB models as anatomy.
 // Layers are ordered outer -> inner; only soft tissue is `clippable` (cut by the
 // scalpel), organs stay whole so the cut reveals them intact.
+import skinUrl from "@/shared/assets/models/skin.glb?url";
 import myologyUrl from "@/shared/assets/models/myology.glb?url";
 import angiologyUrl from "@/shared/assets/models/angiology.glb?url";
 import splanchnologyUrl from "@/shared/assets/models/splanchnology.glb?url";
 
-// Skin has no dedicated GLB, so it reuses the muscle mesh: one flat skin tone,
-// scaled slightly out so it sits just outside the muscle without z-fighting.
+// Real body-surface mesh exported from Z-Anatomy ("Regions of human body"),
+// meshopt-compressed to share the same coordinate space as the other layers.
+// Painted one flat skin tone; clicking it shows a generic "Teri" detail.
 export const SKIN_DETAIL = {
   label: "Teri",
   color: "#e8b89b",
@@ -14,7 +16,7 @@ export const SKIN_DETAIL = {
 };
 
 export const SURGERY_LAYERS = [
-  { slug: "skin", title: "Teri", url: myologyUrl, color: "#e8b89b", clippable: true, flatColor: "#e8b89b", detail: SKIN_DETAIL, scale: 1.02 },
+  { slug: "skin", title: "Teri", url: skinUrl, color: "#e8b89b", clippable: true, flatColor: "#e8b89b", detail: SKIN_DETAIL },
   { slug: "muscle", title: "Mushaklar", url: myologyUrl, color: "#c0392b", clippable: true },
   { slug: "vessels", title: "Qon-tomir", url: angiologyUrl, color: "#7b241c", clippable: true },
   { slug: "organs", title: "Ichki a'zolar", url: splanchnologyUrl, color: "#cd6155", clippable: false },
