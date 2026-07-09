@@ -46,3 +46,16 @@ export const ORGANELLES = [
 
 export const getOrganelle = (id) =>
   ORGANELLES.find((o) => o.id === id) || null;
+
+// Detailed external (Sketchfab) cell models shown via an embedded iframe viewer.
+export const CELL_MODELS = [
+  {
+    id: "eukaryotic-cell",
+    name: "Eukariot hujayra · 3D",
+    sketchfab: "b7d84e5f2d5e411fbb195ab2742f2256",
+    about:
+      "SGU BioMedical Visualization markazi tayyorlagan batafsil eukariot hujayra modeli. Yadro, mitoxondriya, endoplazmatik to'r va boshqa organoidlarni yaqindan aylantirib ko'ring.",
+  },
+];
+
+export const getCellModel = (id) => CELL_MODELS.find((m) => m.id === id) || null;
