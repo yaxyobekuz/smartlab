@@ -55,6 +55,12 @@ export const SUBJECTS = [
         short: "Mushak, qon-tomir, asab, bo'g'im va ichki a'zolar tizimlarini 3D da o'rganing.",
         icon: "🧍",
       },
+      {
+        slug: "surgery",
+        title: "Jarrohlik",
+        short: "Qatlamlarni yeching yoki skalpel bilan kesib ichki a'zolarni ko'ring.",
+        icon: "🔪",
+      },
     ],
   },
   {

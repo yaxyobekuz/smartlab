@@ -23,6 +23,7 @@ const Scene = ({
   bg,
   autoRotate = false,
   frameloop = "always",
+  gl,
 }) => {
   const { paused, controlsRef, xrStore, inVR, cardboard, walk } =
     useSceneControlOptional();
@@ -89,6 +90,7 @@ const Scene = ({
           frameloop={freeControl ? "always" : frameloop}
           camera={{ position: camera, fov: 50 }}
           dpr={[1, 2]}
+          gl={gl}
         >
           {/* Wrap in <XR> only when a store exists (workspace); the hero has none. */}
           {xrStore ? <XR store={xrStore}>{content}</XR> : content}
