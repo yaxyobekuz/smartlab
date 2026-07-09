@@ -85,6 +85,28 @@ export const useLabBench = () => {
     });
   }, []);
 
+  // AI (Gemini) aniqlagan reaksiyani ijro etadi: ikkala moddani idishga quyadi
+  // va status'ga mos effektni chiqaradi. AI tavsifi/tenglamasi bannerda ko'rinadi.
+  const playAiReaction = useCallback((subA, subB, aiResult) => {
+    const status = aiResult?.status || "neytral";
+    const base = effectForStatus(status);
+    const effect = {
+      ...base,
+      detail: aiResult?.description || base.detail,
+      equation: aiResult?.equation || null,
+      intensity: aiResult?.intensity || null,
+    };
+
+    setPoured((prev) => [...prev, subA, subB]);
+    setPour((p) => ({ seq: p.seq + 1, color: subB.color, state: subB.state }));
+    setReaction((r) => ({ seq: r.seq + 1, effect }));
+    setHistory((h) => [
+      ...h,
+      { index: h.length + 1, name: subA.name, formula: subA.formula, color: subA.color, reaction: null, product: null },
+      { index: h.length + 2, name: subB.name, formula: subB.formula, color: subB.color, reaction: effect.kind ? effect.title : null, product: null },
+    ]);
+  }, []);
+
   const undo = useCallback(() => {
     setPoured((prev) => prev.slice(0, -1));
     setHistory((h) => h.slice(0, -1));
@@ -124,6 +146,7 @@ export const useLabBench = () => {
     heating,
     temperature,
     add,
+    playAiReaction,
     undo,
     clear,
     toggleHeat,

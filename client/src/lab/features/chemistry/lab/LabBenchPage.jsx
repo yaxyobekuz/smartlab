@@ -2,13 +2,14 @@
 // into the beaker, watch colours blend and reactions fire. When the mixture
 // adds up to a known molecule, its name and formula appear.
 import { useEffect, useMemo, useState } from "react";
-import { Flame, Undo2, Trash2, Grid3x3 } from "lucide-react";
+import { Flame, Undo2, Trash2, Grid3x3, Sparkles } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import LabWorkspace from "@/lab/components/LabWorkspace";
 import FormulaText from "@/lab/components/FormulaText";
 import LabScene from "./scene/LabScene";
 import SubstanceChest from "./SubstanceChest";
 import PeriodicTableModal from "./PeriodicTableModal";
+import AiReactionModal from "./AiReactionModal";
 import { useLabBench } from "./useLabBench";
 import {
   SUBSTANCES,
@@ -64,6 +65,7 @@ const ActionButton = ({ label, active, disabled, onClick, children }) => (
 const LabBenchPage = () => {
   const bench = useLabBench();
   const [showTable, setShowTable] = useState(false);
+  const [showAi, setShowAi] = useState(false);
   const [hiddenSeq, setHiddenSeq] = useState(0);
 
   // Hide the reaction headline ~2.8s after each new reaction fires. Only the
@@ -158,8 +160,15 @@ const LabBenchPage = () => {
                   REACTION_STYLES[flash.kind],
                 )}
               >
-                <span className="text-base font-bold">{flash.title}</span>
-                <span className="text-sm opacity-90">{flash.detail}</span>
+                <div className="min-w-0">
+                  <span className="block text-base font-bold">{flash.title}</span>
+                  <span className="block text-sm opacity-90">{flash.detail}</span>
+                  {flash.equation && (
+                    <span className="mt-0.5 block text-xs font-medium opacity-80">
+                      <FormulaText formula={flash.equation} />
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -195,6 +204,16 @@ const LabBenchPage = () => {
       }
       info={
         <div className="space-y-4">
+          {/* AI reaksiya - miqdor kiritib, Gemini aniqlaydi */}
+          <button
+            type="button"
+            onClick={() => setShowAi(true)}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+          >
+            <Sparkles size={15} />
+            AI reaksiya (miqdor bilan)
+          </button>
+
           {/* Actions */}
           <div className="grid grid-cols-2 gap-1.5">
             <ActionButton
@@ -291,6 +310,13 @@ const LabBenchPage = () => {
 
           {showTable && (
             <PeriodicTableModal onPick={bench.add} onClose={() => setShowTable(false)} />
+          )}
+
+          {showAi && (
+            <AiReactionModal
+              onClose={() => setShowAi(false)}
+              onReaction={bench.playAiReaction}
+            />
           )}
         </div>
       }
