@@ -1,6 +1,7 @@
 // Lists the topics of one subject (/:subject).
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import Icon from "@/lab/components/Icon";
 import { getSubject } from "@/lab/data/subjects";
 import NotFoundPage from "./NotFoundPage";
 
@@ -20,10 +21,10 @@ const SubjectPage = () => {
 
       <div className="mb-6 flex items-center gap-3">
         <span
-          className="grid size-12 place-items-center rounded-xl text-2xl"
+          className="grid size-12 place-items-center rounded-xl"
           style={{ backgroundColor: `${subject.color}1a` }}
         >
-          {subject.icon}
+          <Icon name={subject.icon} size={24} style={{ color: subject.color }} />
         </span>
         <div>
           <h1 className="text-2xl font-semibold">{subject.title}</h1>
@@ -38,7 +39,12 @@ const SubjectPage = () => {
             to={`/${subject.slug}/${t.slug}`}
             className="group rounded-2xl border border-border bg-card p-5 transition-all hover:-translate-y-1 hover:shadow-md"
           >
-            <div className="text-3xl">{t.icon}</div>
+            <div
+              className="grid size-11 place-items-center rounded-xl"
+              style={{ backgroundColor: `${subject.color}1a` }}
+            >
+              <Icon name={t.icon} size={22} style={{ color: subject.color }} />
+            </div>
             <h3 className="mt-3 font-semibold">{t.title}</h3>
             <p className="mt-1 text-sm text-muted-foreground">{t.short}</p>
             <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">

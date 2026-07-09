@@ -19,7 +19,7 @@ export const ANATOMY = [
     slug: "myology",
     title: "Mushaklar tizimi",
     short: "Tana mushaklarining joylashuvini 3D da ko'ring.",
-    icon: "💪",
+    icon: "Dumbbell",
     url: myologyUrl,
     about:
       "Mushaklar tizimi (miologiya) - tana harakatini ta'minlovchi skelet mushaklari. Ular suyaklarga birikib qisqarish orqali harakat hosil qiladi.",
@@ -28,7 +28,7 @@ export const ANATOMY = [
     slug: "angiology",
     title: "Qon-tomir tizimi",
     short: "Arteriya va venalarning butun tanadagi tarmog'ini kuzating.",
-    icon: "🩸",
+    icon: "HeartPulse",
     url: angiologyUrl,
     about:
       "Qon-tomir tizimi (angiologiya) - yurak, arteriyalar, venalar va kapillyarlar. Qonni butun tanaga yetkazib, kislorod va oziq moddalarni tashiydi.",
@@ -37,7 +37,7 @@ export const ANATOMY = [
     slug: "neurology",
     title: "Asab tizimi",
     short: "Bosh miya, orqa miya va nervlar tarmog'ini ko'ring.",
-    icon: "🧠",
+    icon: "Brain",
     url: neurologyUrl,
     about:
       "Asab tizimi (nevrologiya) - bosh miya, orqa miya va periferik nervlar. Tana a'zolari o'rtasida signal uzatib, harakat va sezgini boshqaradi.",
@@ -46,7 +46,7 @@ export const ANATOMY = [
     slug: "arthrology",
     title: "Bo'g'imlar tizimi",
     short: "Suyaklar birlashadigan bo'g'imlarni o'rganing.",
-    icon: "🦴",
+    icon: "Bone",
     url: arthrologyUrl,
     about:
       "Bo'g'imlar tizimi (artrologiya) - suyaklarni o'zaro bog'lovchi bo'g'imlar. Ular tananing egiluvchanligi va harakat doirasini belgilaydi.",
@@ -55,7 +55,7 @@ export const ANATOMY = [
     slug: "splanchnology",
     title: "Ichki a'zolar",
     short: "Ko'krak va qorin bo'shlig'idagi ichki a'zolarni ko'ring.",
-    icon: "🫁",
+    icon: "Heart",
     url: splanchnologyUrl,
     about:
       "Ichki a'zolar (splanxnologiya) - yurak, o'pka, jigar, oshqozon, ichaklar va boshqa a'zolar. Nafas olish, hazm qilish va ayirish jarayonlarini bajaradi.",
@@ -64,7 +64,7 @@ export const ANATOMY = [
     slug: "muscular-insertions",
     title: "Mushak birikmalari",
     short: "Mushaklarning suyaklarga birikish nuqtalarini ko'ring.",
-    icon: "🔗",
+    icon: "Link",
     url: muscularInsertionsUrl,
     about:
       "Mushak birikmalari - mushaklarning suyaklarga boshlanish (origo) va tugash (insertio) nuqtalari. Bu birikmalar mushak qisqarganda qaysi suyak harakatlanishini belgilaydi.",
@@ -73,7 +73,7 @@ export const ANATOMY = [
     slug: "skeleton",
     title: "Skelet",
     short: "To'liq suyak skeletini har tomondan ko'ring.",
-    icon: "🦴",
+    icon: "Bone",
     url: skeletonUrl,
     keepMaterial: true,
     about:
@@ -83,7 +83,7 @@ export const ANATOMY = [
     slug: "skull",
     title: "Bosh suyagi",
     short: "Bosh suyagi bo'laklarini rangli ajratib ko'ring.",
-    icon: "💀",
+    icon: "Skull",
     url: skullUrl,
     keepMaterial: true,
     about:
@@ -93,7 +93,7 @@ export const ANATOMY = [
     slug: "vertebrae",
     title: "Umurtqalar",
     short: "Umurtqa suyagining tuzilishini yaqindan o'rganing.",
-    icon: "🦴",
+    icon: "Bone",
     url: vertebraeUrl,
     keepMaterial: true,
     about:
@@ -103,7 +103,7 @@ export const ANATOMY = [
     slug: "hand",
     title: "Qo'l panjasi",
     short: "Panja suyaklari va bo'g'imlarini ko'ring.",
-    icon: "✋",
+    icon: "Hand",
     url: handUrl,
     keepMaterial: true,
     about:
@@ -113,7 +113,7 @@ export const ANATOMY = [
     slug: "upper-limb",
     title: "Yuqori oyoq-qo'l",
     short: "Yelka, bilak va panja suyaklarini birga ko'ring.",
-    icon: "💪",
+    icon: "Dumbbell",
     url: upperLimbUrl,
     keepMaterial: true,
     about:
@@ -123,7 +123,7 @@ export const ANATOMY = [
     slug: "lower-limb",
     title: "Pastki oyoq-qo'l",
     short: "Son, boldir va oyoq panjasi suyaklarini ko'ring.",
-    icon: "🦵",
+    icon: "Footprints",
     url: lowerLimbUrl,
     keepMaterial: true,
     about:

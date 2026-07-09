@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Headset } from "lucide-react";
+import Icon from "@/lab/components/Icon";
 import { SUBJECTS } from "@/lab/data/subjects";
 
 // Lazy so Three.js stays out of the initial bundle.
@@ -62,10 +63,10 @@ const LandingPage = () => {
             className="group rounded-2xl border border-border bg-card p-5 transition-all hover:-translate-y-1 hover:shadow-md"
           >
             <div
-              className="grid size-12 place-items-center rounded-xl text-2xl"
+              className="grid size-12 place-items-center rounded-xl"
               style={{ backgroundColor: `${s.color}1a` }}
             >
-              {s.icon}
+              <Icon name={s.icon} size={24} style={{ color: s.color }} />
             </div>
             <h3 className="mt-3 font-semibold">{s.title}</h3>
             <p className="mt-1 text-sm text-muted-foreground">{s.short}</p>

@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
+import { SearchX } from "lucide-react";
 
 const NotFoundPage = () => (
   <div className="container grid min-h-[60vh] place-items-center text-center">
     <div>
-      <p className="text-5xl">🔍</p>
+      <SearchX size={56} strokeWidth={1.5} className="mx-auto text-muted-foreground" />
       <h1 className="mt-4 text-2xl font-semibold">Bunday yo'nalish topilmadi</h1>
       <p className="mt-2 text-muted-foreground">
         Bu kategoriya hali mavjud emas yoki manzil noto'g'ri.
