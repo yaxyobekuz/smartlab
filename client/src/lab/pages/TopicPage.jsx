@@ -28,7 +28,7 @@ const PAGES = {
   ),
   "physics/wave": lazy(() => import("@/lab/features/physics/wave/WavePage")),
   "electronics/arduino": lazy(() =>
-    import("@/lab/features/electronics/arduino/ArduinoPage"),
+    import("@/lab/features/electronics/circuit/CircuitPage"),
   ),
 };
 

@@ -44,6 +44,7 @@ const AnatomyPage = () => {
             <directionalLight position={[-5, 2, -4]} intensity={0.4} />
             <AnatomyModel
               url={model.url}
+              keepMaterial={!!model.keepMaterial}
               frozen={!!selectedPart}
               onPick={(part) => setField("selectedPart", part)}
             />

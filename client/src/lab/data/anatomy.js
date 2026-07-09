@@ -7,6 +7,12 @@ import neurologyUrl from "@/shared/assets/models/neurology.glb?url";
 import arthrologyUrl from "@/shared/assets/models/arthrology.glb?url";
 import splanchnologyUrl from "@/shared/assets/models/splanchnology.glb?url";
 import muscularInsertionsUrl from "@/shared/assets/models/muscular_insertions.glb?url";
+import skeletonUrl from "@/shared/assets/models/skeleton.glb?url";
+import skullUrl from "@/shared/assets/models/skull.glb?url";
+import vertebraeUrl from "@/shared/assets/models/vertebrae.glb?url";
+import handUrl from "@/shared/assets/models/hand.glb?url";
+import upperLimbUrl from "@/shared/assets/models/upper-limb.glb?url";
+import lowerLimbUrl from "@/shared/assets/models/lower-limb.glb?url";
 
 export const ANATOMY = [
   {
@@ -62,6 +68,66 @@ export const ANATOMY = [
     url: muscularInsertionsUrl,
     about:
       "Mushak birikmalari - mushaklarning suyaklarga boshlanish (origo) va tugash (insertio) nuqtalari. Bu birikmalar mushak qisqarganda qaysi suyak harakatlanishini belgilaydi.",
+  },
+  {
+    slug: "skeleton",
+    title: "Skelet",
+    short: "To'liq suyak skeletini har tomondan ko'ring.",
+    icon: "🦴",
+    url: skeletonUrl,
+    keepMaterial: true,
+    about:
+      "Skelet - tanadagi barcha suyaklar majmuasi. U tanaga tayanch beradi, ichki a'zolarni himoya qiladi va mushaklar bilan birga harakatni ta'minlaydi.",
+  },
+  {
+    slug: "skull",
+    title: "Bosh suyagi",
+    short: "Bosh suyagi bo'laklarini rangli ajratib ko'ring.",
+    icon: "💀",
+    url: skullUrl,
+    keepMaterial: true,
+    about:
+      "Bosh suyagi (kranium) - miya va sezgi a'zolarini himoya qiluvchi suyaklar. Har bir suyak alohida rangda ajratilgan: peshona, tepa, chakka, ensa va yuz suyaklari.",
+  },
+  {
+    slug: "vertebrae",
+    title: "Umurtqalar",
+    short: "Umurtqa suyagining tuzilishini yaqindan o'rganing.",
+    icon: "🦴",
+    url: vertebraeUrl,
+    keepMaterial: true,
+    about:
+      "Umurtqalar - umurtqa pog'onasini tashkil etuvchi suyaklar. Har biri tana, yoy va o'siqlardan iborat bo'lib, orqa miyani himoya qiladi.",
+  },
+  {
+    slug: "hand",
+    title: "Qo'l panjasi",
+    short: "Panja suyaklari va bo'g'imlarini ko'ring.",
+    icon: "✋",
+    url: handUrl,
+    keepMaterial: true,
+    about:
+      "Qo'l panjasi - bilak-kaft (karpal), kaft (metakarpal) va barmoq (falanga) suyaklaridan iborat. Inson eng nozik harakatlarni shu tuzilma orqali bajaradi.",
+  },
+  {
+    slug: "upper-limb",
+    title: "Yuqori oyoq-qo'l",
+    short: "Yelka, bilak va panja suyaklarini birga ko'ring.",
+    icon: "💪",
+    url: upperLimbUrl,
+    keepMaterial: true,
+    about:
+      "Yuqori oyoq-qo'l - yelka (yelka suyagi), bilak (bilak va tirsak suyaklari) va panja suyaklari. Keng harakat doirasi bilan ajralib turadi.",
+  },
+  {
+    slug: "lower-limb",
+    title: "Pastki oyoq-qo'l",
+    short: "Son, boldir va oyoq panjasi suyaklarini ko'ring.",
+    icon: "🦵",
+    url: lowerLimbUrl,
+    keepMaterial: true,
+    about:
+      "Pastki oyoq-qo'l - son suyagi, tizza qopqog'i, boldir suyaklari va oyoq panjasi. Tana og'irligini ko'tarib, yurish va turishni ta'minlaydi.",
   },
 ];
 

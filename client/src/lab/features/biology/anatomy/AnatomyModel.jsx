@@ -15,7 +15,7 @@ import { resolveMaterial } from "@/lab/data/anatomyMaterials";
 
 const HOVER_COLOR = new THREE.Color("#22d3ee");
 
-const AnatomyModel = ({ url, onPick, frozen = false }) => {
+const AnatomyModel = ({ url, onPick, frozen = false, keepMaterial = false }) => {
   const { scene } = useGLTF(url);
   const invalidate = useThree((s) => s.invalidate);
   const selected = useRef(null);
@@ -24,7 +24,12 @@ const AnatomyModel = ({ url, onPick, frozen = false }) => {
   const model = useMemo(() => scene.clone(true), [scene]);
 
   // Tint every mesh by its material name; store the resolved detail per mesh.
+  // Models that ship their own colours (skeleton, skull...) keep them as-is.
   useEffect(() => {
+    if (keepMaterial) {
+      invalidate();
+      return;
+    }
     model.traverse((child) => {
       if (!child.isMesh) return;
       const matName = Array.isArray(child.material)
@@ -40,7 +45,7 @@ const AnatomyModel = ({ url, onPick, frozen = false }) => {
       child.userData.baseColor = child.material.color.clone();
     });
     invalidate();
-  }, [model, invalidate]);
+  }, [model, invalidate, keepMaterial]);
 
   // Build the raycast BVH off the critical path so first paint isn't blocked.
   useEffect(() => {

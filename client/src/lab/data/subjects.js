@@ -93,8 +93,8 @@ export const SUBJECTS = [
     topics: [
       {
         slug: "arduino",
-        title: "Arduino",
-        short: "LED miltillashi, RGB, servo va tugmani 3D platada sinab ko'ring.",
+        title: "Sxema quruvchi",
+        short: "Komponentlarni tortib ulang, kod yozing va simulyatsiyani jonli kuzating.",
         icon: "🤖",
       },
     ],
