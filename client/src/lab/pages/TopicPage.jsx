@@ -33,6 +33,9 @@ const PAGES = {
     import("@/lab/features/physics/solar-system/SolarSystemPage"),
   ),
   "physics/wave": lazy(() => import("@/lab/features/physics/wave/WavePage")),
+  "physics/quantum-coin": lazy(() =>
+    import("@/lab/features/physics/quantum-coin/QuantumCoinPage"),
+  ),
   "electronics/arduino": lazy(() =>
     import("@/lab/features/electronics/circuit/CircuitPage"),
   ),

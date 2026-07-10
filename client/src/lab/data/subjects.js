@@ -94,6 +94,12 @@ export const SUBJECTS = [
         short: "Sinus to'lqini va mayatnik tebranishini ko'ring.",
         icon: "Waves",
       },
+      {
+        slug: "quantum-coin",
+        title: "Kvant tanga tashlash",
+        short: "Kvant holat va o'lchashni interaktiv PhET simulyatsiyasida o'rganing.",
+        icon: "Atom",
+      },
     ],
   },
   {
