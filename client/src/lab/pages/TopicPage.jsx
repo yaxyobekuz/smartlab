@@ -18,7 +18,13 @@ const PAGES = {
   "chemistry/atoms": lazy(() =>
     import("@/lab/features/chemistry/atoms/AtomsPage"),
   ),
+  "chemistry/periodic-table": lazy(() =>
+    import("@/lab/features/chemistry/periodic/PeriodicTablePage"),
+  ),
   "biology/cell": lazy(() => import("@/lab/features/biology/cell/CellPage")),
+  "biology/cell-studio": lazy(() =>
+    import("@/lab/features/biology/cell-studio/CellStudioPage"),
+  ),
   "biology/dna": lazy(() => import("@/lab/features/biology/dna/DnaPage")),
   "biology/surgery": lazy(() =>
     import("@/lab/features/biology/surgery/SurgeryPage"),

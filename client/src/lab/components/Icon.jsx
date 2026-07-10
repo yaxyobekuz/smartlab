@@ -23,6 +23,7 @@ import {
   Skull,
   Hand,
   Footprints,
+  Grid3x3,
   Circle,
 } from "lucide-react";
 
@@ -49,6 +50,7 @@ const ICONS = {
   Skull,
   Hand,
   Footprints,
+  Grid3x3,
 };
 
 const Icon = ({ name, ...props }) => {

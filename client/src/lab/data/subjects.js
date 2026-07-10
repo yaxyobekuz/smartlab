@@ -11,6 +11,12 @@ export const SUBJECTS = [
     color: "#2563eb",
     topics: [
       {
+        slug: "periodic-table",
+        title: "Davriy jadval",
+        short: "118 element, ionlar va tenglama/molyar massa kalkulyatorlari.",
+        icon: "Grid3x3",
+      },
+      {
         slug: "molecules",
         title: "Molekulalar",
         short: "Suv, CO₂, metan kabi birikmalarni aylantirib ko'ring.",
@@ -41,6 +47,12 @@ export const SUBJECTS = [
         slug: "cell",
         title: "Hujayra",
         short: "Hujayra organoidlari bilan tanishing.",
+        icon: "Microscope",
+      },
+      {
+        slug: "cell-studio",
+        title: "Hujayra studiyasi",
+        short: "7 xil hujayrani 3D da o'rganing — organoidlar, mikroskop va solishtirish.",
         icon: "Microscope",
       },
       {
