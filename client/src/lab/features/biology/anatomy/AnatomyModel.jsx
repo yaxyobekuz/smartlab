@@ -40,9 +40,11 @@ const AnatomyModel = ({ url, onPick, frozen = false, keepMaterial = false }) => 
 
   // VR box: kontroller bilan aylantirish + nishon orqali tanlash.
   const { vrBox } = useSceneControlOptional();
-  const { axes: ctrlAxes, on: onController } = useVrController({
-    enabled: !!vrBox,
-  });
+  const {
+    axes: ctrlAxes,
+    on: onController,
+    poll: pollController,
+  } = useVrController({ enabled: !!vrBox });
 
   // Clone so the cached source scene is never mutated.
   const model = useMemo(() => scene.clone(true), [scene]);
@@ -155,9 +157,11 @@ const AnatomyModel = ({ url, onPick, frozen = false, keepMaterial = false }) => 
     return () => offs.forEach((off) => off && off());
   }, [vrBox, onController, gazePick, clearSelection, dolly]);
 
-  // Joystik bilan modelni aylantirish (faqat VR box'da; boshqa rejimda no-op).
+  // Kontrollerni yagona R3F siklida o'qiymiz + joystik bilan aylantirish.
   useFrame((_, delta) => {
-    if (!vrBox || !rotRef.current) return;
+    if (!vrBox) return;
+    pollController();
+    if (!rotRef.current) return;
     const { x, y } = ctrlAxes.current;
     if (!x && !y) return;
     const dt = Math.min(delta, 0.05);
