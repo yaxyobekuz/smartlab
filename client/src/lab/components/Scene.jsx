@@ -25,13 +25,14 @@ const Scene = ({
   frameloop = "always",
   gl,
 }) => {
-  const { paused, controlsRef, xrStore, inVR, cardboard, walk } =
+  const { paused, controlsRef, xrStore, inVR, cardboard, vrBox, walk } =
     useSceneControlOptional();
 
   // In cardboard mode the gyroscope drives the camera, so disable orbit + adaptive
   // dpr (CardboardView always renders) and stop auto-rotate. Walk mode is a
   // first-person controller, so it also takes over from OrbitControls.
-  const cardboardOn = !!cardboard;
+  // "VR box" shares the same stereo split (persisting without a gyroscope).
+  const cardboardOn = !!cardboard || !!vrBox;
   const walkOn = !!walk;
   const freeControl = cardboardOn || walkOn;
 
@@ -39,7 +40,7 @@ const Scene = ({
   // session (they fight the WebXR-owned camera and blank the headset).
   const cameraControls = (
     <>
-      <CardboardView enabled={cardboardOn && !inVR} />
+      <CardboardView enabled={cardboardOn && !inVR} persist={!!vrBox} />
       {!freeControl && frameloop === "always" && <AdaptiveDpr pixelated />}
       {!freeControl && (
         <OrbitControls

@@ -27,6 +27,9 @@ export const SceneControlProvider = ({ children }) => {
   const [inVR, setInVR] = useState(() => xrStore.getState().session != null);
   const [vrSupported, setVrSupported] = useState(false);
   const [cardboard, setCardboard] = useState(false);
+  // "VR box" (Cardboard-style headset): fullscreen stereo split, gyro-driven when
+  // available and a static split otherwise - so it never blanks on a gyro-less device.
+  const [vrBox, setVrBox] = useState(false);
   const [walk, setWalk] = useState(false);
   const [gyroSupported] = useState(detectGyro);
   // Short Uzbek note shown when VR can't start / falls back to another mode.
@@ -104,6 +107,20 @@ export const SceneControlProvider = ({ children }) => {
       setVrMessage("Giroskopga ruxsat berilmadi");
     }
   }, [cardboard, requestGyroPermission]);
+
+  // Dedicated "VR box" mode: go straight to the fullscreen left/right stereo split
+  // for a phone-in-a-headset - no immersive-vr headset attempt. Unlike cardboard it
+  // does NOT require a gyroscope (persists as a static split), so it also previews
+  // on desktop. Gyro is requested here (needs the button's user gesture) for head-look.
+  const exitVrBox = useCallback(() => setVrBox(false), []);
+  const enterVrBox = useCallback(async () => {
+    setVrMessage("");
+    const ok = await requestGyroPermission();
+    setWalk(false);
+    setCardboard(false);
+    setVrBox(true);
+    if (!ok) setVrMessage("Giroskopsiz: statik ko'rinish");
+  }, [requestGyroPermission]);
 
   // ONE universal "Enter VR": real headset (immersive-vr) -> phone cardboard
   // (stereo + gyro) -> desktop magic-window (drag-look + WASD). Always does
@@ -184,6 +201,14 @@ export const SceneControlProvider = ({ children }) => {
     return () => window.removeEventListener("keydown", onKey);
   }, [cardboard]);
 
+  // Esc leaves VR box mode (fullscreen exit is also synced in LabWorkspace).
+  useEffect(() => {
+    if (!vrBox) return;
+    const onKey = (e) => e.key === "Escape" && setVrBox(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [vrBox]);
+
   // Executes a tool call emitted by the AI agent. Returns true when handled,
   // so the panel can show a small "bajarildi" confirmation.
   const runAiAction = useCallback(
@@ -238,6 +263,9 @@ export const SceneControlProvider = ({ children }) => {
       gyroSupported,
       toggleCardboard,
       exitCardboard,
+      vrBox,
+      enterVrBox,
+      exitVrBox,
       walk,
       toggleWalk,
       exitWalk,
@@ -261,6 +289,9 @@ export const SceneControlProvider = ({ children }) => {
       gyroSupported,
       toggleCardboard,
       exitCardboard,
+      vrBox,
+      enterVrBox,
+      exitVrBox,
       walk,
       toggleWalk,
       exitWalk,

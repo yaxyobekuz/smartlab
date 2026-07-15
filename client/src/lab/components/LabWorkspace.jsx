@@ -95,6 +95,9 @@ const WorkspaceBody = ({
     vrMessage,
     cardboard,
     exitCardboard,
+    vrBox,
+    enterVrBox,
+    exitVrBox,
     walk,
     exitWalk,
     setAiContext,
@@ -105,7 +108,7 @@ const WorkspaceBody = ({
   const vrRequested = searchParams.get("vr") === "1";
 
   // Immersive/walk modes take over the whole screen - no panels, no mobile bar.
-  const immersive = cardboard || inVR || walk;
+  const immersive = cardboard || inVR || walk || vrBox;
 
   // Feed the live page context to the AI agent: subject, topic, item list, and
   // the full real data of the active item so answers are grounded, not invented.
@@ -140,6 +143,35 @@ const WorkspaceBody = ({
     if (document.fullscreenElement) document.exitFullscreen();
     else rootRef.current?.requestFullscreen?.();
   };
+
+  // VR box: to'liq ekran + stereo split. Fullscreen va giroskop ruxsati bir xil
+  // foydalanuvchi ishorasidan kelib chiqishi uchun ikkalasini await'siz boshlaymiz
+  // (iOS gyro ruxsati ishorani "yeb" qo'ymasin). iOS-da div fullscreen bo'lmasa,
+  // split baribir ochiladi.
+  const enterVrBoxMode = () => {
+    const entering = enterVrBox();
+    rootRef.current?.requestFullscreen?.().catch(() => {});
+    return entering;
+  };
+
+  // Split ko'rinishdan chiqish: VR box bo'lsa fullscreendan ham chiqamiz.
+  const exitSplitView = () => {
+    if (vrBox) {
+      exitVrBox();
+      if (document.fullscreenElement) document.exitFullscreen();
+    } else {
+      exitCardboard();
+    }
+  };
+
+  // Fullscreendan (Esc / tizim tugmasi bilan) chiqilsa - VR box'ni ham yopamiz.
+  useEffect(() => {
+    const onFsChange = () => {
+      if (!document.fullscreenElement && vrBox) exitVrBox();
+    };
+    document.addEventListener("fullscreenchange", onFsChange);
+    return () => document.removeEventListener("fullscreenchange", onFsChange);
+  }, [vrBox, exitVrBox]);
 
   return (
     <div ref={rootRef} className="relative flex h-full w-full bg-background">
@@ -181,12 +213,12 @@ const WorkspaceBody = ({
           />
         )}
 
-        {cardboard ? (
+        {cardboard || vrBox ? (
           <>
             {/* Center seam to help align the phone in the headset. */}
             <div className="pointer-events-none absolute inset-y-0 left-1/2 z-20 w-px -translate-x-1/2 bg-white/40" />
             <button
-              onClick={exitCardboard}
+              onClick={exitSplitView}
               className="absolute right-3 top-3 z-30 rounded-lg bg-background/90 px-3 py-1.5 text-sm font-medium shadow-md backdrop-blur"
             >
               Chiqish
@@ -199,6 +231,7 @@ const WorkspaceBody = ({
               panelsHidden={panelsHidden}
               onTogglePanels={() => setField("panelsHidden", !panelsHidden)}
               onToggleFullscreen={toggleFullscreen}
+              onEnterVrBox={enterVrBoxMode}
             />
           )
         )}
