@@ -22,7 +22,9 @@ const setFromOrientation = (quat, { alpha, beta, gamma, orient }) => {
   quat.multiply(q0.setFromAxisAngle(zee, -deg2rad(orient)));
 };
 
-const CardboardView = ({ enabled }) => {
+// persist: VR box mode keeps the split even with no gyroscope (static preview),
+// instead of auto-exiting like phone cardboard when no orientation events arrive.
+const CardboardView = ({ enabled, persist = false }) => {
   const gl = useThree((s) => s.gl);
   const scene = useThree((s) => s.scene);
   const camera = useThree((s) => s.camera);
@@ -34,6 +36,8 @@ const CardboardView = ({ enabled }) => {
 
   const stereo = useMemo(() => new StereoEffect(gl), [gl]);
   const orientation = useRef({ alpha: 0, beta: 0, gamma: 0, orient: 0 });
+  // Haqiqiy giroskop hodisasi kelmaguncha false; kelmasa kamerani boshqarmaymiz.
+  const oriented = useRef(false);
 
   // StereoEffect mantiqiy (CSS) piksellarda ishlaydi; telefon dpr=2 bo'lsa,
   // ekranni faqat pastki-chap chorakka chizadi. Cardboard davomida dpr=1 ga
@@ -57,10 +61,12 @@ const CardboardView = ({ enabled }) => {
   useEffect(() => {
     if (!enabled) return;
     const o = orientation.current;
+    oriented.current = false;
     let gotEvent = false;
     const onDevice = (e) => {
       if (e.alpha == null && e.beta == null && e.gamma == null) return;
       gotEvent = true;
+      oriented.current = true;
       o.alpha = e.alpha ?? 0;
       o.beta = e.beta ?? 0;
       o.gamma = e.gamma ?? 0;
@@ -75,25 +81,31 @@ const CardboardView = ({ enabled }) => {
     window.addEventListener("orientationchange", onScreen, false);
     window.screen?.orientation?.addEventListener?.("change", onScreen);
     // Watchdog: ~1.2s ichida haqiqiy gyro hodisasi kelmasa, avtomatik chiqamiz.
-    const watchdog = window.setTimeout(() => {
-      if (!gotEvent) {
-        setVrMessage?.("Giroskop aniqlanmadi");
-        exitCardboard?.();
-      }
-    }, 1200);
+    // VR box (persist) rejimida chiqmaymiz - split statik ko'rinish sifatida qoladi.
+    const watchdog = persist
+      ? null
+      : window.setTimeout(() => {
+          if (!gotEvent) {
+            setVrMessage?.("Giroskop aniqlanmadi");
+            exitCardboard?.();
+          }
+        }, 1200);
     return () => {
-      window.clearTimeout(watchdog);
+      if (watchdog) window.clearTimeout(watchdog);
       window.removeEventListener("deviceorientationabsolute", onDevice, true);
       window.removeEventListener("deviceorientation", onDevice, true);
       window.removeEventListener("orientationchange", onScreen, false);
       window.screen?.orientation?.removeEventListener?.("change", onScreen);
     };
-  }, [enabled, exitCardboard, setVrMessage]);
+  }, [enabled, persist, exitCardboard, setVrMessage]);
 
   // priority > 0 suppresses fiber's default render; we render via the stereo effect.
   useFrame(() => {
     if (!enabled) return;
-    setFromOrientation(camera.quaternion, orientation.current);
+    // Giroskop hodisasi kelgan bo'lsa - kamerani bosh harakati boshqaradi. Aks
+    // holda (kompyuter, giroskopsiz) kamerani tegmaymiz, shunda model ko'rinib
+    // turadi va ekran bo'sh qolmaydi.
+    if (oriented.current) setFromOrientation(camera.quaternion, orientation.current);
     stereo.render(scene, camera);
   }, enabled ? 1 : 0);
 
