@@ -6,6 +6,7 @@ import { OrbitControls, AdaptiveDpr } from "@react-three/drei";
 import { XR, XROrigin, IfInSessionMode } from "@react-three/xr";
 import { useSceneControlOptional } from "./sceneControl";
 import CardboardView from "./CardboardView";
+import GazeReticle from "./GazeReticle";
 import Locomotion from "./Locomotion";
 
 const Loader = () => (
@@ -64,6 +65,9 @@ const Scene = ({
       <directionalLight position={[5, 5, 5]} intensity={1.1} />
       <directionalLight position={[-5, -3, -5]} intensity={0.4} />
       {children}
+
+      {/* VR box: markazda nishon (kontroller "tanlash" nimani olishini ko'rsatadi). */}
+      <GazeReticle enabled={!!vrBox} />
 
       <Locomotion />
 
