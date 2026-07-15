@@ -5,8 +5,14 @@
 // by the render loop) and discrete presses fire registered edge callbacks once.
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const DEADZONE = 0.18;
+// Katta deadzone: arzon stiklarning tinch holatdagi drifti "zilzila" qilib
+// aylantirmasligi uchun.
+const DEADZONE = 0.28;
 const dz = (v) => (Math.abs(v) < DEADZONE ? 0 : v);
+
+// Emulyatsiya qilingan WebXR kontrollerlari (IWER "xr-standard") tinch holatda
+// ham nol bo'lmagan/shovqinli o'qlar beradi - ularni haqiqiy remote deb olmaymiz.
+const isRealPad = (p) => p && p.mapping !== "xr-standard";
 
 // Standard gamepad face buttons: 0=A, 1=B, 2=X, 3=Y. Unknown indices are logged
 // so the mapping can be tuned for a specific remote.
@@ -92,18 +98,15 @@ export default function useVrController({ enabled = true } = {}) {
     let raf = 0;
     const poll = () => {
       const pads = navigator.getGamepads ? Array.from(navigator.getGamepads()) : [];
-      const pad = pads.find(Boolean) || null;
+      const pad = pads.find(isRealPad) || null;
       markConnected(!!pad);
       let x = 0;
       let y = 0;
       if (pad) {
+        // Faqat asosiy stik (axes[0]/[1]). Boshqa o'qlar (trigger/hat) tinch
+        // holatda nol bo'lmasligi mumkin, shuning uchun ularni o'qimaymiz.
         x = dz(pad.axes[0] || 0);
         y = dz(pad.axes[1] || 0);
-        // Some remotes report the stick on axes 2/3 instead.
-        if (x === 0 && y === 0) {
-          x = dz(pad.axes[2] || 0);
-          y = dz(pad.axes[3] || 0);
-        }
         pad.buttons.forEach((b, i) => {
           const pressed = b.pressed || b.value > 0.5;
           if (pressed && !prev[i]) {
@@ -127,7 +130,7 @@ export default function useVrController({ enabled = true } = {}) {
     const onConn = () => markConnected(true);
     const onDisc = () => {
       const now = navigator.getGamepads ? navigator.getGamepads() : [];
-      markConnected(Array.from(now).some(Boolean));
+      markConnected(Array.from(now).some(isRealPad));
     };
     window.addEventListener("gamepadconnected", onConn);
     window.addEventListener("gamepaddisconnected", onDisc);
