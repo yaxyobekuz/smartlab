@@ -38,8 +38,6 @@ const CardboardView = ({ enabled, persist = false }) => {
   const orientation = useRef({ alpha: 0, beta: 0, gamma: 0, orient: 0 });
   // Haqiqiy giroskop hodisasi kelmaguncha false; kelmasa kamerani boshqarmaymiz.
   const oriented = useRef(false);
-  // Giroskop tekislash uchun oraliq (nishon) kvaternion.
-  const targetQuat = useMemo(() => new THREE.Quaternion(), []);
 
   // StereoEffect mantiqiy (CSS) piksellarda ishlaydi; telefon dpr=2 bo'lsa,
   // ekranni faqat pastki-chap chorakka chizadi. Cardboard davomida dpr=1 ga
@@ -107,13 +105,7 @@ const CardboardView = ({ enabled, persist = false }) => {
     // Giroskop hodisasi kelgan bo'lsa - kamerani bosh harakati boshqaradi. Aks
     // holda (kompyuter, giroskopsiz) kamerani tegmaymiz, shunda model ko'rinib
     // turadi va ekran bo'sh qolmaydi.
-    if (oriented.current) {
-      setFromOrientation(targetQuat, orientation.current);
-      // Yengil tekislash: giroskop shovqinini so'ndiradi. Shu bilan z-fighting
-      // pirpirashi statik holatga o'tadi va umumiy ko'rinish barqarorroq bo'ladi
-      // (bosh kuzatuviga sezilmas kechikish).
-      camera.quaternion.slerp(targetQuat, 0.4);
-    }
+    if (oriented.current) setFromOrientation(camera.quaternion, orientation.current);
     stereo.render(scene, camera);
   }, enabled ? 1 : 0);
 
