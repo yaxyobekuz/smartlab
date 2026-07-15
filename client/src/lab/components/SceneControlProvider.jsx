@@ -121,8 +121,11 @@ export const SceneControlProvider = ({ children }) => {
         // fall through to cardboard / walk
       }
     }
-    // 2) Phone cardboard (any device with the orientation API).
-    if ("DeviceOrientationEvent" in window) {
+    // 2) Phone cardboard - faqat haqiqiy sensor/teginishli qurilmada. Desktop
+    //    Safari ham DeviceOrientationEvent'ni e'lon qiladi (giroskopsiz), shuning
+    //    uchun bu yerda qat'iy detektsiya (gyroSupported) ishlatiladi, aks holda
+    //    kompyuter split-screen cardboard'ga tushib qolardi.
+    if (gyroSupported) {
       const ok = await requestGyroPermission();
       if (ok) {
         setWalk(false);
@@ -136,7 +139,7 @@ export const SceneControlProvider = ({ children }) => {
     setCardboard(false);
     setWalk(true);
     return "walk";
-  }, [enterVR, requestGyroPermission]);
+  }, [enterVR, requestGyroPermission, gyroSupported]);
 
   // Desktop first-person walk mode (mutually exclusive with cardboard).
   const exitWalk = useCallback(() => setWalk(false), []);

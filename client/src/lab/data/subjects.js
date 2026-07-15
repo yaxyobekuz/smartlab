@@ -34,6 +34,18 @@ export const SUBJECTS = [
         short: "Yadro va elektron orbitalarini kuzating.",
         icon: "Atom",
       },
+      {
+        slug: "ph",
+        title: "pH simulyatsiya",
+        short: "Eritma kuchini o'zgartirib pH va indikator rangini kuzating.",
+        icon: "Droplet",
+      },
+      {
+        slug: "gas-laws",
+        title: "Gaz qonunlari",
+        short: "Hajm, harorat va mol miqdorini o'zgartirib bosimni hisoblang.",
+        icon: "Gauge",
+      },
     ],
   },
   {
@@ -73,6 +85,12 @@ export const SUBJECTS = [
         short: "Qatlamlarni yeching yoki skalpel bilan kesib ichki a'zolarni ko'ring.",
         icon: "Scissors",
       },
+      {
+        slug: "genetics",
+        title: "Genetika (Punnett)",
+        short: "Ota-ona allellarini tanlab, avlod nisbatlarini Punnett jadvalida ko'ring.",
+        icon: "GitFork",
+      },
     ],
   },
   {
@@ -100,6 +118,18 @@ export const SUBJECTS = [
         short: "Kvant holat va o'lchashni interaktiv PhET simulyatsiyasida o'rganing.",
         icon: "Atom",
       },
+      {
+        slug: "projectile",
+        title: "Otilma harakat",
+        short: "Burchak va tezlikni o'zgartirib snaryad trayektoriyasini kuzating.",
+        icon: "Rocket",
+      },
+      {
+        slug: "spring",
+        title: "Prujina va SHT",
+        short: "Prujina qattiqligi va massani o'zgartirib tebranish davrini o'lchang.",
+        icon: "Activity",
+      },
     ],
   },
   {
@@ -114,6 +144,21 @@ export const SUBJECTS = [
         title: "Sxema quruvchi",
         short: "Komponentlarni tortib ulang, kod yozing va simulyatsiyani jonli kuzating.",
         icon: "Cpu",
+      },
+    ],
+  },
+  {
+    slug: "history",
+    title: "Tarix",
+    short: "O'tmish yodgorliklari - Registonni 3D da AI gid bilan kashf eting.",
+    icon: "Landmark",
+    color: "#b5751a",
+    topics: [
+      {
+        slug: "registan",
+        title: "Registon (audio-gid)",
+        short: "3D Registon: hotspotlar, sayohat, vaqt sayohati va AI gid.",
+        icon: "Landmark",
       },
     ],
   },

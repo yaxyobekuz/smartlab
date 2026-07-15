@@ -25,6 +25,12 @@ import {
   Footprints,
   Grid3x3,
   Circle,
+  Rocket,
+  Activity,
+  Droplet,
+  Gauge,
+  GitFork,
+  Landmark,
 } from "lucide-react";
 
 const ICONS = {
@@ -51,6 +57,12 @@ const ICONS = {
   Hand,
   Footprints,
   Grid3x3,
+  Rocket,
+  Activity,
+  Droplet,
+  Gauge,
+  GitFork,
+  Landmark,
 };
 
 const Icon = ({ name, ...props }) => {

@@ -40,6 +40,8 @@ const ElementBody = ({ number }) => {
   const cat = getCategoryMeta(b.type);
   const phys = p.physical || {};
   const elec = p.electronic || {};
+  // Oxidation states live at level3.electronic (array); fall back to the basic string.
+  const oxStates = elec.oxidationStates?.common?.join(", ") || b.commonOxidationStates || null;
 
   return (
     <div className="max-h-[70vh] space-y-4 overflow-y-auto px-1 pb-2">
@@ -64,7 +66,7 @@ const ElementBody = ({ number }) => {
         <Row label="Davr" value={b.period} />
         <Row label="Agregat holati (STP)" value={b.phaseAtSTP} />
         <Row label="Valent elektronlar" value={b.valenceElectrons} />
-        <Row label="Oksidlanish darajalari" value={b.commonOxidationStates} />
+        <Row label="Oksidlanish darajalari" value={oxStates} />
         <Row label="Keng tarqalgan ionlar" value={b.commonIons} />
       </Section>
 

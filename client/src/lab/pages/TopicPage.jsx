@@ -39,6 +39,22 @@ const PAGES = {
   "electronics/arduino": lazy(() =>
     import("@/lab/features/electronics/circuit/CircuitPage"),
   ),
+  "physics/projectile": lazy(() =>
+    import("@/lab/features/physics/projectile/ProjectilePage"),
+  ),
+  "physics/spring": lazy(() =>
+    import("@/lab/features/physics/spring/SpringPage"),
+  ),
+  "chemistry/ph": lazy(() => import("@/lab/features/chemistry/ph/PhPage")),
+  "chemistry/gas-laws": lazy(() =>
+    import("@/lab/features/chemistry/gas-laws/GasLawsPage"),
+  ),
+  "biology/genetics": lazy(() =>
+    import("@/lab/features/biology/genetics/GeneticsPage"),
+  ),
+  "history/registan": lazy(() =>
+    import("@/lab/features/history/registan/RegistanGuidePage"),
+  ),
 };
 
 const Fallback = () => (

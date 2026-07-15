@@ -1,5 +1,6 @@
-// Solar system dataset. size/distance/speed are scaled for visualization,
-// real facts shown in the info panel.
+// Solar system dataset. size/distance/speed are scaled for visualization;
+// the *fact* fields (diameter, distanceFromSun, ...) are real and shown in the
+// info panel + fed to Mira AI (scalar fields survive cleanActiveData).
 
 export const SUN = { name: "Quyosh", color: "#fbbf24", size: 2 };
 
@@ -12,6 +13,11 @@ export const PLANETS = [
     distance: 4,
     speed: 0.048,
     about: "Quyoshga eng yaqin va eng kichik sayyora. Bir yili 88 Yer kuniga teng.",
+    diameter: "4 879 km",
+    distanceFromSun: "57.9 mln km",
+    orbitalPeriod: "88 kun",
+    gravity: "3.7 m/s²",
+    moons: 0,
   },
   {
     id: "venus",
@@ -21,6 +27,11 @@ export const PLANETS = [
     distance: 6,
     speed: 0.035,
     about: "Eng issiq sayyora. Qalin atmosferasi issiqlikni ushlab qoladi.",
+    diameter: "12 104 km",
+    distanceFromSun: "108.2 mln km",
+    orbitalPeriod: "225 kun",
+    gravity: "8.9 m/s²",
+    moons: 0,
   },
   {
     id: "earth",
@@ -30,6 +41,11 @@ export const PLANETS = [
     distance: 8.5,
     speed: 0.029,
     about: "Bizning sayyoramiz - hayot mavjud bo'lgan yagona ma'lum sayyora.",
+    diameter: "12 742 km",
+    distanceFromSun: "149.6 mln km",
+    orbitalPeriod: "365.25 kun",
+    gravity: "9.8 m/s²",
+    moons: 1,
   },
   {
     id: "mars",
@@ -39,6 +55,11 @@ export const PLANETS = [
     distance: 11,
     speed: 0.024,
     about: "Qizil sayyora. Yuzasidagi temir oksidi unga qizil rang beradi.",
+    diameter: "6 779 km",
+    distanceFromSun: "227.9 mln km",
+    orbitalPeriod: "687 kun",
+    gravity: "3.7 m/s²",
+    moons: 2,
   },
   {
     id: "jupiter",
@@ -48,6 +69,11 @@ export const PLANETS = [
     distance: 15,
     speed: 0.013,
     about: "Eng katta sayyora. Mashhur 'Katta qizil dog'i' ulkan bo'rondir.",
+    diameter: "139 820 km",
+    distanceFromSun: "778.5 mln km",
+    orbitalPeriod: "11.9 yil",
+    gravity: "24.8 m/s²",
+    moons: 95,
   },
   {
     id: "saturn",
@@ -57,7 +83,41 @@ export const PLANETS = [
     distance: 19,
     speed: 0.009,
     about: "Halqalari bilan mashhur. Halqalar muz va tosh bo'laklaridan iborat.",
+    diameter: "116 460 km",
+    distanceFromSun: "1 434 mln km",
+    orbitalPeriod: "29.5 yil",
+    gravity: "10.4 m/s²",
+    moons: 146,
     ring: true,
+  },
+  {
+    id: "uranus",
+    name: "Uran",
+    color: "#a7e8e0",
+    size: 0.9,
+    distance: 23,
+    speed: 0.006,
+    about: "Yon tomoni bilan aylanadigan muzli gigant. Yashil-havorang metan tufayli.",
+    diameter: "50 724 km",
+    distanceFromSun: "2 871 mln km",
+    orbitalPeriod: "84 yil",
+    gravity: "8.7 m/s²",
+    moons: 28,
+    ring: true,
+  },
+  {
+    id: "neptune",
+    name: "Neptun",
+    color: "#3b5bdb",
+    size: 0.88,
+    distance: 27,
+    speed: 0.005,
+    about: "Eng uzoq sayyora. Quyosh tizimidagi eng kuchli shamollar shu yerda.",
+    diameter: "49 244 km",
+    distanceFromSun: "4 495 mln km",
+    orbitalPeriod: "165 yil",
+    gravity: "11.2 m/s²",
+    moons: 16,
   },
 ];
 
