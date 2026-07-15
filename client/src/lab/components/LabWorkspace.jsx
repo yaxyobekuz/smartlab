@@ -223,6 +223,14 @@ const WorkspaceBody = ({
             >
               Chiqish
             </button>
+            {/* VR box'da kontroller yo'riqnomasi. */}
+            {vrBox && (
+              <div className="pointer-events-none absolute inset-x-0 bottom-4 z-30 flex justify-center px-4">
+                <div className="rounded-full bg-background/80 px-3 py-1 text-[11px] text-muted-foreground backdrop-blur">
+                  Joystik — aylantirish · A — tanlash · B — orqaga · X/Y — masshtab
+                </div>
+              </div>
+            )}
           </>
         ) : (
           // Toolbar is hidden during a WebXR session; the headset drives the view.
