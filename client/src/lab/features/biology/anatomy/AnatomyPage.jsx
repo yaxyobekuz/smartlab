@@ -30,10 +30,6 @@ const AnatomyPage = () => {
           <Scene
             camera={[0, 1, 6]}
             frameloop="demand"
-            // Zich anatomiya yuzalari z-fighting'i sezilmasligi uchun chuqurlik
-            // buferi diapazonini toraytiramiz (aniqlik keskin oshadi).
-            near={0.3}
-            far={60}
             controls={{
               minDistance: 0.5,
               maxDistance: 30,

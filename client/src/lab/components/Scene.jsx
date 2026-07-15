@@ -25,8 +25,6 @@ const Scene = ({
   autoRotate = false,
   frameloop = "always",
   gl,
-  near,
-  far,
 }) => {
   const { paused, controlsRef, xrStore, inVR, cardboard, vrBox, walk } =
     useSceneControlOptional();
@@ -95,12 +93,7 @@ const Scene = ({
         {/* Full-resolution rendering; perf comes from frameloop, not lower dpr. */}
         <Canvas
           frameloop={freeControl ? "always" : frameloop}
-          camera={{
-            position: camera,
-            fov: 50,
-            ...(near != null && { near }),
-            ...(far != null && { far }),
-          }}
+          camera={{ position: camera, fov: 50 }}
           dpr={[1, 2]}
           gl={gl}
         >
