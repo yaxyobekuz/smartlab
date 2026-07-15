@@ -9,6 +9,7 @@ import {
   Plus,
   Minus,
   Headset,
+  Glasses,
   Footprints,
 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
@@ -30,7 +31,7 @@ const ToolButton = ({ label, active, onClick, children, className }) => (
   </button>
 );
 
-const Toolbar = ({ onToggleFullscreen, onTogglePanels, panelsHidden }) => {
+const Toolbar = ({ onToggleFullscreen, onTogglePanels, onEnterVrBox, panelsHidden }) => {
   const {
     paused,
     togglePause,
@@ -108,6 +109,13 @@ const Toolbar = ({ onToggleFullscreen, onTogglePanels, panelsHidden }) => {
         <ToolButton label="VR rejimi" onClick={startVR}>
           <Headset size={18} />
         </ToolButton>
+
+        {/* VR box: to'liq ekranda 2 linza uchun "[ ][ ]" chap/o'ng stereo split. */}
+        {onEnterVrBox && (
+          <ToolButton label="VR box (2 linza)" onClick={onEnterVrBox}>
+            <Glasses size={18} />
+          </ToolButton>
+        )}
 
         {/* Sayohat: gyrosi yo'q qurilmalarda alohida tugma (WASD + sichqoncha). */}
         {!gyroSupported && (

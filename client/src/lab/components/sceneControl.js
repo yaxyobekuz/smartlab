@@ -26,6 +26,10 @@ const NOOP_CONTROL = {
   gyroSupported: false,
   toggleCardboard: () => {},
   exitCardboard: () => {},
+  // "VR box": fullscreen left/right stereo split adapted for the two lenses.
+  vrBox: false,
+  enterVrBox: async () => {},
+  exitVrBox: () => {},
   // Desktop first-person "walk" mode: drag-look + WASD locomotion.
   walk: false,
   toggleWalk: () => {},

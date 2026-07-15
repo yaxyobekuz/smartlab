@@ -6,6 +6,7 @@ import { OrbitControls, AdaptiveDpr } from "@react-three/drei";
 import { XR, XROrigin, IfInSessionMode } from "@react-three/xr";
 import { useSceneControlOptional } from "./sceneControl";
 import CardboardView from "./CardboardView";
+import GazeReticle from "./GazeReticle";
 import Locomotion from "./Locomotion";
 
 const Loader = () => (
@@ -25,13 +26,14 @@ const Scene = ({
   frameloop = "always",
   gl,
 }) => {
-  const { paused, controlsRef, xrStore, inVR, cardboard, walk } =
+  const { paused, controlsRef, xrStore, inVR, cardboard, vrBox, walk } =
     useSceneControlOptional();
 
   // In cardboard mode the gyroscope drives the camera, so disable orbit + adaptive
   // dpr (CardboardView always renders) and stop auto-rotate. Walk mode is a
   // first-person controller, so it also takes over from OrbitControls.
-  const cardboardOn = !!cardboard;
+  // "VR box" shares the same stereo split (persisting without a gyroscope).
+  const cardboardOn = !!cardboard || !!vrBox;
   const walkOn = !!walk;
   const freeControl = cardboardOn || walkOn;
 
@@ -39,7 +41,7 @@ const Scene = ({
   // session (they fight the WebXR-owned camera and blank the headset).
   const cameraControls = (
     <>
-      <CardboardView enabled={cardboardOn && !inVR} />
+      <CardboardView enabled={cardboardOn && !inVR} persist={!!vrBox} />
       {!freeControl && frameloop === "always" && <AdaptiveDpr pixelated />}
       {!freeControl && (
         <OrbitControls
@@ -63,6 +65,9 @@ const Scene = ({
       <directionalLight position={[5, 5, 5]} intensity={1.1} />
       <directionalLight position={[-5, -3, -5]} intensity={0.4} />
       {children}
+
+      {/* VR box: markazda nishon (kontroller "tanlash" nimani olishini ko'rsatadi). */}
+      <GazeReticle enabled={!!vrBox} />
 
       <Locomotion />
 
