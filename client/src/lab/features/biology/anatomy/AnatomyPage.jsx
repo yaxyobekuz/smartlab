@@ -30,6 +30,9 @@ const AnatomyPage = () => {
           <Scene
             camera={[0, 1, 6]}
             frameloop="demand"
+            // Qatlamli anatomiya yuzalari VR'da (giroskop mikro-siljishida)
+            // z-fighting'dan pirpiramasligi uchun logarifmik chuqurlik buferi.
+            gl={{ logarithmicDepthBuffer: true }}
             controls={{
               minDistance: 0.5,
               maxDistance: 30,
