@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <title>Anatomiya VR</title>
+
+    <!-- WebXR polyfill: oddiy telefonda ham cardboard STEREO ("Enter VR") beradi -->
+    <script src="/vr/lib/webxr-polyfill.js"></script>
+    <script>
+      if (window.WebXRPolyfill) new WebXRPolyfill();
+    </script>
+    <!-- A-Frame (mahalliy, CDN emas) -->
+    <script src="/vr/lib/aframe.min.js"></script>
+
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        font-family: system-ui, sans-serif;
+      }
+      #exit {
+        position: fixed;
+        top: 12px;
+        right: 12px;
+        z-index: 9999;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.85);
+        color: #fff;
+        font-size: 13px;
+        text-decoration: none;
+      }
+      #hint {
+        position: fixed;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        padding: 6px 14px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.7);
+        color: #e2e8f0;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <a id="exit" href="/biology/anatomy">Chiqish</a>
+    <div id="hint">
+      Telefonni buring — atrofida aylanadi · qismga 1s qarang — tanlanadi
+    </div>
+
+    <script>
+      // Z-Anatomy modellari qismlarni faqat material nomi bilan ataydi. Har
+      // materialga anatomik rang + o'zbekcha nom + tavsif (React ilovadagi
+      // anatomyMaterials.js bilan bir xil).
+      const MATERIALS = {
+        artery: { color: "#c0392b", label: "Arteriya", desc: "Yurakdan a'zolarga kislorodga boy qonni olib boruvchi qon tomir." },
+        articular_capsule: { color: "#8e7cc3", label: "Bo'g'im kapsulasi", desc: "Bo'g'imni o'rab, sinovial suyuqlikni ushlab turuvchi parda." },
+        bone: { color: "#e8dcc0", label: "Suyak", desc: "Tananing tayanch skeletini tashkil etuvchi qattiq to'qima." },
+        brain: { color: "#f2b6c6", label: "Bosh miya", desc: "Markaziy asab tizimining bosh qismi - fikrlash va boshqaruv markazi." },
+        bronchi: { color: "#d98880", label: "Bronxlar", desc: "Traxeyadan o'pkaga havo olib boruvchi naychalar." },
+        cartilage: { color: "#aed6f1", label: "Tog'ay", desc: "Bo'g'im va nafas yo'llaridagi egiluvchan biriktiruvchi to'qima." },
+        cerebellum: { color: "#e8a0b8", label: "Miyacha", desc: "Harakat muvozanati va koordinatsiyasini boshqaruvchi miya bo'limi." },
+        cornea: { color: "#aab7c4", label: "Shox parda", desc: "Ko'zning oldingi shaffof qavati, yorug'likni sindiradi." },
+        ductus: { color: "#7dcea0", label: "Yo'l (kanal)", desc: "Suyuqlik yoki sekretni tashuvchi anatomik naycha." },
+        eye: { color: "#fdfefe", label: "Ko'z", desc: "Ko'rish a'zosi - yorug'likni qabul qilib miyaga uzatadi." },
+        fat: { color: "#f7dc6f", label: "Yog' to'qimasi", desc: "Energiya zaxirasi va himoya vazifasini bajaruvchi to'qima." },
+        gland: { color: "#bb8fce", label: "Bez", desc: "Gormon yoki sekret ishlab chiqaruvchi a'zo." },
+        intestine: { color: "#e59866", label: "Ichak", desc: "Ovqat hazm qilish va oziq moddalar so'rilishini ta'minlaydi." },
+        iris: { color: "#5499c7", label: "Rangdor parda", desc: "Qorachiq o'lchamini boshqaradi." },
+        lcr: { color: "#a9cce3", label: "Miya suyuqligi", desc: "Bosh va orqa miyani o'rab, himoya qiluvchi suyuqlik." },
+        ligament: { color: "#d5dbdb", label: "Boylam", desc: "Suyaklarni o'zaro bog'lab, bo'g'imni mustahkamlovchi to'qima." },
+        lung: { color: "#ec7063", label: "O'pka", desc: "Nafas olishda kislorod almashinuvini ta'minlaydi." },
+        mucosa: { color: "#f5b7b1", label: "Shilliq parda", desc: "Ichki a'zo yuzasini qoplab, namlik va himoya beruvchi qavat." },
+        muscles: { color: "#c0392b", label: "Mushak", desc: "Qisqarish orqali tana harakatini ta'minlovchi to'qima." },
+        muscular_ending: { color: "#2980b9", label: "Mushak tugashi", desc: "Mushakning suyakka birikadigan tugash (insertio) nuqtasi." },
+        muscular_origin: { color: "#c0392b", label: "Mushak boshlanishi", desc: "Mushakning suyakka birikadigan boshlanish (origo) nuqtasi." },
+        nerve: { color: "#f4d03f", label: "Nerv", desc: "Tana bo'ylab elektr signallarni uzatuvchi nerv tolasi." },
+        nucleus: { color: "#9b59b6", label: "Yadro", desc: "Asab markazi yoki boshqaruv vazifasini bajaruvchi qism." },
+        organ: { color: "#cd6155", label: "A'zo", desc: "Muayyan fiziologik vazifani bajaruvchi ichki a'zo." },
+        peritoneum: { color: "#fadbd8", label: "Qorin pardasi", desc: "Qorin bo'shlig'i va ichki a'zolarni qoplaydigan parda." },
+        suture: { color: "#d7ccc8", label: "Choklar", desc: "Kalla suyaklarini birlashtiruvchi qo'zg'almas birikma." },
+        teeth: { color: "#fdf6e3", label: "Tishlar", desc: "Ovqatni maydalashga xizmat qiluvchi qattiq tuzilmalar." },
+        tendon: { color: "#d5d8dc", label: "Pay", desc: "Mushakni suyakka biriktiruvchi pishiq biriktiruvchi to'qima." },
+        vein: { color: "#2c3e94", label: "Vena", desc: "A'zolardan yurakka qonni qaytaruvchi qon tomir." },
+        white_matter: { color: "#fae5d3", label: "Oq modda", desc: "Miya va orqa miyaning nerv tolalaridan iborat qismi." },
+      };
+      const resolve = (name) => {
+        if (!name) return null;
+        return MATERIALS[name.replace(/\.\d+$/, "").toLowerCase()] || null;
+      };
+      const THREE = AFRAME.THREE;
+      const HOVER = new THREE.Color("#22d3ee");
+
+      // Modelni material bo'yicha bo'yaydi, qismlarni tanlaydi va doskani boshqaradi.
+      AFRAME.registerComponent("anatomy", {
+        init: function () {
+          this.selected = null;
+          this.el.addEventListener("model-loaded", () => {
+            const root = this.el.getObject3D("mesh");
+            if (!root) return;
+            root.traverse((o) => {
+              if (!o.isMesh) return;
+              const mat = Array.isArray(o.material) ? o.material[0] : o.material;
+              const d = resolve(mat && mat.name);
+              o.userData.detail = d;
+              o.material = new THREE.MeshStandardMaterial({
+                color: (d && d.color) || "#cfd8dc",
+                roughness: 0.7,
+                metalness: 0.05,
+              });
+              o.userData.baseColor = o.material.color.clone();
+            });
+            this.el.emit("anatomy-ready");
+          });
+        },
+        restore: function (m) {
+          if (m && m.userData.baseColor) {
+            m.material.color.copy(m.userData.baseColor);
+            m.material.emissive.set("#000000");
+          }
+        },
+        select: function (mesh) {
+          const d = mesh && mesh.userData.detail;
+          if (!d) return;
+          this.restore(this.selected);
+          this.selected = mesh;
+          mesh.material.color.lerp(HOVER, 0.45);
+          mesh.material.emissive.copy(HOVER).multiplyScalar(0.3);
+          const panel = document.getElementById("panel");
+          document.getElementById("ptitle").setAttribute("value", d.label || "");
+          document.getElementById("pdesc").setAttribute("value", d.desc || "");
+          panel.setAttribute("visible", true);
+        },
+      });
+
+      // Nishon (kursor) ostidagi qismni ~1.1s qarab tursang - tanlaydi (dwell).
+      // Hech qanday tugma/klaviatura shart emas. Halqa to'lib boradi.
+      AFRAME.registerComponent("gaze-dwell", {
+        init: function () {
+          this.dwellMesh = null;
+          this.dwellT = 0;
+          this.DWELL = 1.1;
+        },
+        tick: function (time, dt) {
+          const ray = this.el.components.raycaster;
+          const model = document.getElementById("model");
+          const anatomy = model && model.components.anatomy;
+          if (!ray || !anatomy) return;
+          let mesh = null;
+          const hits = ray.intersections || [];
+          for (let i = 0; i < hits.length; i++) {
+            const o = hits[i].object;
+            if (o && o.userData && o.userData.detail) { mesh = o; break; }
+          }
+          if (mesh && mesh !== anatomy.selected) {
+            if (mesh === this.dwellMesh) {
+              this.dwellT += (dt || 0) / 1000;
+              if (this.dwellT >= this.DWELL) {
+                anatomy.select(mesh);
+                this.dwellMesh = null;
+                this.dwellT = 0;
+              }
+            } else {
+              this.dwellMesh = mesh;
+              this.dwellT = 0;
+            }
+          } else {
+            this.dwellMesh = null;
+            this.dwellT = 0;
+          }
+          const frac = this.dwellMesh ? Math.min(this.dwellT / this.DWELL, 1) : 0;
+          this.el.object3D.scale.setScalar(0.7 + frac);
+        },
+      });
+
+      // Orbit: telefonni ISTALGAN tomonga burganda kamera model atrofida aylanadi;
+      // model doim markazda qoladi - har tomonini (old/yon/orqa/tep/past) ko'rasan.
+      AFRAME.registerComponent("orbit-rig", {
+        init: function () {
+          this.target = new THREE.Vector3(0, 1, 0);
+          this.radius = 3.2;
+          this.q = new THREE.Quaternion();
+          this.f = new THREE.Vector3();
+          const model = document.getElementById("model");
+          model.addEventListener("anatomy-ready", () => {
+            const root = model.getObject3D("mesh");
+            const box = new THREE.Box3().setFromObject(root);
+            const s = new THREE.Sphere();
+            box.getBoundingSphere(s);
+            this.target.copy(s.center);
+            const cam = this.el.querySelector("[camera]");
+            const fov = ((cam.getAttribute("camera").fov || 80) * Math.PI) / 180;
+            this.radius = (s.radius / Math.sin(fov / 2)) * 1.1;
+          });
+        },
+        tick: function () {
+          const cam = this.cam || (this.cam = this.el.querySelector("[camera]"));
+          if (!cam) return;
+          cam.object3D.getWorldQuaternion(this.q);
+          this.f.set(0, 0, -1).applyQuaternion(this.q);
+          if (this.f.lengthSq() < 1e-6) return;
+          this.f.normalize();
+          this.el.object3D.position.set(
+            this.target.x - this.f.x * this.radius,
+            this.target.y - this.f.y * this.radius,
+            this.target.z - this.f.z * this.radius,
+          );
+        },
+      });
+    </script>
+
+    <a-scene
+      gltf-model="dracoDecoderPath: /draco/; meshoptDecoderPath: /vr/meshopt_decoder.js"
+      background="color: #eef2ff"
+      renderer="antialias: true; colorManagement: true"
+      vr-mode-ui="enabled: true"
+    >
+      <a-assets>
+        <a-asset-item id="muscle" src="/models/myology.glb"></a-asset-item>
+      </a-assets>
+
+      <!-- Kamera rig: orbit shuni model atrofida suradi -->
+      <a-entity id="rig" orbit-rig>
+        <a-entity
+          id="cam"
+          camera
+          look-controls="magicWindowTrackingEnabled: true; touchEnabled: true"
+          position="0 0 0"
+        >
+          <!-- Gaze nishon + dwell halqasi -->
+          <a-entity
+            id="cursor"
+            gaze-dwell
+            raycaster="objects: .selectable; far: 100; interval: 80"
+            position="0 0 -1"
+            geometry="primitive: ring; radiusInner: 0.012; radiusOuter: 0.02"
+            material="color: #22d3ee; shader: flat; opacity: 0.95; depthTest: false"
+          ></a-entity>
+
+          <!-- Malumot doskasi (chapda; qismni tanlaganda ko'rinadi) -->
+          <a-entity id="panel" visible="false" position="-0.55 -0.02 -1.3">
+            <a-plane
+              width="0.72"
+              height="0.5"
+              material="shader: flat; color: #0b1220; opacity: 0.92"
+            ></a-plane>
+            <a-text
+              id="ptitle"
+              value=""
+              color="#e6f9ff"
+              width="1.4"
+              align="left"
+              anchor="left"
+              position="-0.33 0.17 0.01"
+            ></a-text>
+            <a-text
+              id="pdesc"
+              value=""
+              color="#b6c2d1"
+              width="1.05"
+              align="left"
+              anchor="left"
+              baseline="top"
+              position="-0.33 0.05 0.01"
+            ></a-text>
+          </a-entity>
+        </a-entity>
+      </a-entity>
+
+      <!-- Model: markazda, orbit shuning atrofida aylanadi -->
+      <a-entity
+        id="model"
+        class="selectable"
+        gltf-model="#muscle"
+        anatomy
+        position="0 0 0"
+      ></a-entity>
+
+      <a-light type="hemisphere" color="#ffffff" ground-color="#9ca3af" intensity="1"></a-light>
+      <a-light type="directional" position="4 6 5" intensity="0.7"></a-light>
+      <a-light type="directional" position="-5 2 -4" intensity="0.35"></a-light>
+      <a-sky color="#eef2ff"></a-sky>
+    </a-scene>
+  </body>
+</html>
