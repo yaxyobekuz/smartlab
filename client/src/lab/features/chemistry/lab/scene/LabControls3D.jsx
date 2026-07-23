@@ -3,7 +3,7 @@
 // isitish (tortma richag) va tozalash (yuqoriga qaragan cho'tkali tugma) shu
 // yerdan boshqariladi. Har shishaning nomi yuzasiga oq qog'oz yorliqqa yozilgan.
 // Pointer (onClick) hodisalari @react-three/xr da kontroller "select" bilan ishlaydi.
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Text, RoundedBox } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -11,6 +11,7 @@ import * as THREE from "three";
 const SHELF_Z = 2.2;
 const ROW_Y = 1.0;
 const STEP = 0.5;
+const BOTTLE_R = 0.24; // gaze nishoni radiusi (ko'rish oson bo'lsin uchun kengroq)
 
 // Lerp maqsadlari - har kadrda yangi Color yaratmaslik uchun modul darajasida.
 const HEAT_ON = new THREE.Color("#f97316");
@@ -59,13 +60,31 @@ const PaperLabel = ({ name }) => (
   </group>
 );
 
-// Bitta reaktiv shishasi: bosilganda idishga quyiladi.
-const Bottle = ({ reagent, x, onPour }) => {
+// Bitta reaktiv shishasi. Desktopda: bosilganda idishga quyiladi (onPour).
+// VR/cardboard'da: gaze bilan olinadi - shu sabab o'z pozitsiyasini gaze
+// tizimiga (gazeApi) target sifatida ro'yxatga oladi. gazeHover=markazga
+// qaralayotgan bo'lsa yorishadi; gazeHidden=qo'lga olingan (javondan yashiriladi).
+const Bottle = ({ reagent, x, onPour, gazeApi, gazeHover, gazeHidden }) => {
   const [hover, setHover] = useState(false);
+
+  // Gaze target'i sifatida ro'yxatdan o'tish (dunyo koordinatalari statik).
+  useEffect(() => {
+    if (!gazeApi) return;
+    return gazeApi.registerTarget(`bottle:${reagent.id}`, {
+      kind: "bottle",
+      reagent,
+      position: new THREE.Vector3(x, ROW_Y, SHELF_Z),
+      radius: BOTTLE_R,
+    });
+  }, [gazeApi, reagent, x]);
+
+  if (gazeHidden) return null; // qo'lda ko'tarilgan - javonda ko'rinmaydi
+
+  const lit = hover || gazeHover;
   return (
     <group
       position={[x, ROW_Y, SHELF_Z]}
-      scale={hover ? 1.12 : 1}
+      scale={lit ? 1.12 : 1}
       onPointerOver={(e) => {
         e.stopPropagation();
         setHover(true);
@@ -94,7 +113,7 @@ const Bottle = ({ reagent, x, onPour }) => {
           color={reagent.color}
           roughness={0.35}
           emissive={reagent.color}
-          emissiveIntensity={hover ? 0.4 : 0.12}
+          emissiveIntensity={lit ? 0.4 : 0.12}
         />
       </mesh>
       {/* tiqin */}
@@ -265,7 +284,14 @@ const CleanButton = ({ x, onClick }) => {
   );
 };
 
-const LabControls3D = ({ reagents = [], onPour, heating, onToggleHeat, onClear }) => {
+const LabControls3D = ({
+  reagents = [],
+  onPour,
+  heating,
+  onToggleHeat,
+  onClear,
+  gazeApi, // VR gaze tizimi (ixtiyoriy); yo'q bo'lsa desktop click ishlaydi
+}) => {
   const n = reagents.length;
   // Bottles are centred. With many of them, tighten the gap so the row stays
   // within ±1.7 and never collides with the heat switch (-2.0) / clean (+2.0).
@@ -284,6 +310,9 @@ const LabControls3D = ({ reagents = [], onPour, heating, onToggleHeat, onClear }
           reagent={r}
           x={(i - (n - 1) / 2) * step}
           onPour={onPour}
+          gazeApi={gazeApi}
+          gazeHover={gazeApi?.hoverId === `bottle:${r.id}`}
+          gazeHidden={gazeApi?.held?.id === `bottle:${r.id}`}
         />
       ))}
 

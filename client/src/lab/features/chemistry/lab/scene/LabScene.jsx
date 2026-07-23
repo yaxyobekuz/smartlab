@@ -3,7 +3,7 @@
 // lighting (Lightformer Environment - offline-safe, no HDRI download) for real
 // glass reflections, plus soft contact shadows for grounding. Camera/animation
 // pause + reset are wired to the workspace toolbar via SceneControl.
-import { Suspense, useRef } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import {
   OrbitControls,
@@ -11,6 +11,7 @@ import {
   Lightformer,
   ContactShadows,
 } from "@react-three/drei";
+import * as THREE from "three";
 import { XR, XROrigin, IfInSessionMode } from "@react-three/xr";
 import { useSceneControlOptional } from "@/lab/components/sceneControl";
 import CardboardView from "@/lab/components/CardboardView";
@@ -27,12 +28,52 @@ import Bubbles from "./Bubbles";
 import Steam from "./Steam";
 import PourDrop from "./PourDrop";
 import Fog from "./Fog";
+import VrHand from "./VrHand";
+import GazeReticleHit from "./GazeReticleHit";
+import { useGazeGrab } from "./useGazeGrab";
 import {
   CAMERA_POSITION,
   CAMERA_TARGET,
   FLAME_Y,
   TUBE_X,
+  TUBE_MOUTH_Y,
 } from "./labGeometry";
+
+// Gaze-grab tizimini <Canvas> ichida ishga tushiradi (hook R3F kontekstini talab
+// qiladi). Probirkani "quy" nishoni sifatida ro'yxatga oladi va VrHand + reticle
+// hit-feedback'ni chizadi. Faqat VR/cardboard faol bo'lganda (enabled) ishlaydi.
+const GazeGrabLayer = ({ enabled, onPour, onReady }) => {
+  const gaze = useGazeGrab({ enabled, onPour });
+
+  // Probirka og'zi - "bu yerga quy" nishoni. Radiusni kengroq olamiz (qarash oson).
+  useEffect(() => {
+    if (!enabled) return;
+    return gaze.registerTarget("tube", {
+      kind: "tube",
+      position: new THREE.Vector3(TUBE_X, TUBE_MOUTH_Y - 0.3, 0),
+      radius: 0.7,
+    });
+  }, [enabled, gaze]);
+
+  // Ota-komponentga gaze api'sini uzatamiz (shishalarni highlight qilish uchun).
+  useEffect(() => {
+    onReady?.(enabled ? gaze : null);
+  }, [enabled, gaze, onReady]);
+
+  if (!enabled) return null;
+  const pouring = !!gaze.held && gaze.hoverId === "tube";
+  return (
+    <>
+      <VrHand enabled={enabled} held={gaze.held} pouring={pouring} />
+      <GazeReticleHit
+        active={!!gaze.hoverId}
+        pouring={pouring}
+        holding={!!gaze.held}
+        dwell={gaze.dwellProgress}
+      />
+    </>
+  );
+};
 
 const Loader = () => (
   <div className="absolute inset-0 grid place-items-center text-sm text-muted-foreground">
@@ -83,12 +124,19 @@ const Apparatus = ({
 // reagents/onPour/onToggleHeat/onClear drive the in-scene 3D controls (VR + mouse);
 // the rest of the props are display state passed through to the apparatus.
 const LabScene = ({ reagents, onPour, onToggleHeat, onClear, ...display }) => {
-  const { paused, controlsRef, xrStore, inVR, cardboard, walk } =
+  const { paused, controlsRef, xrStore, inVR, cardboard, vrBox, walk } =
     useSceneControlOptional();
   const originRef = useRef(null);
+  // VR gaze-grab tizimi shu holatda ekan (LabControls3D shishalarni gaze bilan
+  // yoritishi uchun kerak). GazeGrabLayer <Canvas> ichida onReady bilan beradi.
+  const [gazeApi, setGazeApi] = useState(null);
+
+  // Gaze-grab faqat "boshni burib qaraladigan" rejimlarda: haqiqiy shlem (inVR),
+  // telefon cardboard, yoki VR box. Desktop/oddiy rejimda click-to-pour saqlanadi.
+  const gazeEnabled = inVR || cardboard || vrBox;
 
   // OrbitControls only in plain mode; VR/cardboard/walk drive the camera themselves.
-  const freeControl = inVR || cardboard || walk;
+  const freeControl = inVR || cardboard || vrBox || walk;
 
   const content = (
     <>
@@ -106,6 +154,15 @@ const LabScene = ({ reagents, onPour, onToggleHeat, onClear, ...display }) => {
         heating={display.heating}
         onToggleHeat={onToggleHeat}
         onClear={onClear}
+        gazeApi={gazeApi}
+      />
+
+      {/* VR gaze bilan olish-quyish qatlami (shishani gaze + tap/dwell bilan
+          olib probirkaga quyadi). onReady gaze api'sini yuqoriga chiqaradi. */}
+      <GazeGrabLayer
+        enabled={gazeEnabled}
+        onPour={onPour}
+        onReady={setGazeApi}
       />
 
       <ContactShadows

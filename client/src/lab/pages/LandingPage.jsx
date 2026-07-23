@@ -1,11 +1,8 @@
-import { lazy, Suspense } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Headset } from "lucide-react";
 import Icon from "@/lab/components/Icon";
 import { SUBJECTS } from "@/lab/data/subjects";
-
-// Lazy so Three.js stays out of the initial bundle.
-const HeroScene = lazy(() => import("@/lab/components/HeroScene"));
+import heroVr from "@/shared/assets/images/hero-vr.png";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -46,10 +43,12 @@ const LandingPage = () => {
         </div>
       </div>
 
-      <div className="h-72 md:h-96">
-        <Suspense fallback={null}>
-          <HeroScene />
-        </Suspense>
+      <div className="flex h-72 items-center justify-center md:h-96">
+        <img
+          src={heroVr}
+          alt="VR ko'zoynak kiygan bola"
+          className="h-full w-auto object-contain drop-shadow-2xl"
+        />
       </div>
     </section>
 

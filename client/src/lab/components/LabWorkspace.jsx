@@ -244,6 +244,19 @@ const WorkspaceBody = ({
           )
         )}
 
+        {/* VR (cardboard/vrBox/headset) da qo'l bilan quyish yo'riqnomasi:
+            markazga qaratib shishani ol, probirkaga qaratib quy. Cardboard'da
+            butun ekran stereo bo'lgani uchun matnni ikkala ko'zga chiqmaydigan
+            markaziy tasmada emas, tepada beramiz. */}
+        {(cardboard || vrBox || inVR) && (
+          <div className="pointer-events-none absolute inset-x-0 top-4 z-20 flex justify-center px-4">
+            <div className="pointer-events-auto rounded-full border border-border bg-background/90 px-4 py-1.5 text-center text-xs font-medium text-muted-foreground shadow-sm backdrop-blur">
+              Shishaga qarab bosing (yoki qarab turing) - oling · probirkaga
+              qaratib yana bosing - quyiladi
+            </div>
+          </div>
+        )}
+
         {/* Sayohat (walk) rejimi yo'riqnomasi */}
         {walk && !inVR && (
           <div className="pointer-events-none absolute inset-x-0 top-4 z-20 flex justify-center px-4">
