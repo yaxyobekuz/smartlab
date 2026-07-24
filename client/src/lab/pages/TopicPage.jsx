@@ -55,6 +55,9 @@ const PAGES = {
   "history/registan": lazy(() =>
     import("@/lab/features/history/registan/RegistanGuidePage"),
   ),
+  "history/atlas": lazy(() =>
+    import("@/lab/features/history/atlas/AtlasPage"),
+  ),
 };
 
 const Fallback = () => (

@@ -13,4 +13,8 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // maplibre-gl web worker'i Vite pre-bundle'da buzilib, GeoJSON qatlamlari yuklanmaydi.
+  optimizeDeps: {
+    exclude: ["maplibre-gl"],
+  },
 });

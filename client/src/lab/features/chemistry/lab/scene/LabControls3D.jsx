@@ -60,11 +60,13 @@ const PaperLabel = ({ name }) => (
   </group>
 );
 
-// Bitta reaktiv shishasi. Desktopda: bosilganda idishga quyiladi (onPour).
-// VR/cardboard'da: gaze bilan olinadi - shu sabab o'z pozitsiyasini gaze
-// tizimiga (gazeApi) target sifatida ro'yxatga oladi. gazeHover=markazga
-// qaralayotgan bo'lsa yorishadi; gazeHidden=qo'lga olingan (javondan yashiriladi).
-const Bottle = ({ reagent, x, onPour, gazeApi, gazeHover, gazeHidden }) => {
+// Bitta reaktiv shishasi. Uch xil rejim, bittasi bosilganda:
+//  - Desktop: idishga quyiladi (onPour).
+//  - Cardboard/vrBox: gaze bilan olinadi (gazeApi orqali, onClick emas).
+//  - Haqiqiy shlem (Quest): controller nuri bilan bosish = olish (onGrab), keyin
+//    controller bilan probirkaga olib borib quyiladi.
+// gazeHover/gazeHidden gaze tizimidan; grabbed = Quest'da ushlangan (yashiriladi).
+const Bottle = ({ reagent, x, onPour, onGrab, grabbed, gazeApi, gazeHover, gazeHidden }) => {
   const [hover, setHover] = useState(false);
 
   // Gaze target'i sifatida ro'yxatdan o'tish (dunyo koordinatalari statik).
@@ -78,7 +80,7 @@ const Bottle = ({ reagent, x, onPour, gazeApi, gazeHover, gazeHidden }) => {
     });
   }, [gazeApi, reagent, x]);
 
-  if (gazeHidden) return null; // qo'lda ko'tarilgan - javonda ko'rinmaydi
+  if (gazeHidden || grabbed) return null; // ko'tarilgan - javonda ko'rinmaydi
 
   const lit = hover || gazeHover;
   return (
@@ -92,7 +94,9 @@ const Bottle = ({ reagent, x, onPour, gazeApi, gazeHover, gazeHidden }) => {
       onPointerOut={() => setHover(false)}
       onClick={(e) => {
         e.stopPropagation();
-        onPour?.(reagent);
+        // Quest'da bosish = olish; aks holda to'g'ridan-to'g'ri quyish.
+        if (onGrab) onGrab(reagent);
+        else onPour?.(reagent);
       }}
     >
       {/* shisha */}
@@ -291,6 +295,8 @@ const LabControls3D = ({
   onToggleHeat,
   onClear,
   gazeApi, // VR gaze tizimi (ixtiyoriy); yo'q bo'lsa desktop click ishlaydi
+  onGrab, // Quest'da shishani olish (berilsa onClick=grab, aks holda pour)
+  heldReagentId, // Quest'da ushlangan shisha id'si (javondan yashiriladi)
 }) => {
   const n = reagents.length;
   // Bottles are centred. With many of them, tighten the gap so the row stays
@@ -310,6 +316,8 @@ const LabControls3D = ({
           reagent={r}
           x={(i - (n - 1) / 2) * step}
           onPour={onPour}
+          onGrab={onGrab}
+          grabbed={heldReagentId === r.id}
           gazeApi={gazeApi}
           gazeHover={gazeApi?.hoverId === `bottle:${r.id}`}
           gazeHidden={gazeApi?.held?.id === `bottle:${r.id}`}

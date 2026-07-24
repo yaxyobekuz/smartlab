@@ -30,6 +30,9 @@ import PourDrop from "./PourDrop";
 import Fog from "./Fog";
 import VrHand from "./VrHand";
 import GazeReticleHit from "./GazeReticleHit";
+import VrTeleport from "./VrTeleport";
+import VrControllerGrab from "./VrControllerGrab";
+import VrPanel3D from "./VrPanel3D";
 import { useGazeGrab } from "./useGazeGrab";
 import {
   CAMERA_POSITION,
@@ -130,10 +133,23 @@ const LabScene = ({ reagents, onPour, onToggleHeat, onClear, ...display }) => {
   // VR gaze-grab tizimi shu holatda ekan (LabControls3D shishalarni gaze bilan
   // yoritishi uchun kerak). GazeGrabLayer <Canvas> ichida onReady bilan beradi.
   const [gazeApi, setGazeApi] = useState(null);
+  // Haqiqiy shlem (Quest) rejimida controller bilan ushlangan shisha - {reagent}|null.
+  // Cardboard gaze grab'i o'zining held'ini gazeApi ichida saqlaydi (bu alohida).
+  const [ctrlHeld, setCtrlHeld] = useState(null);
 
-  // Gaze-grab faqat "boshni burib qaraladigan" rejimlarda: haqiqiy shlem (inVR),
-  // telefon cardboard, yoki VR box. Desktop/oddiy rejimda click-to-pour saqlanadi.
-  const gazeEnabled = inVR || cardboard || vrBox;
+  // Cardboard/VR box: gaze + tap. Haqiqiy shlem (inVR): controller + teleport +
+  // 3D panel. Desktop/oddiy rejimda click-to-pour saqlanadi.
+  const gazeEnabled = cardboard || vrBox; // gaze faqat telefon-VR uchun
+  const handsEnabled = inVR; // 6DoF controller faqat haqiqiy shlemda
+
+  // Shishani controller bilan olish (Quest): grab -> ctrlHeld; qo'yish/quyish
+  // VrControllerGrab trigger'idan keladi. onPour reaksiyani, onDrop tashlashni beradi.
+  const grabBottle = (reagent) => setCtrlHeld({ reagent });
+  const dropBottle = () => setCtrlHeld(null);
+  const pourHeld = (reagent) => {
+    onPour?.(reagent);
+    setCtrlHeld(null);
+  };
 
   // OrbitControls only in plain mode; VR/cardboard/walk drive the camera themselves.
   const freeControl = inVR || cardboard || vrBox || walk;
@@ -155,14 +171,32 @@ const LabScene = ({ reagents, onPour, onToggleHeat, onClear, ...display }) => {
         onToggleHeat={onToggleHeat}
         onClear={onClear}
         gazeApi={gazeApi}
+        // Quest'da shishani bosish = olish (quyish emas); ushlangan bo'lsa yashiramiz.
+        onGrab={handsEnabled ? grabBottle : undefined}
+        heldReagentId={ctrlHeld?.reagent?.id}
       />
 
-      {/* VR gaze bilan olish-quyish qatlami (shishani gaze + tap/dwell bilan
-          olib probirkaga quyadi). onReady gaze api'sini yuqoriga chiqaradi. */}
+      {/* Telefon-VR (cardboard/vrBox): gaze + tap bilan olish-quyish qatlami. */}
       <GazeGrabLayer
         enabled={gazeEnabled}
         onPour={onPour}
         onReady={setGazeApi}
+      />
+
+      {/* Haqiqiy shlem (Quest): 6DoF controller bilan olib egib quyish,
+          teleport bilan yurish, va havoda suzuvchi 3D boshqaruv paneli. */}
+      <VrControllerGrab
+        enabled={handsEnabled}
+        held={ctrlHeld}
+        onPour={pourHeld}
+        onDrop={dropBottle}
+      />
+      <VrTeleport enabled={handsEnabled} originRef={originRef} />
+      <VrPanel3D
+        enabled={handsEnabled}
+        heating={display.heating}
+        onToggleHeat={onToggleHeat}
+        onClear={onClear}
       />
 
       <ContactShadows

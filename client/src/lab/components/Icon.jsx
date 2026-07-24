@@ -31,6 +31,7 @@ import {
   Gauge,
   GitFork,
   Landmark,
+  Map as MapIcon,
 } from "lucide-react";
 
 const ICONS = {
@@ -63,6 +64,7 @@ const ICONS = {
   Gauge,
   GitFork,
   Landmark,
+  Map: MapIcon,
 };
 
 const Icon = ({ name, ...props }) => {
