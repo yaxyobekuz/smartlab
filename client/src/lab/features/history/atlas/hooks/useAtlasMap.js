@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef } from "react";
-import { Map as MapLibreMap, NavigationControl } from "maplibre-gl";
+import { Map as MapLibreMap, NavigationControl, setWorkerUrl } from "maplibre-gl";
+// maplibre worker'ini o'zi import.meta.url orqali qidiradi — bundle qilingach bu manzil
+// mavjud bo'lmay qoladi va GeoJSON qatlamlari (worker'da parse qilinadi) chizilmaydi.
+import maplibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import { geojsonUrl } from "../data/atlasYears";
+
+setWorkerUrl(maplibreWorkerUrl);
 
 // Matnsiz (labels-free) toza raster fon — fonda shahar/viloyat nomlari chalkashtirmasligi uchun.
 // CARTO "light_nolabels" (kalitsiz, bepul). Faqat relyef/tekstura ko'rinadi.
