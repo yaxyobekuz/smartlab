@@ -53,6 +53,17 @@ export default {
           "0%, 100%": { backgroundPosition: "0% 50%" },
           "50%": { backgroundPosition: "100% 50%" },
         },
+        // Landing foni: mayin ko'tarilib-tushish.
+        "float-y": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-16px)" },
+        },
+        // Landing foni: sekin erkin suzish.
+        drift: {
+          "0%, 100%": { transform: "translate3d(0, 0, 0)" },
+          "33%": { transform: "translate3d(12px, -16px, 0)" },
+          "66%": { transform: "translate3d(-10px, 10px, 0)" },
+        },
       },
       animation: {
         "msg-in": "msg-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both",
@@ -63,6 +74,8 @@ export default {
         shimmer: "shimmer 1.2s ease-in-out",
         blink: "blink 1s step-end infinite",
         "gradient-x": "gradient-x 4s ease infinite",
+        "float-y": "float-y 7s ease-in-out infinite",
+        drift: "drift 18s ease-in-out infinite",
       },
       colors: {
         background: "hsl(var(--background))",

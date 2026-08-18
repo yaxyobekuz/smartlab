@@ -151,3 +151,114 @@ Sabab topildi — va u **hosting muammosi emas**, shuning uchun Vercel'da ham tu
 <sub>session `151aa141` · branch `main` · 11 ta qadam</sub>
 
 ---
+
+## 2026-08-12 23:23 — ## Landing Page — Full Redesign & Interactive Background Kirish (landi
+
+**So'rov**
+
+> ## Landing Page — Full Redesign & Interactive Background
+>
+> Kirish (landing) sahifasini **to‘liq redesign qil**. Hozirgi dizaynni shunchaki biroz o‘zgartirish emas, balki zamonaviy, premium va educational-tech uslubdagi yangi landing page yarat.
+>
+> ### 1. Asosiy vizual konsept
+>
+> Landing page birinchi qarashdayoq bu platforma **ta’lim, fan va bilim** bilan bog‘liq ekanligini ko‘rsatishi kerak.
+>
+> Design:
+>
+> * Modern / premium / clean
+> * Minimalist, lekin juda bo‘sh ko‘rinmasin
+> * Professional EdTech SaaS aesthetic
+> * Smooth animations
+> * Subtle glassmorphism kerak bo‘lsa ishlatish mumkin
+> * Typography juda aniq va o‘qilishi oson bo‘lsin
+> * Responsive: mobile, tablet va desktop uchun mukammal ishlasin
+> * Existing project design system, colors va componentlarni imkon qadar saqla, lekin kerak bo‘lsa professional darajada yaxshila
+>
+> ### 2. Hero section
+>
+> Hero section sahifaning eng kuchli qismi bo‘lsin.
+>
+> Unda:
+>
+> * Kuchli headline
+> * Qisqa va tushunarli subtitle
+> * Asosiy CTA button
+> * Ikkinchi darajali CTA kerak bo‘lsa qo‘shilsin
+> * Platformaning asosiy qiymati bir qarashda tushunarli bo‘lsin
+>
+> Hero background oddiy static gradient yoki rasm bo‘lmasin.
+>
+> ### 3. Interactive scientific background
+>
+> Hero section or
+> …
+
+**O'zgargan fayllar (21)**
+
+- `client/src/lab/components/landing/usePointerRef.js` — yaratildi/qayta yozildi
+- `client/src/lab/components/landing/useReveal.js` — yaratildi/qayta yozildi
+- `client/src/lab/components/landing/Reveal.jsx` — yaratildi/qayta yozildi
+- `client/src/lab/components/landing/scienceModels.jsx` — tahrirlandi, yaratildi/qayta yozildi
+- `client/src/lab/components/landing/HeroScene.jsx` — tahrirlandi, yaratildi/qayta yozildi
+- `client/src/lab/components/landing/HeroBackdrop.jsx` — tahrirlandi, yaratildi/qayta yozildi
+- `client/src/lab/components/landing/LandingActions.jsx` — yaratildi/qayta yozildi
+- `client/src/lab/components/landing/SectionHead.jsx` — yaratildi/qayta yozildi
+- `client/src/lab/components/landing/HeroSection.jsx` — tahrirlandi, yaratildi/qayta yozildi
+- `client/src/lab/components/landing/StatsSection.jsx` — tahrirlandi, yaratildi/qayta yozildi
+- `client/src/lab/components/landing/SubjectsSection.jsx` — tahrirlandi, yaratildi/qayta yozildi
+- `client/src/lab/components/landing/FeaturesSection.jsx` — tahrirlandi, yaratildi/qayta yozildi
+- `client/src/lab/components/landing/ProcessSection.jsx` — tahrirlandi, yaratildi/qayta yozildi
+- `client/src/lab/components/landing/CtaSection.jsx` — yaratildi/qayta yozildi
+- `client/src/lab/components/landing/LandingFooter.jsx` — yaratildi/qayta yozildi
+- `client/src/lab/components/landing/index.js` — yaratildi/qayta yozildi
+- `client/src/lab/pages/LandingPage.jsx` — yaratildi/qayta yozildi
+- `client/tailwind.config.js` — tahrirlandi
+- `client/index.html` — tahrirlandi
+- `/private/tmp/claude-501/-Users-shukrullo-Desktop-smartlab/37a7d248-5cb4-427f-9e7a-bc9f8254c079/scratchpad/shot.mjs` — tahrirlandi, yaratildi/qayta yozildi
+- `/Users/shukrullo/.claude/projects/-Users-shukrullo-Desktop-smartlab/memory/purple-theme-hero.md` — yaratildi/qayta yozildi
+
+**Buyruqlar (42)**
+
+```sh
+ls && echo "---CLIENT---" && ls client/src && echo "---PKG---" && cat client/package.json
+cd /Users/shukrullo/Desktop/smartlab/client && find src -iname "*land*" -o -iname "*home*" -o -iname "*hero*" | head -50
+cd /Users/shukrullo/Desktop/smartlab/client/src && ls lab lab/components lab/pages lab/data shared/components/ui shared/components/bg 2>/dev/null | head -120
+cat lab/data/subjects.js
+cat app/routes.jsx 2>/dev/null | head -120 && echo "===LAB INDEX===" && cat lab/index.js && echo "===LAYOUTS===" && ls lab/layouts && ls lab/features
+cd /Users/shukrullo/Desktop/smartlab/client && cat src/styles/*.css 2>/dev/null | head -150 ; ls src/styles; echo "===TAILWIND==="; cat tailwind.config.js | hea…
+cd /Users/shukrullo/Desktop/smartlab/client/src && cat lab/layouts/LabLayout.jsx && echo "===HEADER===" && cat lab/components/LabHeader.jsx && echo "===HOOKS===…
+cat lab/pages/SubjectPage.jsx | head -80 && echo "===ICON===" && cat lab/components/Icon.jsx && echo "===INDEXHTML===" && cat ../index.html
+cat shared/components/ui/button/Button.jsx && echo "===MQ===" && cat shared/hooks/useMediaQuery.js && echo "===GREP===" && grep -rln "prefers-reduced-motion\|In…
+cd /Users/shukrullo/Desktop/smartlab/client && sed -n '80,200p' tailwind.config.js
+cd /Users/shukrullo/Desktop/smartlab/client/src && cat shared/components/ui/card/StatCard.jsx shared/components/ui/card/Card.jsx shared/components/ui/badge/*.js…
+cat shared/components/ui/counter/AnimatedCounter.jsx
+cd /Users/shukrullo/Desktop/smartlab/client && grep -rn "HeroFloatingScene" src | cat
+rm src/lab/components/HeroFloatingScene.jsx && npm run lint 2>&1 | tail -30
+npx eslint src/lab/components/landing src/lab/pages/LandingPage.jsx 2>&1 | tail -40
+npx eslint src/lab/components/landing src/lab/pages/LandingPage.jsx && echo "LINT OK" ; npm run build 2>&1 | tail -25
+npm run build 2>&1 | grep -iE "HeroScene|landing|index-"
+cd /Users/shukrullo/Desktop/smartlab && ls .claude/skills 2>/dev/null && which chromium-cli playwright 2>/dev/null; npx chromium-cli --version 2>&1 | head -3
+ls /Applications | grep -i chrome; ls "/Applications/Google Chrome.app/Contents/MacOS/" 2>/dev/null
+cd /Users/shukrullo/Desktop/smartlab/client && npm run dev > /private/tmp/claude-501/-Users-shukrullo-Desktop-smartlab/37a7d248-5cb4-427f-9e7a-bc9f8254c079/scra…
+ls ~/.cache/puppeteer ~/.cache/ms-playwright ~/Library/Caches/ms-playwright ~/Library/Caches/puppeteer 2>/dev/null; ls /Applications | head -40
+ls ~/.cache/puppeteer/chrome/ && find ~/.cache/puppeteer/chrome -name "Google Chrome for Testing" -maxdepth 4 2>/dev/null | head -2; tail -5 /private/tmp/claude…
+ls ~/Library/Caches/ms-playwright/chromium-1234/ 2>/dev/null; find ~/Library/Caches/ms-playwright/chromium-1234 -maxdepth 3 -name "Chromium" 2>/dev/null | head;…
+find ~/Library/Caches/ms-playwright/chromium-1234/chrome-mac-arm64 -maxdepth 3 -name "*Chromium*" | head -5; echo "---"; curl -s -o /dev/null -w "%{http_code}" …
+ls ~/Library/Caches/ms-playwright/chromium-1234/chrome-mac-arm64/; ls ~/Library/Caches/ms-playwright/chromium_headless_shell-1234/ 2>/dev/null
+# … yana 17 ta
+```
+
+**Natija**
+
+I'll start by analyzing the existing landing page and design system before making changes.
+
+Now I have the full picture. Let me build the redesign — a set of reusable landing components plus a new interactive science backdrop.
+
+Now the Tailwind keyframes for the fallback background and SEO meta:
+
+Renders cleanly (only a pre-existing three.js deprecation warning). Two refinements: the photo's rectangular edge is visible, and two backdrop objects drift into the text band.
+
+<sub>session `37a7d248` · branch `main` · 117 ta qadam</sub>
+
+---
