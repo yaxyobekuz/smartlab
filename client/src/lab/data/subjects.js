@@ -91,6 +91,12 @@ export const SUBJECTS = [
         short: "Ota-ona allellarini tanlab, avlod nisbatlarini Punnett jadvalida ko'ring.",
         icon: "GitFork",
       },
+      {
+        slug: "simulator",
+        title: "Odam Tanasi Simulyatori",
+        short: "Inson tanasi tizimlarini interaktiv 3D simulyatorda o'rganing.",
+        icon: "PersonStanding",
+      },
     ],
   },
   {

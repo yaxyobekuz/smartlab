@@ -13,6 +13,15 @@ import vertebraeUrl from "@/shared/assets/models/vertebrae.glb?url";
 import handUrl from "@/shared/assets/models/hand.glb?url";
 import upperLimbUrl from "@/shared/assets/models/upper-limb.glb?url";
 import lowerLimbUrl from "@/shared/assets/models/lower-limb.glb?url";
+import digestiveSystemUrl from "@/shared/assets/models/digestive_system.glb?url";
+import ecorcheUrl from "@/shared/assets/models/ecorche_-_anatomy_study.glb?url";
+import diaphragmUrl from "@/shared/assets/models/human_diaphragm.glb?url";
+import heartUrl from "@/shared/assets/models/human_heart_3d_model.glb?url";
+import kidneyUrl from "@/shared/assets/models/human_kidney.glb?url";
+import liverUrl from "@/shared/assets/models/human_liver_and_gallbladder.glb?url";
+import orbitEyeUrl from "@/shared/assets/models/muscles_of_the_orbit_eye.glb?url";
+import lungsUrl from "@/shared/assets/models/realistic_human_lungs.glb?url";
+
 
 export const ANATOMY = [
   {
@@ -128,6 +137,86 @@ export const ANATOMY = [
     keepMaterial: true,
     about:
       "Pastki oyoq-qo'l - son suyagi, tizza qopqog'i, boldir suyaklari va oyoq panjasi. Tana og'irligini ko'tarib, yurish va turishni ta'minlaydi.",
+  },
+  {
+    slug: "digestive-system",
+    title: "Hazm qilish tizimi",
+    short: "Hazm qilish tizimi organlarini ko'ring.",
+    icon: "Utensils",
+    url: digestiveSystemUrl,
+    keepMaterial: true,
+    about:
+      "Hazm qilish tizimi - ozuqa moddalarini parchalab, energiyani o'zlashtirish uchun xizmat qiladi. Oshqozon va ichaklardan iborat.",
+  },
+  {
+    slug: "ecorche",
+    title: "Ekorche (Anatomiya)",
+    short: "Mushaklar tana yuzasi anatomiyasini batafsil o'rganing.",
+    icon: "User",
+    url: ecorcheUrl,
+    keepMaterial: true,
+    about:
+      "Ekorche - terisiz holatda mushaklarni va ularning anatomik tuzilishini tasvirlovchi model. Inson anatomiyasini chuqur o'rganish uchun.",
+  },
+  {
+    slug: "diaphragm",
+    title: "Diafragma",
+    short: "Nafas olishda qatnashadigan asosiy mushakni ko'ring.",
+    icon: "Wind",
+    url: diaphragmUrl,
+    keepMaterial: true,
+    about:
+      "Diafragma - ko'krak va qorin bo'shliqlarini ajratib turuvchi, nafas olish jarayonida qatnashadigan asosiy gumbazsimon mushak.",
+  },
+  {
+    slug: "heart",
+    title: "Yurak",
+    short: "Inson yuragining 3D modelini yaqindan kuzating.",
+    icon: "Heart",
+    url: heartUrl,
+    keepMaterial: true,
+    about:
+      "Yurak - qon aylanish tizimining markaziy organi bo'lib, tanaga qon haydash vazifasini bajaradi.",
+  },
+  {
+    slug: "kidney",
+    title: "Buyrak",
+    short: "Inson buyragining tuzilishini ko'ring.",
+    icon: "Droplets",
+    url: kidneyUrl,
+    keepMaterial: true,
+    about:
+      "Buyrak - qonni filtrlab keraksiz moddalarni va ortiqcha suvni siydik orqali ajratib chiqaruvchi juft a'zo.",
+  },
+  {
+    slug: "liver-and-gallbladder",
+    title: "Jigar va O't pufagi",
+    short: "Jigar va o't pufagining anatomiyasini o'rganing.",
+    icon: "Activity",
+    url: liverUrl,
+    keepMaterial: true,
+    about:
+      "Jigar qonni zaharli moddalardan tozalaydi, o't pufagi esa hazm qilish uchun o't suyuqligini saqlaydi.",
+  },
+  {
+    slug: "eye-orbit-muscles",
+    title: "Ko'z kosasi mushaklari",
+    short: "Ko'zni harakatlantiruvchi mushaklarni ko'ring.",
+    icon: "Eye",
+    url: orbitEyeUrl,
+    keepMaterial: true,
+    about:
+      "Ko'z kosasi mushaklari - ko'z soqqasini barcha yo'nalishlarda harakatlantirish imkonini beradi.",
+  },
+  {
+    slug: "lungs",
+    title: "O'pkalar",
+    short: "Nafas olish tizimining asosiy organi.",
+    icon: "Wind",
+    url: lungsUrl,
+    keepMaterial: true,
+    about:
+      "O'pkalar - nafas olish tizimining markaziy organi bo'lib, qonni kislorod bilan boyitib, karbonat angidridni chiqarib yuboradi.",
   },
 ];
 
