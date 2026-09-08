@@ -31,6 +31,7 @@ import {
   Gauge,
   GitFork,
   Landmark,
+  ScanSearch,
   Map as MapIcon,
 } from "lucide-react";
 
@@ -64,6 +65,7 @@ const ICONS = {
   Gauge,
   GitFork,
   Landmark,
+  ScanSearch,
   Map: MapIcon,
 };
 

@@ -11,7 +11,11 @@ KIMYO (chemistry):
 BIOLOGIYA (biology):
 - Hujayra (cell): hujayra organoidlari.
 - DNK spirali (dna): qo'sh spiral va nukleotidlar.
-- Anatomiya: muskullar, qon-tomir tizimi va boshqa GLB modellar.
+- Anatomiya (anatomy): muskullar, qon-tomir tizimi va boshqa GLB modellar.
+- Inson atlasi (human-atlas): BodyParts3D asosidagi 2234 qismli 3D tana - 15 tizim (skelet,
+  mushak, yurak, arteriya, vena, asab, nafas, hazm, siydik, limfa, endokrin, ko'payish, teri,
+  biriktiruvchi, sezgi), 3432 nomli tuzilma qidiruvi, portlatish (inventar) va ajratib ko'rsatish.
+  select_item bilan to'plamlar: all, skeleton, muscles, organs, cardio, nervous, body.
 
 FIZIKA (physics):
 - Quyosh tizimi (solar-system): sayyoralar orbitada aylanishi.

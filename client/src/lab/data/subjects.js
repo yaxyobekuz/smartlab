@@ -80,6 +80,12 @@ export const SUBJECTS = [
         icon: "PersonStanding",
       },
       {
+        slug: "human-atlas",
+        title: "Inson atlasi",
+        short: "2234 ta qism, 15 tizim: qidiring, tizimlarni yoqing, portlating va ajratib ko'ring.",
+        icon: "ScanSearch",
+      },
+      {
         slug: "surgery",
         title: "Jarrohlik",
         short: "Qatlamlarni yeching yoki skalpel bilan kesib ichki a'zolarni ko'ring.",

@@ -26,6 +26,9 @@ const PAGES = {
     import("@/lab/features/biology/cell-studio/CellStudioPage"),
   ),
   "biology/dna": lazy(() => import("@/lab/features/biology/dna/DnaPage")),
+  "biology/human-atlas": lazy(() =>
+    import("@/lab/features/biology/human-atlas/HumanAtlasPage"),
+  ),
   "biology/surgery": lazy(() =>
     import("@/lab/features/biology/surgery/SurgeryPage"),
   ),

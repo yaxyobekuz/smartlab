@@ -321,3 +321,82 @@ open http://localhost:5173/ 2>&1 || echo "brauzerni ocholmadim"
 <sub>session `8a0914c5` · branch `main` · 11 ta qadam</sub>
 
 ---
+
+## 2026-09-08 13:38 — desktop folder ichida human atlast loyihasi mavjud ushbu loyihani ichi
+
+**So'rov**
+
+> desktop folder ichida human atlast loyihasi mavjud ushbu loyihani ichidagi malaumot datalarini olib smart labga integeratsiya qilib bering
+
+**O'zgargan fayllar (7)**
+
+- `client/src/lab/features/biology/human-atlas/data/systems.js` — yaratildi/qayta yozildi
+- `client/src/lab/features/biology/human-atlas/AtlasBody.jsx` — yaratildi/qayta yozildi
+- `client/src/lab/features/biology/human-atlas/AtlasControls.jsx` — yaratildi/qayta yozildi
+- `client/src/lab/features/biology/human-atlas/AtlasDetailCard.jsx` — yaratildi/qayta yozildi
+- `client/src/lab/features/biology/human-atlas/HumanAtlasPage.jsx` — yaratildi/qayta yozildi
+- `/private/tmp/claude-501/-Users-shukrullo-Desktop-smartlab/78fea31d-d78a-4eb2-bd20-4ba246bd0575/scratchpad/atlas-check.mjs` — yaratildi/qayta yozildi
+- `/Users/shukrullo/.claude/projects/-Users-shukrullo-Desktop-smartlab/memory/human-atlas-integration.md` — yaratildi/qayta yozildi
+
+**Buyruqlar (52)**
+
+```sh
+ls -la /Users/shukrullo/Desktop/ | head -50; echo ---; ls -d /Users/shukrullo/Desktop/*atlas* /Users/shukrullo/Desktop/*Atlas* /Users/shukrullo/Desktop/*human* …
+cd /Users/shukrullo/Desktop/human-atlas && ls -la && echo --- && cat README.md 2>/dev/null | head -80 && echo --- && cat package.json 2>/dev/null && echo --- &&…
+cd /Users/shukrullo/Desktop/human-atlas && find app web components hooks lib scripts public -type f -not -name '*.DS_Store' | xargs ls -la | awk '{print $5, $9}…
+cd /Users/shukrullo/Desktop/human-atlas && cat app/anatomy.ts app/model-download.ts app/explosion-layout.ts app/pointer-tap.ts app/agent-tools.ts
+cd /Users/shukrullo/Desktop/human-atlas && cat app/scene.tsx
+cd /Users/shukrullo/Desktop/human-atlas && cat app/page.tsx web/main.tsx web/index.html
+cd /Users/shukrullo/Desktop/human-atlas && node -e ' const a=JSON.parse(require("fs").readFileSync("public/models/atlas.json","utf8")); console.log(Object.keys(…
+ls client/src && ls client/src/pages 2>/dev/null; find client/src -ipath '*anatom*' -o -ipath '*biology*' | grep -v node_modules | head -60; echo ---; ls client…
+cat client/CLAUDE.md | head -150; echo ---; ls client/src/lab client/src/lab/* | head -80; echo ---; ls client/src/app; grep -rn "anatomy" client/src/app --incl…
+cat client/src/lab/features/biology/anatomy/AnatomyPage.jsx; echo ---; wc -l client/src/lab/features/biology/anatomy/*.jsx client/src/lab/data/anatomy.js
+grep -rn "surgery\|anatomy" client/src/lab/data/*.js client/src/lab/*.jsx client/src/app/*.jsx 2>/dev/null | grep -v "^client/src/lab/data/anatomy.js" | head -4…
+cat client/src/lab/data/subjects.js | head -200; echo ---ROUTES; cat client/src/app/routes.jsx; echo ---LAB INDEX; cat client/src/lab/index.js
+cat client/src/lab/components/LabWorkspace.jsx; echo ---SCENE; cat client/src/lab/components/Scene.jsx; echo ---TOOLBAR; head -80 client/src/lab/components/Tool…
+cat client/src/lab/features/biology/anatomy/AnatomyModel.jsx client/src/lab/features/biology/anatomy/AnatomyDetailModal.jsx; echo ---DATA; head -60 client/src/l…
+ls client/src/lab/features/biology client/src/lab/features/biology/surgery; head -120 client/src/lab/features/biology/surgery/SurgeryPage.jsx; echo ---; cat cli…
+cat client/src/lab/pages/TopicPage.jsx; echo ---SC; cat client/src/lab/components/sceneControl.js; echo ---PROVIDER; grep -n "setAiContext\|onSelectItem\|reset\…
+cat client/src/shared/lib/query/keys.js; echo ---MAT; head -80 client/src/lab/data/anatomyMaterials.js; echo ---; grep -rn "public/models\|/models/" client/src …
+ls server/src/modules; ls server/src/modules/ai 2>/dev/null; grep -n "context\|select_item\|subject" server/src/modules/ai/*.service.js 2>/dev/null | head -50
+cd /Users/shukrullo/Desktop/human-atlas && cat scripts/validate-atlas.mjs; echo ---; node -e ' const a=JSON.parse(require("fs").readFileSync("public/models/atla…
+head -60 server/src/modules/ai/ai.knowledge.js; grep -n "anatomy\|surgery" server/src/modules/ai/ai.knowledge.js | head; echo ---; sed -n 200,260p client/src/la…
+cd /Users/shukrullo/Desktop/human-atlas && node -e ' const a=JSON.parse(require("fs").readFileSync("public/models/atlas.json","utf8")); const byName={};for(cons…
+mkdir -p client/public/models/atlas && cp /Users/shukrullo/Desktop/human-atlas/public/models/body-*.bin.gz client/public/models/atlas/ && cp /Users/shukrullo/De…
+python3 - <<'EOF' p='client/src/shared/lib/query/keys.js' s=open(p).read() s=s.replace(""" stats: (params) => ["activityLogs", "stats", params], }, });""",""" s…
+ls client/src/shared/components/ui; echo ---; sed -n 1,80p client/src/lab/features/biology/surgery/SurgeryControls.jsx
+python3 - <<'EOF' # 1) Subject registry: new topic after "anatomy" p='client/src/lab/data/subjects.js' s=open(p).read() old=''' { slug: "surgery", title: "Jarro…
+# … yana 27 ta
+```
+
+**Natija**
+
+Avval Desktop'dagi "human atlas" loyihasini topib, undagi ma'lumot strukturasini o'rganaman.
+
+Human Atlas — BodyParts3D asosidagi 2234 mesh, 15 tizim, 3432 tushuncha (CC BY 4.0). Endi data formati va yuklash mantiqini, hamda smartlab'dagi mavjud anatomiya sahifasini ko'raman.
+
+Human Atlas data formati aniq: `atlas.json` (parts + concepts + chunks) va 15 ta binary chunk (~33 MB gzip). Endi smartlab'ning lab tuzilishini, marshrutlarni va mavjud anatomiya sahifasini ko'raman.
+
+Endi datani ko'chiraman va atlas.json'dagi chunk yo'llarini smartlab'ga moslayman (faqat gzip variantlarini olib, ~60 MB siqilmagan fayllarni tashlab ketaman).
+
+Data tayyor. Endi feature fayllarini yozaman: avval o'zbekcha tizimlar, tushuntirishlar va nom lug'ati.
+
+Endi yuklovchi (api + TanStack hook), portlatish layouti va 3D tanani chizuvchi asosiy komponentni yozaman.
+
+Existing lab panels use native range/checkbox inputs with Tailwind, so I'll follow that pattern. Now the controls panel, detail card and the page.
+
+Deps installed. Now lint the new feature and run a production build to catch import/shader-module errors.
+
+Lint is clean now. Next I'll remove a leftover unused constant, start the dev server, and use the web-testing skill to verify the page renders in a real browser.
+
+Port 5173 is held by the lc-total dev server, so I'll run smartlab's client on 5199 instead and prepare the Playwright check script at the same time.
+
+The flow works end to end with no console errors. Let me look at the screenshots to verify the rendering visually.
+
+Human Atlas loyihasi smartlab'ga to'liq integratsiya qilindi. Yangi sahifa: **Biologiya → "Inson atlasi"** ([/biology/human-atlas](client/src/lab/features/biology/human-atlas/HumanAtlasPage.jsx)). Lint va production build toza, brauzerda Playwright bilan tekshi
+
+…(qisqartirildi)
+
+<sub>session `78fea31d` · branch `main` · 70 ta qadam</sub>
+
+---

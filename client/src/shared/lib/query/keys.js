@@ -14,4 +14,7 @@ export const qk = Object.freeze({
     one: (id) => ["activityLogs", "detail", id],
     stats: (params) => ["activityLogs", "stats", params],
   },
+  humanAtlas: {
+    manifest: () => ["humanAtlas", "manifest"],
+  },
 });
