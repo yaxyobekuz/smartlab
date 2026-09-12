@@ -400,3 +400,39 @@ Human Atlas loyihasi smartlab'ga to'liq integratsiya qilindi. Yangi sahifa: **Bi
 <sub>session `78fea31d` · branch `main` · 70 ta qadam</sub>
 
 ---
+
+## 2026-09-11 17:50 — http://192.168.1.72:5173/ shu ipdagi loyihani kill qil
+
+**So'rov**
+
+> http://192.168.1.72:5173/ shu ipdagi loyihani kill qil
+
+**Buyruqlar (4)**
+
+```sh
+lsof -nP -iTCP:5173 -sTCP:LISTEN
+ps -o pid,ppid,command -p 58324,82660
+ps -o pid,ppid,command -p 82636; lsof -p 58324 -a -d cwd -Fn | grep '^n'
+kill 82636 82660 58324; sleep 1; lsof -nP -iTCP:5173 -sTCP:LISTEN || echo "port 5173 bo'sh"
+```
+
+**Natija**
+
+Port 5173'da ishlayotgan jarayonni topib to'xtataman.
+
+Port 5173 bo'shatildi. `http://192.168.1.72:5173/` endi javob bermaydi.
+
+Ikkita jarayon shu portda ishlab turgan edi, ikkalasi ham to'xtatildi:
+
+- **smartlab client** — `npm run dev --host` orqali ishga tushgan Vite dev-server (IPv6).
+- **Ferma loyihasi** — `/Users/shukrullo/Desktop/Ferma` ichidagi `scripts/serve.mjs 5173` (IPv4, yetim jarayon). Aynan IPv4 manzilga kelgan so'rovlarni shu qabul qilardi.
+
+Smartlab clientni qayta ishga tushirish uchun:
+
+```
+cd client && npm run dev -- --host
+```
+
+<sub>session `8d26ed72` · branch `main` · 4 ta qadam</sub>
+
+---
