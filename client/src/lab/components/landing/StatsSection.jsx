@@ -1,4 +1,5 @@
 import AnimatedCounter from "@/shared/components/ui/counter/AnimatedCounter";
+import { PixelSprite } from "@/shared/components/ui/pixel";
 import useMediaQuery from "@/shared/hooks/useMediaQuery";
 import { SUBJECTS } from "@/lab/data/subjects";
 import useReveal from "./useReveal";
@@ -6,38 +7,33 @@ import useReveal from "./useReveal";
 const TOPIC_COUNT = SUBJECTS.reduce((sum, s) => sum + s.topics.length, 0);
 
 const STATS = [
-  { value: SUBJECTS.length, label: "Fan yo'nalishi", hint: "Kimyodan tarixgacha" },
-  { value: TOPIC_COUNT, label: "Interaktiv mavzu", hint: "Har biri 3D sahnada" },
-  { value: 3, label: "O'rganish rejimi", hint: "3D, VR va AI gid" },
-  { value: 100, suffix: "%", label: "O'zbek tilida", hint: "Matn va AI izohlari" },
+  { value: SUBJECTS.length, label: "fan yo'nalishi", sprite: "flask" },
+  { value: TOPIC_COUNT, label: "interaktiv mavzu", sprite: "cube" },
+  { value: 3, label: "o'rganish rejimi", sprite: "headset" },
+  { value: 100, suffix: "%", label: "o'zbek tilida", sprite: "bubble" },
 ];
 
+// Bonau.ly-style thin stats bar right under the hero desk.
 const StatsSection = () => {
-  // Sanoq faqat bo'lim ko'ringanda boshlanadi.
   const [ref, shown] = useReveal({ threshold: 0.3 });
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
 
   return (
-    <section ref={ref} className="container -mt-4 pb-4 md:pb-8">
-      <div className="grid grid-cols-2 gap-3 rounded-3xl border border-border/60 bg-card/60 p-4 backdrop-blur sm:p-6 lg:grid-cols-4">
-        {STATS.map(({ value, suffix, label, hint }) => (
-          <div
-            key={label}
-            className="rounded-2xl px-4 py-3 transition-colors hover:bg-primary/5"
-          >
-            <p className="text-3xl font-extrabold tracking-tight text-primary md:text-4xl">
-              {shown ? (
-                <AnimatedCounter
-                  value={value}
-                  suffix={suffix}
-                  duration={reducedMotion ? 0 : 1200}
-                />
-              ) : (
-                <span>0{suffix ?? ""}</span>
-              )}
+    <section ref={ref} className="border-y-2 border-pixel-ink bg-card">
+      <div className="container grid grid-cols-2 gap-y-4 py-5 lg:grid-cols-4 lg:divide-x-2 lg:divide-dashed lg:divide-border">
+        {STATS.map(({ value, suffix, label, sprite }) => (
+          <div key={label} className="flex items-center gap-3 lg:justify-center">
+            <PixelSprite name={sprite} size={28} />
+            <p className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2">
+              <span className="font-pixel text-2xl font-bold text-foreground md:text-3xl">
+                {shown ? (
+                  <AnimatedCounter value={value} suffix={suffix} duration={reducedMotion ? 0 : 1200} />
+                ) : (
+                  `0${suffix ?? ""}`
+                )}
+              </span>
+              <span className="text-xs text-muted-foreground sm:text-sm">{label}</span>
             </p>
-            <p className="mt-1 text-sm font-semibold">{label}</p>
-            <p className="text-xs text-muted-foreground">{hint}</p>
           </div>
         ))}
       </div>

@@ -1,8 +1,13 @@
-// Lists the topics of one subject (/:subject).
+// Lists the topics of one subject (/:subject) as a level path.
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ArrowRight } from "lucide-react";
-import Icon from "@/lab/components/Icon";
-import { getSubject } from "@/lab/data/subjects";
+import {
+  GridBackground,
+  PixelSprite,
+  PixelTag,
+  SUBJECT_SPRITES,
+} from "@/shared/components/ui/pixel";
+import { SUBJECTS, getSubject } from "@/lab/data/subjects";
+import LevelPath from "@/lab/components/subject/LevelPath";
 import NotFoundPage from "./NotFoundPage";
 
 const SubjectPage = () => {
@@ -10,52 +15,46 @@ const SubjectPage = () => {
   const subject = getSubject(slug);
   if (!subject) return <NotFoundPage />;
 
+  const worldNumber = SUBJECTS.findIndex((s) => s.slug === subject.slug) + 1;
+
   return (
-    <div className="container py-8">
-      <Link
-        to="/"
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft size={16} /> Bosh sahifa
-      </Link>
+    <div className="relative isolate min-h-full overflow-hidden">
+      <GridBackground fade="bottom" />
 
-      <div className="mb-6 flex items-center gap-3">
-        <span
-          className="grid size-12 place-items-center rounded-xl"
-          style={{ backgroundColor: `${subject.color}1a` }}
+      <div className="container py-8 md:py-12">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 font-pixel text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
-          <Icon name={subject.icon} size={24} style={{ color: subject.color }} />
-        </span>
-        <div>
-          <h1 className="text-2xl font-semibold">{subject.title}</h1>
-          <p className="text-sm text-muted-foreground">{subject.short}</p>
-        </div>
-      </div>
+          <PixelSprite name="arrowDown" size={12} className="rotate-90" />
+          Bosh sahifa
+        </Link>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {subject.topics.map((t) => (
-          <Link
-            key={t.slug}
-            to={`/${subject.slug}/${t.slug}`}
-            className="group rounded-2xl border border-border bg-card p-5 transition-all hover:-translate-y-1 hover:shadow-md"
-          >
-            <div
-              className="grid size-11 place-items-center rounded-xl"
-              style={{ backgroundColor: `${subject.color}1a` }}
+        <header className="mt-6 flex flex-col gap-5 sm:flex-row sm:items-center">
+          <span className="pixel-outline-shadow w-fit motion-safe:animate-pixel-bob">
+            <span
+              className="pixel-corners grid size-24 place-items-center"
+              // Opaque base: the outline filter would show through a translucent fill.
+              style={{ background: `linear-gradient(${subject.color}26, ${subject.color}26), #fff` }}
             >
-              <Icon name={t.icon} size={22} style={{ color: subject.color }} />
-            </div>
-            <h3 className="mt-3 font-semibold">{t.title}</h3>
-            <p className="mt-1 text-sm text-muted-foreground">{t.short}</p>
-            <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
-              Ko'rish
-              <ArrowRight
-                size={14}
-                className="transition-transform group-hover:translate-x-0.5"
-              />
+              <PixelSprite name={SUBJECT_SPRITES[subject.slug]} size={60} />
             </span>
-          </Link>
-        ))}
+          </span>
+          <div>
+            <PixelTag>
+              <span style={{ color: subject.color }}>{worldNumber}-dunyo</span>
+              <span className="text-muted-foreground">· {subject.topics.length} ta mavzu</span>
+            </PixelTag>
+            <h1 className="mt-3 font-pixel text-4xl font-bold leading-none md:text-6xl">
+              {subject.title}
+            </h1>
+            <p className="mt-2 max-w-xl text-muted-foreground">{subject.short}</p>
+          </div>
+        </header>
+
+        <div className="mt-12 md:mt-16">
+          <LevelPath subject={subject} />
+        </div>
       </div>
     </div>
   );

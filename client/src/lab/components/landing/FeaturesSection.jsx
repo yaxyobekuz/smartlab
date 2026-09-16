@@ -1,73 +1,75 @@
-import {
-  Boxes,
-  Bot,
-  Headset,
-  Languages,
-  MonitorSmartphone,
-  Waypoints,
-} from "lucide-react";
+import { PixelCard, PixelHeading, PixelSprite } from "@/shared/components/ui/pixel";
 import Reveal from "./Reveal";
-import SectionHead from "./SectionHead";
 
 const FEATURES = [
   {
-    icon: Boxes,
+    sprite: "cube",
+    tag: "3D",
     title: "3D interaktiv modellar",
     text: "Molekula, hujayra, anatomiya va sayyoralarni aylantiring, kattalashtiring va ichidan ko'ring.",
   },
   {
-    icon: Waypoints,
+    sprite: "gear",
+    tag: "SIM",
     title: "Haqiqiy simulyatsiyalar",
     text: "Reaksiya, pH, gaz qonunlari va elektron sxemalar fizik-kimyoviy qoidalar asosida hisoblanadi.",
   },
   {
-    icon: Bot,
+    sprite: "robot",
+    tag: "AI",
     title: "AI o'qituvchi",
     text: "Mavzu kontekstini biladigan sun'iy intellekt savolingizga o'sha sahnaning o'zida javob beradi.",
   },
   {
-    icon: Headset,
+    sprite: "headset",
+    tag: "VR",
     title: "VR va WebXR",
-    text: "Telefon uchun Cardboard yoki Quest ko'zoynagi — laboratoriyaga ichkaridan kiring.",
+    text: "Telefon uchun Cardboard yoki Quest ko'zoynagi bilan laboratoriyaga ichkaridan kiring.",
   },
   {
-    icon: Languages,
+    sprite: "bubble",
+    tag: "UZ",
     title: "To'liq o'zbek tilida",
     text: "Barcha mavzular, atamalar va AI izohlari o'zbek tilida tayyorlangan.",
   },
   {
-    icon: MonitorSmartphone,
+    sprite: "phone",
+    tag: "WEB",
     title: "Brauzerda ishlaydi",
-    text: "O'rnatish va ro'yxatdan o'tish shart emas — havolani ochish kifoya, telefonda ham ishlaydi.",
+    text: "O'rnatish va ro'yxatdan o'tish shart emas. Havolani oching, telefonda ham ishlaydi.",
   },
 ];
 
 const FeaturesSection = () => (
-  <section className="relative overflow-hidden py-16 md:py-20">
-    <div className="pointer-events-none absolute inset-x-0 top-1/2 -z-10 h-72 -translate-y-1/2 bg-primary/5 blur-3xl" />
-
+  <section className="border-y-2 border-pixel-ink bg-secondary/60 py-16 md:py-24">
     <div className="container">
-      <SectionHead
-        centered
-        eyebrow="Imkoniyatlar"
-        title="O'qish emas — boshdan kechirish"
-        description="Smartlab darslikdagi rasmni jonli tajribaga aylantiradi: ko'ring, o'zgartiring, natijani kuzating."
-      />
+      <Reveal>
+        <PixelHeading
+          centered
+          eyebrow="Imkoniyatlar"
+          eyebrowIcon={<PixelSprite name="bolt" size={14} />}
+          title="Laboratoriyadagi jihozlar"
+          description="Darslikdagi rasm jonli tajribaga aylanadi: ko'ring, o'zgartiring, natijani kuzating."
+        />
+      </Reveal>
 
-      <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {FEATURES.map(({ icon: FeatureIcon, title, text }, i) => (
-          <Reveal
-            key={title}
-            delay={i * 60}
-            className="group h-full rounded-3xl border border-border/60 bg-card/70 p-6 backdrop-blur transition-colors duration-300 hover:border-primary/40 motion-reduce:transition-none"
-          >
-            <span className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none">
-              <FeatureIcon size={22} />
-            </span>
-            <h3 className="mt-4 text-base font-bold">{title}</h3>
-            <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-              {text}
-            </p>
+      <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {FEATURES.map(({ sprite, tag, title, text }, i) => (
+          <Reveal key={title} delay={i * 60} className="h-full">
+            <PixelCard className="group relative h-full p-5">
+              <span className="absolute right-4 top-4 bg-pixel-ink px-1.5 py-0.5 font-pixel text-[11px] font-semibold tracking-wider text-pixel-coin">
+                {tag}
+              </span>
+              <span className="grid size-16 place-items-center rounded-sm border-2 border-dashed border-border bg-background">
+                <PixelSprite
+                  name={sprite}
+                  size={40}
+                  className="transition-transform duration-150 group-hover:-translate-y-1 motion-reduce:transition-none"
+                />
+              </span>
+              <h3 className="mt-4 font-pixel text-xl font-semibold">{title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{text}</p>
+            </PixelCard>
           </Reveal>
         ))}
       </div>

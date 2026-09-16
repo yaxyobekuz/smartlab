@@ -1,47 +1,53 @@
-import { FlaskConical, MousePointerClick, Sparkles } from "lucide-react";
+import { PixelHeading, PixelSprite } from "@/shared/components/ui/pixel";
 import Reveal from "./Reveal";
-import SectionHead from "./SectionHead";
 
 const STEPS = [
   {
-    icon: MousePointerClick,
+    sprite: "cursor",
     title: "Fanni tanlang",
-    text: "Kimyo, biologiya, fizika, elektronika yoki tarix — sizni qiziqtirgan yo'nalishni oching.",
+    text: "Kimyo, biologiya, fizika, elektronika yoki tarix: qiziqtirgan yo'nalishni oching.",
   },
   {
-    icon: FlaskConical,
+    sprite: "flask",
     title: "Mavzuni sinab ko'ring",
-    text: "3D sahnada modelni aylantiring, tajriba o'tkazing va parametrlarni o'zgartirib natijani kuzating.",
+    text: "3D sahnada modelni aylantiring, tajriba o'tkazing, parametrlarni o'zgartirib natijani kuzating.",
   },
   {
-    icon: Sparkles,
+    sprite: "sparkle",
     title: "AI dan so'rang",
     text: "Tushunmagan joyingizni o'sha sahnaning o'zida AI o'qituvchidan o'zbek tilida so'rang.",
   },
 ];
 
 const ProcessSection = () => (
-  <section className="container py-16 md:py-20">
-    <SectionHead
-      centered
-      eyebrow="Qanday ishlaydi"
-      title="Uch qadamda tajribaga kirishing"
-      description="Ro'yxatdan o'tish, dastur o'rnatish yoki qo'shimcha jihoz shart emas."
-    />
+  <section className="container py-16 md:py-24">
+    <Reveal>
+      <PixelHeading
+        centered
+        eyebrow="Qanday ishlaydi"
+        eyebrowIcon={<PixelSprite name="cursor" size={10} />}
+        title="Uch qadamda tajribaga"
+        description="Ro'yxatdan o'tish, dastur o'rnatish yoki qo'shimcha jihoz shart emas."
+      />
+    </Reveal>
 
-    <div className="relative mt-12 grid gap-6 md:grid-cols-3">
-      {/* qadamlarni bog'lovchi chiziq (faqat desktopda) */}
-      <div className="pointer-events-none absolute left-0 right-0 top-7 hidden h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent md:block" />
+    <div className="relative mt-14 grid gap-10 md:grid-cols-3 md:gap-6">
+      <div
+        aria-hidden="true"
+        className="absolute left-[16%] right-[16%] top-10 hidden border-t-4 border-dashed border-border md:block"
+      />
 
-      {STEPS.map(({ icon: StepIcon, title, text }, i) => (
+      {STEPS.map(({ sprite, title, text }, i) => (
         <Reveal key={title} delay={i * 110} className="relative text-center">
-          <span className="relative mx-auto grid size-14 place-items-center rounded-2xl border border-primary/25 bg-background text-primary shadow-lg shadow-primary/10">
-            <StepIcon size={24} />
-            <span className="absolute -right-2 -top-2 grid size-6 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-              {i + 1}
-            </span>
+          <div className="pixel-outline-shadow relative mx-auto w-fit">
+            <div className="pixel-corners grid size-20 place-items-center bg-card">
+              <PixelSprite name={sprite} size={40} />
+            </div>
+          </div>
+          <span className="absolute left-1/2 top-0 ml-7 grid size-8 -translate-y-2 place-items-center bg-primary font-pixel text-base font-bold text-primary-foreground">
+            {i + 1}
           </span>
-          <h3 className="mt-4 text-lg font-bold">{title}</h3>
+          <h3 className="mt-6 font-pixel text-xl font-semibold">{title}</h3>
           <p className="mx-auto mt-1.5 max-w-xs text-sm leading-relaxed text-muted-foreground">
             {text}
           </p>

@@ -1,34 +1,42 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Headset } from "lucide-react";
+import { PixelButton, PixelSprite } from "@/shared/components/ui/pixel";
 import { SUBJECTS } from "@/lab/data/subjects";
 import Reveal from "./Reveal";
-import { PrimaryAction, SecondaryAction } from "./LandingActions";
 
 const CtaSection = () => {
   const navigate = useNavigate();
   const enterLabVR = () => navigate("/chemistry/lab?vr=1");
 
   return (
-    <section className="container pb-20 pt-4 md:pb-28">
-      <Reveal className="relative overflow-hidden rounded-[2rem] border border-primary/25 bg-gradient-to-br from-violet-500/15 via-purple-500/10 to-fuchsia-500/15 px-6 py-14 text-center backdrop-blur md:px-16">
-        <div className="pointer-events-none absolute -left-16 -top-16 size-64 rounded-full bg-primary/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 -right-10 size-64 rounded-full bg-fuchsia-500/20 blur-3xl" />
+    <section className="container pb-20 md:pb-28">
+      <Reveal className="relative overflow-hidden rounded-md border-2 border-pixel-ink bg-primary px-6 py-14 text-center shadow-[6px_6px_0_0_theme(colors.pixel.ink)] md:px-16">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-20"
+          style={{
+            backgroundImage:
+              "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)",
+            backgroundSize: "32px 32px",
+          }}
+        />
+        <PixelSprite name="star" size={48} className="absolute left-6 top-6 hidden motion-safe:animate-pixel-bob sm:block" />
+        <PixelSprite name="heart" size={40} className="absolute bottom-8 right-8 hidden motion-safe:animate-pixel-bob sm:block" style={{ animationDelay: "0.5s" }} />
+        <PixelSprite name="bolt" size={34} className="absolute right-16 top-8 hidden motion-safe:animate-pixel-bob md:block" style={{ animationDelay: "0.9s" }} />
 
-        <h2 className="relative mx-auto max-w-2xl text-3xl font-extrabold tracking-tight md:text-4xl">
+        <h2 className="relative mx-auto max-w-2xl font-pixel text-3xl font-bold leading-tight text-white md:text-5xl">
           Birinchi tajribangizni hoziroq boshlang
         </h2>
-        <p className="relative mx-auto mt-3 max-w-xl text-base text-muted-foreground">
-          Laboratoriya ochiq — hech qanday ro'yxatdan o'tish yoki to'lov talab
-          qilinmaydi. Bitta bosishda 3D sahnaga kirasiz.
+        <p className="relative mx-auto mt-3 max-w-xl text-base text-violet-100">
+          Laboratoriya ochiq: ro'yxatdan o'tish ham, to'lov ham kerak emas. Bitta bosishda 3D sahnaga kirasiz.
         </p>
 
-        <div className="relative mt-8 flex flex-wrap justify-center gap-4">
-          <PrimaryAction to={`/${SUBJECTS[0].slug}`} icon={ArrowRight}>
+        <div className="relative mt-8 flex flex-wrap justify-center gap-5">
+          <PixelButton to={`/${SUBJECTS[0].slug}`} variant="coin" size="lg" icon={<PixelSprite name="flask" size={22} />}>
             Laboratoriyani ochish
-          </PrimaryAction>
-          <SecondaryAction onClick={enterLabVR} icon={Headset}>
+          </PixelButton>
+          <PixelButton onClick={enterLabVR} variant="secondary" size="lg" icon={<PixelSprite name="headset" size={24} />}>
             VR rejimda sinash
-          </SecondaryAction>
+          </PixelButton>
         </div>
       </Reveal>
     </section>

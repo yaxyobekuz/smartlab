@@ -5,14 +5,14 @@ import {
   LandingFooter,
   ProcessSection,
   StatsSection,
-  SubjectsSection,
+  WorldMapSection,
 } from "@/lab/components/landing";
 
 const LandingPage = () => (
   <>
     <HeroSection />
     <StatsSection />
-    <SubjectsSection />
+    <WorldMapSection />
     <FeaturesSection />
     <ProcessSection />
     <CtaSection />

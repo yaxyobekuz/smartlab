@@ -117,6 +117,44 @@
   .container {
     @apply max-w-7xl mx-auto px-4;
   }
+
+  /* Pixel uslub: zinapoya burchaklar (clip-path) */
+  .pixel-corners {
+    clip-path: polygon(
+      0 4px, 4px 4px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,
+      100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%,
+      4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px)
+    );
+  }
+
+  /* clip-path kesgan shaklga konturni drop-shadow chizadi - border kesilib qoladi */
+  .pixel-outline {
+    filter: drop-shadow(2px 0 0 theme(colors.pixel.ink))
+      drop-shadow(-2px 0 0 theme(colors.pixel.ink))
+      drop-shadow(0 2px 0 theme(colors.pixel.ink))
+      drop-shadow(0 -2px 0 theme(colors.pixel.ink));
+  }
+
+  .pixel-outline-shadow {
+    filter: drop-shadow(2px 0 0 theme(colors.pixel.ink))
+      drop-shadow(-2px 0 0 theme(colors.pixel.ink))
+      drop-shadow(0 2px 0 theme(colors.pixel.ink))
+      drop-shadow(0 -2px 0 theme(colors.pixel.ink))
+      drop-shadow(4px 4px 0 theme(colors.pixel.ink));
+  }
+
+  /* Own GPU layer: looping sprites/cards move without repainting the page */
+  [class*="animate-pixel-bob"],
+  [class*="animate-float-y"] {
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+
+  .bg-pixel-grid {
+    background-image: linear-gradient(hsl(var(--border)) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
 }
 
 @layer components {

@@ -6,6 +6,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Inter", "sans-serif"],
+        pixel: ["'Pixelify Sans'", "Inter", "sans-serif"],
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -55,10 +56,15 @@ export default {
         },
         // Landing foni: mayin ko'tarilib-tushish.
         "float-y": {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-16px)" },
+          "0%, 100%": { transform: "translate3d(0, 0, 0)" },
+          "50%": { transform: "translate3d(0, -16px, 0)" },
         },
         // Landing foni: sekin erkin suzish.
+        // Pixel uslub: silliq emas, "kadrma-kadr" sakrash.
+        "pixel-bob": {
+          "0%, 100%": { transform: "translate3d(0, 0, 0)" },
+          "50%": { transform: "translate3d(0, -8px, 0)" },
+        },
         drift: {
           "0%, 100%": { transform: "translate3d(0, 0, 0)" },
           "33%": { transform: "translate3d(12px, -16px, 0)" },
@@ -76,8 +82,16 @@ export default {
         "gradient-x": "gradient-x 4s ease infinite",
         "float-y": "float-y 7s ease-in-out infinite",
         drift: "drift 18s ease-in-out infinite",
+        "pixel-bob": "pixel-bob 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite",
       },
       colors: {
+        pixel: {
+          ink: "#1d1330",
+          coin: "#facc15",
+          heart: "#ef4444",
+          slime: "#22c55e",
+          bolt: "#3b82f6",
+        },
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
