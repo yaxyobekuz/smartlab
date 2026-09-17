@@ -3,13 +3,14 @@ export const SUBTITLE =
   "Haqiqiy laboratoriya xonasida yuring, jihozlarni yaqindan ko'ring va tajribalar o'tkazing.";
 export const BACK_LABEL = "Kimyo";
 export const BACK_TO = "/chemistry";
-export const CLASSIC_TO = "/chemistry/lab";
+export const CLASSIC_TO = "/chemistry/lab-classic";
 
 export const CONTROLS = [
   { keys: ["W", "A", "S", "D"], label: "Yurish" },
   { keys: ["Shift"], label: "Yugurish" },
   { keys: ["Sichqoncha"], label: "Atrofga qarash" },
-  { keys: ["Chap tugma"], label: "Olish / qo'yish" },
+  { keys: ["Chap tugma"], label: "Olish, qo'yish, ishlatish" },
+  { keys: ["Chap tugma (bosib turing)"], label: "Quyish, qizdirish, aralashtirish" },
   { keys: ["G"], label: "Qo'ldagini tashlash" },
   { keys: ["1–5"], label: "Qo'ldagi narsani tanlash" },
   { keys: ["E"], label: "Moddalar shkafi" },

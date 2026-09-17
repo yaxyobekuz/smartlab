@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { useKit } from "../../equipment/kit/kitContext";
+import { useDevice, useDeviceStep } from "../../equipment/kit/deviceState";
 import BlobShadow from "../../equipment/kit/BlobShadow";
 import { createSubstanceLabelTexture } from "../labels/substanceLabel";
 import { CAP_DOME, MM, buildScrewCap, buildWrapLabel, seedOf } from "./shapeUtils";
@@ -39,14 +40,19 @@ const assetsFor = (type) => {
   return cache[type];
 };
 
-const PowderJar = ({ substance, remaining = 1, capOn = true, ...props }) => {
+const readRemaining = (device) => device.remaining ?? 1;
+
+const PowderJar = ({ simId, substance, remaining = 1, capOn = true, ...props }) => {
   const kit = useKit();
+  const { device } = useDevice(simId);
+  const share = useDeviceStep(device, readRemaining, 0.02, remaining);
+  const closed = device ? device.capOn !== false : capOn;
   const { jar = "plastic", color, grain = "fine", fill = 0.7 } = substance.container;
   const type = jar === "plastic" ? "plastic" : "glass";
   const spec = SPECS[type];
   const assets = assetsFor(type);
   const seed = seedOf(substance.id);
-  const amount = Math.max(0, Math.min(1, remaining)) * fill;
+  const amount = Math.max(0, Math.min(1, share)) * fill;
   const level = Math.round(jarLevel(assets.innerProfile, spec.jar.bodyTop, amount) * 4000) / 4000;
 
   const heap = useMemo(
@@ -87,7 +93,7 @@ const PowderJar = ({ substance, remaining = 1, capOn = true, ...props }) => {
         </>
       )}
       {heap && <mesh geometry={heap} material={powder} castShadow />}
-      {capOn ? (
+      {closed ? (
         cap
       ) : (
         <group position={[spec.jar.radius + spec.cap.radius + 0.008, capTop, 0.014]} rotation-x={Math.PI}>

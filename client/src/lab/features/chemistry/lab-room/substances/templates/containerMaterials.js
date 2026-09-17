@@ -88,6 +88,7 @@ diffuseColor.rgb *= 1.0 - hdpeLine * hdpeStrength * 0.35;`,
       );
   };
   material.customProgramCacheKey = () => "substance-hdpe";
+  material.userData.hdpeLevel = uniforms.hdpeLevel;
   return material;
 };
 

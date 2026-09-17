@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { useKit } from "../../equipment/kit/kitContext";
+import { useDevice, useDeviceStep } from "../../equipment/kit/deviceState";
 import Liquid from "../../equipment/kit/Liquid";
 import BlobShadow from "../../equipment/kit/BlobShadow";
 import { volumeBelow } from "../../equipment/kit/vessel";
@@ -74,17 +75,22 @@ const buildContents = ({ pieces, metallic }, innerProfile, level, amount, seed) 
   });
 };
 
-const SolidJar = ({ substance, remaining = 1, capOn = true, ...props }) => {
+const readRemaining = (device) => device.remaining ?? 1;
+
+const SolidJar = ({ simId, substance, remaining = 1, capOn = true, ...props }) => {
   const kit = useKit();
+  const { device } = useDevice(simId);
+  const share = useDeviceStep(device, readRemaining, 0.025, remaining);
+  const closed = device ? device.capOn !== false : capOn;
   const { jar = "glass", color, metallic = 0, pieces = "chunks", underOil = false, fill = 0.55 } = substance.container;
   const type = jar === "plastic" ? "plastic" : "glass";
   const spec = SPECS[type];
   const assets = assetsFor(type);
   const seed = seedOf(substance.id);
-  const share = Math.max(0, Math.min(1, remaining));
+  const left = Math.max(0, Math.min(1, share));
   // Rolls and hanks scale by amount; a catalog fill of 0.6 counts as a full one.
-  const amount = Math.round(Math.min(1, (fill * share) / 0.6) * 40) / 40;
-  const level = jarLevel(assets.innerProfile, spec.jar.bodyTop, fill * share);
+  const amount = Math.round(Math.min(1, (fill * left) / 0.6) * 40) / 40;
+  const level = jarLevel(assets.innerProfile, spec.jar.bodyTop, fill * left);
 
   const contents = useMemo(
     () => buildContents({ pieces, metallic }, assets.innerProfile, Math.round(level * 2000) / 2000, amount, seed),
@@ -133,7 +139,7 @@ const SolidJar = ({ substance, remaining = 1, capOn = true, ...props }) => {
       )}
       {contents.main && <mesh geometry={contents.main} material={material} castShadow />}
       {contents.extra && <mesh geometry={contents.extra} material={material} castShadow />}
-      {capOn ? (
+      {closed ? (
         cap
       ) : (
         <group position={[spec.jar.radius + spec.cap.radius + 0.008, capTop, 0.016]} rotation-x={Math.PI}>

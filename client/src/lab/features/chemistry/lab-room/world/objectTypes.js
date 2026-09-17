@@ -5,10 +5,10 @@ export const SUBSTANCE_PREFIX = "sub:";
 
 // Physical proxies in model space (origin at the base). Cylinders stand on y = 0; boxes give size + center.
 const EQUIPMENT_BODIES = {
-  beaker: { shape: "cylinder", radius: 0.036, height: 0.095, breaks: "glass" },
-  "conical-flask": { shape: "cylinder", radius: 0.0425, height: 0.145, breaks: "glass" },
-  "test-tube": { shape: "cylinder", radius: 0.01, height: 0.18, breaks: "glass", lying: true },
-  "measuring-cylinder": { shape: "cylinder", radius: 0.042, height: 0.25, breaks: "glass" },
+  beaker: { shape: "cylinder", radius: 0.036, height: 0.095, breaks: "glass", support: true },
+  "conical-flask": { shape: "cylinder", radius: 0.0425, height: 0.145, breaks: "glass", support: true },
+  "test-tube": { shape: "cylinder", radius: 0.01, height: 0.18, breaks: "glass", lying: true, support: true },
+  "measuring-cylinder": { shape: "cylinder", radius: 0.042, height: 0.25, breaks: "glass", support: true },
   "evaporating-dish": { shape: "cylinder", radius: 0.05, height: 0.045, breaks: "porcelain" },
   crucible: { shape: "cylinder", radius: 0.021, height: 0.047, breaks: "porcelain" },
   "crystallizing-dish": { shape: "cylinder", radius: 0.076, height: 0.0765, breaks: "glass" },
@@ -19,19 +19,22 @@ const EQUIPMENT_BODIES = {
   "stirring-rod": { shape: "box", size: [0.2, 0.0066, 0.0066], center: [0, 0.0033, 0], breaks: "glass" },
   funnel: { shape: "cylinder", radius: 0.0375, height: 0.133, breaks: "glass", lying: true },
   thermometer: { shape: "box", size: [0.3, 0.006, 0.008], center: [0, 0.003, 0], breaks: "glass" },
-  "digital-scale": { shape: "box", size: [0.13, 0.053, 0.19], center: [0, 0.0265, 0], support: true },
+  "digital-scale": { shape: "box", size: [0.13, 0.053, 0.19], center: [0, 0.0265, 0], support: true, heavy: true },
   "ph-paper": { shape: "box", size: [0.06, 0.042, 0.035], center: [0, 0.021, 0] },
   "spirit-lamp": { shape: "cylinder", radius: 0.038, height: 0.1145, breaks: "glass" },
-  "hot-plate": { shape: "box", size: [0.16, 0.11, 0.28], center: [0, 0.055, 0], support: true },
+  "hot-plate": { shape: "box", size: [0.16, 0.11, 0.28], center: [0, 0.055, 0], support: true, heavy: true },
   "retort-stand": {
     shape: "compound",
     parts: [
       { size: [0.13, 0.014, 0.2], center: [0, 0.007, 0] },
       { size: [0.012, 0.6, 0.012], center: [0, 0.31, -0.068] },
+      // Ring with wire gauze: vessels stand on it above the lamp.
+      { size: [0.085, 0.004, 0.085], center: [0.013, 0.2166, 0.03] },
     ],
     support: true,
+    heavy: true,
   },
-  "test-tube-rack": { shape: "box", size: [0.2, 0.11, 0.07], center: [0, 0.055, 0] },
+  "test-tube-rack": { shape: "box", size: [0.2, 0.11, 0.07], center: [0, 0.055, 0], support: true },
 };
 
 // Footprint radius, height with the cap on and nominal volume, as measured on the substance templates.

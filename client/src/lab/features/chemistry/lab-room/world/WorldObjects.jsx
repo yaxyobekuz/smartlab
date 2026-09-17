@@ -45,7 +45,7 @@ const WorldObject = ({ object, world }) => {
       {...(dynamic && breaks ? { onCollisionEnter: onImpact } : {})}
     >
       <BodyColliders body={type.body} />
-      <EquipmentModel id={object.typeId} {...object.props} />
+      <EquipmentModel id={object.typeId} simId={object.id} {...object.props} />
     </RigidBody>
   );
 };

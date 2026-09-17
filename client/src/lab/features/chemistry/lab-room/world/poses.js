@@ -6,8 +6,8 @@ const tmpEuler = new Euler();
 const tmpCenter = new Vector3();
 
 // Upright items face the player (+Z toward the camera); long thin items lie on their side across the view.
-export const restPose = (body, point, yaw) => {
-  if (!body.lying) {
+export const restPose = (body, point, yaw, { upright = false } = {}) => {
+  if (!body.lying || upright) {
     return { position: [point.x, point.y + LIFT, point.z], rotation: [0, yaw, 0] };
   }
   const rotation = [0, yaw, Math.PI / 2];

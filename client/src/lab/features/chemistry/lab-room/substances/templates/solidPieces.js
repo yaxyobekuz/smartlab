@@ -289,3 +289,136 @@ export const buildWireHank = ({ innerProfile, amount, seed, wire = 0.8 * MM, max
   }
   return merge(parts);
 };
+
+// Planar projection so the jar-template piece materials tile over a single piece too.
+const planarUv = (geometry) => {
+  const pos = geometry.attributes.position;
+  const uv = new Float32Array(pos.count * 2);
+  for (let i = 0; i < pos.count; i += 1) {
+    uv[i * 2] = pos.getX(i) * 0.5 + pos.getZ(i) * 0.3;
+    uv[i * 2 + 1] = pos.getY(i) * 0.5;
+  }
+  geometry.setAttribute("uv", new BufferAttribute(uv, 2));
+  geometry.computeVertexNormals();
+  return geometry;
+};
+
+// Swept tube along a curve, used for wire coils and their offcuts.
+const sweep = (curve, radius, { closed = false, steps = 48, radial = 6 } = {}) => {
+  const frames = curve.computeFrenetFrames(steps, closed);
+  const positions = [];
+  const normals = [];
+  const indices = [];
+  for (let i = 0; i <= steps; i += 1) {
+    const c = curve.getPointAt(Math.min(1, i / steps));
+    const k = closed ? i % steps : i;
+    for (let j = 0; j <= radial; j += 1) {
+      const a = (j / radial) * Math.PI * 2;
+      const n = frames.normals[k].clone().multiplyScalar(Math.cos(a)).addScaledVector(frames.binormals[k], Math.sin(a));
+      positions.push(c.x + n.x * radius, c.y + n.y * radius, c.z + n.z * radius);
+      normals.push(n.x, n.y, n.z);
+    }
+  }
+  for (let i = 0; i < steps; i += 1) {
+    for (let j = 0; j < radial; j += 1) {
+      const a = i * (radial + 1) + j;
+      const b = a + radial + 1;
+      indices.push(a, b, a + 1, a + 1, b, b + 1);
+    }
+  }
+  const geometry = new BufferGeometry();
+  geometry.setAttribute("position", new BufferAttribute(new Float32Array(positions), 3));
+  geometry.setAttribute("normal", new BufferAttribute(new Float32Array(normals), 3));
+  geometry.setIndex(indices);
+  return geometry;
+};
+
+// Rolled magnesium ribbon: a slightly curled, dented strip one unit long, 0.1 wide and 0.007 thick.
+const ribbonPiece = (rng) => {
+  const along = 26;
+  const across = 3;
+  const positions = [];
+  const indices = [];
+  const twist = (rng() - 0.5) * 0.9;
+  const curl = 0.06 + rng() * 0.09;
+  for (let i = 0; i <= along; i += 1) {
+    const t = i / along;
+    const x = t - 0.5;
+    const bend = curl * (t - 0.5) * (t - 0.5) * 4 - curl * 0.35 + Math.sin(t * 9 + twist) * 0.008;
+    for (let j = 0; j <= across; j += 1) {
+      const w = (j / across - 0.5) * 0.1;
+      const dent = Math.sin(t * 17 + j * 2.1 + twist) * 0.0016;
+      for (const side of [1, -1]) positions.push(x, bend + dent + side * 0.0035 + w * twist * 0.12, w);
+    }
+  }
+  const row = (across + 1) * 2;
+  for (let i = 0; i < along; i += 1) {
+    for (let j = 0; j < across; j += 1) {
+      const a = i * row + j * 2;
+      for (const side of [0, 1]) {
+        const o = a + side;
+        const flip = side === 0;
+        const quad = [o, o + 2, o + row, o + row + 2];
+        indices.push(...(flip ? [quad[0], quad[1], quad[2], quad[1], quad[3], quad[2]] : [quad[0], quad[2], quad[1], quad[1], quad[2], quad[3]]));
+      }
+    }
+  }
+  // Cap the four sides so the strip reads as sheet metal rather than a plane.
+  for (let i = 0; i < along; i += 1) {
+    for (const j of [0, across]) {
+      const a = i * row + j * 2;
+      const b = a + row;
+      indices.push(...(j === 0 ? [a, b, a + 1, a + 1, b, b + 1] : [a, a + 1, b, a + 1, b + 1, b]));
+    }
+  }
+  const geometry = new BufferGeometry();
+  geometry.setAttribute("position", new BufferAttribute(new Float32Array(positions), 3));
+  geometry.setIndex(indices);
+  return planarUv(geometry);
+};
+
+const coilCurve = (rng) => {
+  const turns = 1.6 + rng() * 0.5;
+  const points = [];
+  const steps = 40;
+  for (let i = 0; i <= steps; i += 1) {
+    const t = i / steps;
+    const a = t * turns * Math.PI * 2;
+    const lead = t < 0.06 ? (0.06 - t) * 6 : 0;
+    const r = 0.3 + lead * 0.5 + Math.sin(a * 1.7) * 0.012;
+    points.push(new Vector3(Math.sin(a) * r, -0.32 + t * 0.62, Math.cos(a) * r));
+  }
+  return new CatmullRomCurve3(points, false, "centripetal");
+};
+
+// One piece as picked up with tongs, in unit size; instances scale it by mass.
+export const pieceGeometry = (shape, seed = 3) => {
+  const rng = random(seed);
+  if (shape === "ribbon") return ribbonPiece(rng);
+  if (shape === "wire") return planarUv(sweep(coilCurve(rng), 0.05, { steps: 56, radial: 7 }));
+  const spec = shape === "granule" ? { cuts: 1, detail: 2 } : shape === "chip" ? { cuts: 4, detail: 1 } : { cuts: 5, detail: 2 };
+  const rock = rockShape(rng, spec);
+  const pos = rock.attributes.position;
+  for (let i = 0; i < pos.count; i += 1) pos.setY(i, pos.getY(i) * (shape === "granule" ? 0.78 : 0.88));
+  return planarUv(shape === "chip" ? faceted(rock) : rock);
+};
+
+// Points on the copper coil where silver crystals take hold, with the outward direction of the wire surface.
+export const coilRoots = (count = 90, seed = 3) => {
+  const rng = random(seed + 101);
+  const curve = coilCurve(random(seed));
+  const axis = new Vector3();
+  const roots = [];
+  for (let i = 0; i < count; i += 1) {
+    const t = rng();
+    const point = curve.getPointAt(Math.min(1, t));
+    const tangent = curve.getTangentAt(Math.min(1, t));
+    const a = rng() * Math.PI * 2;
+    axis.set(0, 1, 0);
+    const side = new Vector3().crossVectors(tangent, axis).normalize();
+    const other = new Vector3().crossVectors(tangent, side).normalize();
+    const normal = side.multiplyScalar(Math.cos(a)).addScaledVector(other, Math.sin(a)).normalize();
+    roots.push({ point: point.clone().addScaledVector(normal, 0.05), normal });
+  }
+  return roots;
+};

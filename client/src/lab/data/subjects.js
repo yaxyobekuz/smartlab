@@ -25,7 +25,7 @@ export const SUBJECTS = [
       {
         slug: "lab",
         title: "Interaktiv laboratoriya",
-        short: "Element va reaktivlarni idishga quyib reaksiyalarni kuzating.",
+        short: "Laboratoriya xonasida yuring, reaktivlarni aralashtirib reaksiyalarni kuzating.",
         icon: "TestTubes",
       },
       {

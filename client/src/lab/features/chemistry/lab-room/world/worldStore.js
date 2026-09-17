@@ -142,6 +142,29 @@ export const createWorld = (layout) => {
       commit();
     },
 
+    // A blast throws light placed items outward; heavy supports (stands, hot plates) stay put.
+    knock: (center, radius, strength, exceptId = null) => {
+      let moved = false;
+      for (const object of state.objects.values()) {
+        if (object.state !== "placed" || object.id === exceptId || objectType(object.typeId)?.body.heavy) continue;
+        const dx = object.position[0] - center[0];
+        const dz = object.position[2] - center[2];
+        const distance = Math.hypot(dx, object.position[1] - center[1], dz);
+        if (distance > radius) continue;
+        const push = (strength * 3 * (1 - distance / radius)) / Math.max(0.15, distance);
+        const flat = Math.max(0.05, Math.hypot(dx, dz));
+        for (const child of children(object.id)) detach(child.id);
+        Object.assign(object, {
+          state: "dynamic",
+          supportId: null,
+          velocity: [(dx / flat) * push * 0.6, 1.2 * strength, (dz / flat) * push * 0.6],
+          rev: object.rev + 1,
+        });
+        moved = true;
+      }
+      if (moved) commit();
+    },
+
     selectSlot: (slot) => {
       if (slot < 0 || slot >= SLOT_COUNT || slot === state.activeSlot) return;
       state.activeSlot = slot;

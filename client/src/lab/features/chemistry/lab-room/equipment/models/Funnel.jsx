@@ -1,4 +1,5 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useFrame } from "@react-three/fiber";
 import {
   BufferGeometry,
   CanvasTexture,
@@ -11,6 +12,8 @@ import {
 } from "three";
 import { useKit } from "../kit/kitContext";
 import { arc, toVectors } from "../kit/vessel";
+import { DEVICE_PRIORITY, useDevice } from "../kit/deviceState";
+import { createGrainMaterial, disposeMaterial } from "../../substances/templates/containerMaterials";
 
 // Ø75 mm 60° glass funnel, 1.5 mm wall with a beaded rim, Ø8 × 75 mm stem cut at 45°; Ø110 mm quarter-folded filter.
 const MM = 0.001;
@@ -187,14 +190,62 @@ const createFiberTexture = () => {
   return texture;
 };
 
-const createPaperMaterial = () =>
-  new MeshStandardMaterial({
+// Filter paper darkens and turns glossy where the filtrate has soaked it.
+const createPaperMaterial = () => {
+  const material = new MeshStandardMaterial({
     color: "#f4f2ec",
     map: createFiberTexture(),
     roughness: 0.93,
     vertexColors: true,
     emissive: new Color("#141311"),
   });
+  const uniforms = { uWetY: { value: -1 }, uCakeY: { value: -1 }, uCakeColor: { value: new Color("#1d1b1a") } };
+  material.userData.wet = uniforms.uWetY;
+  material.userData.cake = uniforms;
+  material.onBeforeCompile = (shader) => {
+    Object.assign(shader.uniforms, uniforms);
+    shader.vertexShader = shader.vertexShader
+      .replace("#include <common>", "#include <common>\nvarying float vPaperY;")
+      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvPaperY = position.y;");
+    shader.fragmentShader = shader.fragmentShader
+      .replace("#include <common>", "#include <common>\nuniform float uWetY;\nuniform float uCakeY;\nuniform vec3 uCakeColor;\nvarying float vPaperY;")
+      .replace(
+        "#include <roughnessmap_fragment>",
+        `#include <roughnessmap_fragment>
+        float soaked = 1.0 - smoothstep( uWetY - 0.004, uWetY + 0.004, vPaperY );
+        diffuseColor.rgb *= 1.0 - 0.32 * soaked;
+        roughnessFactor = mix( roughnessFactor, 0.35, soaked );
+        // Solids caught by the paper stain the cone as far up as they were washed.
+        float caked = 1.0 - smoothstep( uCakeY - 0.0025, uCakeY + 0.0025, vPaperY );
+        diffuseColor.rgb = mix( diffuseColor.rgb, uCakeColor, caked * 0.88 );
+        roughnessFactor = mix( roughnessFactor, 0.85, caked );`,
+      );
+  };
+  material.customProgramCacheKey = () => "funnel-paper";
+  return material;
+};
+
+// Cake of solids caught in the cone; the shader clips it at the level the filtrate left it.
+const buildCake = () => {
+  const rows = 14;
+  const points = [[0, 0]];
+  for (let i = 1; i <= rows; i += 1) {
+    const t = i / rows;
+    points.push([t * Math.tan(Math.PI / 6) * 1.0, t]);
+  }
+  points.push([Math.tan(Math.PI / 6) * 1.02, 1.0], [Math.tan(Math.PI / 6) * 0.99, 1.02], [0, 1.04]);
+  return new LatheGeometry(toVectors(points), 40, Math.PI, Math.PI * 2);
+};
+
+// Solids line the 30° cone as a ~0.8 mm layer, so the cake climbs with the square root of its volume.
+const CAKE_LAYER = 0.0008;
+const cakeHeight = (ml) => Math.min(0.05, Math.sqrt((Math.max(0, ml) * 1e-6) / (2.094 * CAKE_LAYER)));
+
+const soakPaper = (material, wetY, cakeY, color) => {
+  material.userData.wet.value = wetY;
+  material.userData.cake.uCakeY.value = cakeY;
+  material.userData.cake.uCakeColor.value.set(color);
+};
 
 let assets = null;
 const getAssets = () => {
@@ -210,6 +261,8 @@ const getAssets = () => {
     outer,
     inner,
     paper,
+    cake: buildCake(),
+    apexY: (STEM.top - (STEM.r - WALL) / SLOPE) * MM - drop,
     rimTopY: (BEAD.y + BEAD.radius) * MM - drop,
     paperTopY: (STEM.top - (STEM.r - WALL) / SLOPE + PAPER.slant * Math.cos(Math.PI / 6)) * MM - drop,
     seatRing30: seatY(0.03),
@@ -218,9 +271,9 @@ const getAssets = () => {
   return assets;
 };
 
-const Funnel = ({ withPaper = true, ...props }) => {
+const Funnel = ({ simId, withPaper = true, solidsMl = 0, solidsColor = "#d8d4cc", wet = 0, ...props }) => {
   const kit = useKit();
-  const { outer, inner, paper } = getAssets();
+  const { outer, inner, paper, cake, apexY } = getAssets();
   const paperMaterial = useMemo(() => createPaperMaterial(), []);
   useEffect(
     () => () => {
@@ -229,10 +282,27 @@ const Funnel = ({ withPaper = true, ...props }) => {
     },
     [paperMaterial],
   );
+  const { device } = useDevice(simId);
+  const [cakeMl, setCakeMl] = useState(solidsMl);
+  const color = device ? (device.solidsColor ?? solidsColor) : solidsColor;
+  const cakeMaterial = useMemo(() => createGrainMaterial({ color, grain: "fine", seed: 9 }), [color]);
+  useEffect(() => () => disposeMaterial(cakeMaterial), [cakeMaterial]);
+  const height = cakeHeight(cakeMl);
+  useFrame(() => {
+    const target = device ? (device.solidsMl ?? 0) : solidsMl;
+    const soak = device ? (device.wet ?? 0) : wet;
+    soakPaper(paperMaterial, apexY + soak * PAPER.slant * Math.cos(Math.PI / 6) * MM, apexY + height, color);
+    const stepped = Math.round(target * 20) / 20;
+    if (stepped !== cakeMl) setCakeMl(stepped);
+  }, DEVICE_PRIORITY);
+
   return (
     <group {...props}>
       <mesh geometry={inner} material={kit.glass} renderOrder={1} />
       {withPaper && <mesh geometry={paper} material={paperMaterial} castShadow />}
+      {height > 0.0004 && (
+        <mesh geometry={cake} material={cakeMaterial} position={[0, apexY + 0.0004, 0]} scale={height * 0.55} />
+      )}
       <mesh geometry={outer} material={kit.glass} renderOrder={3} />
     </group>
   );

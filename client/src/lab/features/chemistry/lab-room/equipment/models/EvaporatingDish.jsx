@@ -1,6 +1,7 @@
 import { LatheGeometry } from "three";
 import { useKit } from "../kit/kitContext";
-import Liquid from "../kit/Liquid";
+import Contents from "../kit/Contents";
+import { profileTable } from "../kit/profileTable";
 import BlobShadow from "../kit/BlobShadow";
 import { arc, toVectors } from "../kit/vessel";
 
@@ -145,21 +146,24 @@ const buildProfile = () => {
 let assets = null;
 const getAssets = () => {
   if (assets) return assets;
-  assets = buildProfile();
+  const built = buildProfile();
+  const { innerProfile } = built;
+  assets = {
+    ...built,
+    mouth: { innerProfile, mouthY: RIM_Y, mouthR: RIM_INNER_RADIUS, capacityMl: profileTable(innerProfile, RIM_Y).capacityMl },
+  };
   return assets;
 };
 
-const EvaporatingDish = ({ volumeMl = 0, liquidColor, liquidOpacity, ...props }) => {
+const EvaporatingDish = ({ simId, volumeMl = 0, liquidColor, liquidOpacity, ...props }) => {
   const kit = useKit();
-  const { foot, body, innerProfile } = getAssets();
+  const { foot, body, mouth } = getAssets();
 
   return (
     <group {...props}>
       <mesh geometry={body} material={kit.porcelainGlazed} castShadow receiveShadow />
       <mesh geometry={foot} material={kit.porcelainMatte} castShadow receiveShadow />
-      {volumeMl > 0 && (
-        <Liquid innerProfile={innerProfile} volumeMl={volumeMl} color={liquidColor} opacity={liquidOpacity} />
-      )}
+      <Contents simId={simId} vessel={mouth} fallback={{ volumeMl, color: liquidColor, opacity: liquidOpacity }} />
       <BlobShadow radius={0.056} opacity={0.32} />
     </group>
   );

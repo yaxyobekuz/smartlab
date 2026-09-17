@@ -1,6 +1,7 @@
 import { LatheGeometry } from "three";
 import { useKit } from "../kit/kitContext";
-import Liquid from "../kit/Liquid";
+import Contents from "../kit/Contents";
+import { profileTable } from "../kit/profileTable";
 import BlobShadow from "../kit/BlobShadow";
 import { arc, toVectors } from "../kit/vessel";
 
@@ -141,6 +142,14 @@ let assets = null;
 const getAssets = () => {
   if (assets) return assets;
   const crucible = buildCrucible();
+  const { innerProfile } = crucible;
+  const mouthY = innerProfile[innerProfile.length - 1][1];
+  crucible.mouth = {
+    innerProfile,
+    mouthY,
+    mouthR: innerProfile[innerProfile.length - 1][0],
+    capacityMl: profileTable(innerProfile, mouthY).capacityMl,
+  };
   const lid = buildLid();
   // Lowest lid height at which its concave underside clears every point of the rounded rim.
   const seat = Math.max(...crucible.rim.map(([r, y]) => y - lid.undersideY(r)));
@@ -148,7 +157,7 @@ const getAssets = () => {
   return assets;
 };
 
-const Crucible = ({ volumeMl = 0, liquidColor, liquidOpacity, lidOpen = false, ...props }) => {
+const Crucible = ({ simId, volumeMl = 0, liquidColor, liquidOpacity, lidOpen = false, ...props }) => {
   const kit = useKit();
   const { crucible, lid, seat } = getAssets();
   const lidPosition = lidOpen ? [TOP_RADIUS + LID_RADIUS + 0.007, -lid.minY, 0.003] : [0, seat, 0];
@@ -157,9 +166,7 @@ const Crucible = ({ volumeMl = 0, liquidColor, liquidOpacity, lidOpen = false, .
     <group {...props}>
       <mesh geometry={crucible.body} material={kit.porcelainGlazed} castShadow receiveShadow />
       <mesh geometry={crucible.foot} material={kit.porcelainMatte} castShadow receiveShadow />
-      {volumeMl > 0 && (
-        <Liquid innerProfile={crucible.innerProfile} volumeMl={volumeMl} color={liquidColor} opacity={liquidOpacity} />
-      )}
+      <Contents simId={simId} vessel={crucible.mouth} fallback={{ volumeMl, color: liquidColor, opacity: liquidOpacity }} />
       <group position={lidPosition}>
         <mesh geometry={lid.upper} material={kit.porcelainGlazed} castShadow receiveShadow />
         <mesh geometry={lid.underside} material={kit.porcelainMatte} castShadow receiveShadow />

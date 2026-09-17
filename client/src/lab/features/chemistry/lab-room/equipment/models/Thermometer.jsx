@@ -1,4 +1,5 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 import {
   CanvasTexture,
   CylinderGeometry,
@@ -10,6 +11,7 @@ import {
 } from "three";
 import { useKit } from "../kit/kitContext";
 import { toVectors } from "../kit/vessel";
+import { DEVICE_PRIORITY, useDevice } from "../kit/deviceState";
 
 // Spirit lab thermometer −10…+110 °C, 300 mm × Ø6 mm, Ø5 × 12 mm bulb, enamel back strip; lies along X, bulb at −X.
 const MM = 0.001;
@@ -134,25 +136,41 @@ const getAssets = () => {
 // Dyed alcohol seen through the capillary wall: deep saturated red with a wet sheen.
 const createSpiritMaterial = () => new MeshStandardMaterial({ color: "#b0121b", roughness: 0.28 });
 
-const Thermometer = ({ temperatureC = 22, ...props }) => {
+const columnLength = (celsius) => (scaleAt(Math.min(SCALE.max + 3, Math.max(SCALE.min - 3, celsius))) - COLUMN.from) * MM;
+
+// The column follows the reading with the lag of a real thermometer.
+const createColumnState = (initial) => {
+  let value = initial;
+  return {
+    update: (target, dt, mesh) => {
+      value += (target - value) * (1 - Math.exp(-Math.min(dt, 0.1) / 0.6));
+      if (mesh) mesh.scale.x = columnLength(value);
+    },
+  };
+};
+
+const Thermometer = ({ simId, temperatureC = 22, ...props }) => {
   const kit = useKit();
   const { body, spirit, column, ring, strip } = getAssets();
   const spiritMaterial = useMemo(() => createSpiritMaterial(), []);
   useEffect(() => () => spiritMaterial.dispose(), [spiritMaterial]);
   const scaleMaterial = kit.print("thermometer-scale", createScaleTexture);
-  const clamped = Math.min(SCALE.max + 3, Math.max(SCALE.min - 3, temperatureC));
-  const top = scaleAt(clamped);
+  const { device } = useDevice(simId);
+  const columnRef = useRef(null);
+  const live = useMemo(() => createColumnState(temperatureC), [temperatureC]);
+  useFrame((_, delta) => live.update(device?.readingC ?? temperatureC, delta, columnRef.current), DEVICE_PRIORITY);
 
   return (
     <group {...props}>
       <mesh geometry={strip} material={scaleMaterial} />
       <mesh geometry={spirit} material={spiritMaterial} renderOrder={2} />
       <mesh
+        ref={columnRef}
         geometry={column}
         material={spiritMaterial}
         renderOrder={2}
         position={[axial(COLUMN.from), R * MM, 0]}
-        scale-x={(top - COLUMN.from) * MM}
+        scale-x={columnLength(temperatureC)}
       />
       <mesh geometry={body} material={kit.glass} renderOrder={3} />
       <mesh geometry={ring} material={kit.glass} renderOrder={3} />

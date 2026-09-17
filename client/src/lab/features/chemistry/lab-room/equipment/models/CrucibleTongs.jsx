@@ -1,7 +1,13 @@
+import { useEffect, useMemo } from "react";
+import { useFrame } from "@react-three/fiber";
 import { BufferGeometry, CatmullRomCurve3, Float32BufferAttribute, LatheGeometry, Vector3 } from "three";
 import { useKit } from "../kit/kitContext";
 import BlobShadow from "../kit/BlobShadow";
 import { arc, toVectors } from "../kit/vessel";
+import { DEVICE_PRIORITY, useDevice } from "../kit/deviceState";
+import { pieceAsset, pieceMaterialFor, pieceSpec } from "../kit/pieceAssets";
+import { createPieceUniforms, patchPieceMaterial } from "../kit/solidShading";
+import { Flame, Smoke, Sparks } from "../../effects";
 
 // Stainless crucible tongs, 230 mm: 6 × 3 mm flat bar, rivet 77 mm from the tips, bows for a Ø40 mm crucible.
 const MM = 0.001;
@@ -153,13 +159,69 @@ const getAssets = () => {
   return assets;
 };
 
-const CrucibleTongs = ({ ...props }) => {
+const FLAME_RADIUS = 0.005;
+const ORIGIN = [0, 0, 0];
+
+// The gripped piece and how hot it is, refreshed once per frame from the device.
+const createHeldState = () => {
+  const glow = { value: 0 };
+  const flame = { kind: "magnesium", intensity: 0 };
+  const smoke = { rate: 0, color: "#f5f5f5", toxic: false };
+  const sparks = { intensity: 0 };
+  return {
+    getFlame: () => (flame.intensity > 0.01 ? flame : null),
+    getSmoke: () => (smoke.rate > 0.01 ? smoke : null),
+    getSparks: () => (sparks.intensity > 0.01 ? sparks : null),
+    update: (piece, dt, uniforms) => {
+      const state = piece?.state ?? {};
+      const step = 1 - Math.exp(-Math.min(dt, 0.1) / 0.25);
+      const heat = state.burning ? 3 : state.molten ? 1.6 : state.hot ? 1 : 0;
+      glow.value += (heat - glow.value) * step;
+      uniforms.uGlow.value = glow.value;
+      uniforms.uGlowColor.value.set(state.burning ? "#fff3d8" : "#ff5a1f");
+      uniforms.uMolten.value += ((state.molten ? 1 : 0) - uniforms.uMolten.value) * step;
+      flame.kind = piece?.species === "Mg" ? "magnesium" : piece?.species === "S" ? "sulfur" : "lamp";
+      flame.intensity += ((state.burning ? 1 : 0) - flame.intensity) * step;
+      smoke.rate = flame.intensity * (piece?.species === "Mg" ? 1 : 0.4);
+      sparks.intensity = flame.intensity * (piece?.species === "Mg" ? 0.6 : 0.2);
+    },
+  };
+};
+
+const CrucibleTongs = ({ simId, piece = null, ...props }) => {
   const kit = useKit();
-  const { arms, rivet } = getAssets();
+  const { arms, rivet, jawTips } = getAssets();
+  const { device } = useDevice(simId);
+  const held = device ? device.piece : piece;
+  const species = held?.species;
+  const shape = held?.shape;
+  const color = held?.color;
+  const spec = species ? pieceSpec(species, shape) : null;
+  const asset = spec ? pieceAsset(spec.shape, 4) : null;
+  const uniforms = useMemo(() => createPieceUniforms(), []);
+  const material = useMemo(
+    () => (spec && color ? patchPieceMaterial(pieceMaterialFor(spec, color).clone(), uniforms, kit.quality) : null),
+    [spec, color, uniforms, kit.quality],
+  );
+  useEffect(() => () => material?.dispose(), [material]);
+  const live = useMemo(() => createHeldState(), []);
+  useFrame((_, delta) => live.update(held, delta, uniforms), DEVICE_PRIORITY);
+
+  const size = spec ? Math.cbrt(Math.max(1e-5, held.grams) / spec.density / 1e6 / spec.unitVolume) : 0;
+  const tip = [jawTips[0] + size * 0.22, jawTips[1], jawTips[2]];
+
   return (
     <group {...props}>
       <mesh geometry={arms} material={kit.steel} castShadow />
       <mesh geometry={rivet} material={kit.steel} castShadow />
+      {asset && material && (
+        <mesh geometry={asset.geometry} material={material} position={tip} rotation={[0, 0, spec.shape === "ribbon" ? 0.25 : 0]} scale={size} castShadow />
+      )}
+      <group position={[tip[0] + size * 0.4, tip[1], tip[2]]}>
+        <Flame origin={ORIGIN} radius={FLAME_RADIUS} get={live.getFlame} />
+        <Smoke origin={ORIGIN} radius={FLAME_RADIUS} get={live.getSmoke} />
+        <Sparks origin={ORIGIN} get={live.getSparks} />
+      </group>
       <group scale-x={3.6}>
         <BlobShadow radius={0.032} opacity={0.16} />
       </group>

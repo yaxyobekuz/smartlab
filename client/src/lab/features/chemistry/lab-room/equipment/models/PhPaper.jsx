@@ -1,8 +1,10 @@
 import { useEffect, useMemo } from "react";
 import {
+  BufferAttribute,
   BufferGeometry,
   CanvasTexture,
   CatmullRomCurve3,
+  Color,
   DoubleSide,
   Float32BufferAttribute,
   MeshStandardMaterial,
@@ -13,6 +15,7 @@ import {
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { useKit } from "../kit/kitContext";
 import BlobShadow from "../kit/BlobShadow";
+import { useDevice } from "../kit/deviceState";
 
 // Universal indicator paper: 60 × 35 × 22 mm roll dispenser standing on its long edge, label facing +Z, 3 loose 70 × 7 mm strips.
 const MM = 0.001;
@@ -151,12 +154,60 @@ const getAssets = () => {
 // Unused universal indicator paper is orange-yellow and matte.
 const createPaperMaterial = () => new MeshStandardMaterial({ color: "#c99545", roughness: 0.95, side: DoubleSide });
 
-const PhPaper = ({ ...props }) => {
+const DRY = new Color("#c99545");
+const TESTED = { x: 6, z: 30, angle: 0.08, length: 62, width: TAPE_WIDTH };
+
+// A torn-off strip lying in front of the box: the dipped end carries the pH colour, wet and slightly darker.
+const buildTestedStrip = (hex) => {
+  const cols = 22;
+  const rows = 2;
+  const wet = new Color(hex);
+  const positions = [];
+  const colors = [];
+  const index = [];
+  for (let i = 0; i <= cols; i += 1) {
+    const t = i / cols;
+    const x = (t - 0.5) * TESTED.length;
+    // Capillary rise: the colour soaks about a third of the way up the strip.
+    const soak = 1 - Math.min(1, Math.max(0, (t - 0.18) / 0.22));
+    const lift = 0.35 + 0.9 * t * t + Math.sin(t * 7) * 0.12;
+    for (let j = 0; j <= rows; j += 1) {
+      const z = (j / rows - 0.5) * TESTED.width;
+      positions.push(x, lift + Math.abs(z) * 0.02, z);
+      const c = DRY.clone().lerp(wet, soak);
+      colors.push(c.r, c.g, c.b);
+    }
+  }
+  for (let i = 0; i < cols; i += 1) {
+    for (let j = 0; j < rows; j += 1) {
+      const a = i * (rows + 1) + j;
+      index.push(a, a + rows + 1, a + 1, a + 1, a + rows + 1, a + rows + 2);
+    }
+  }
+  const geometry = new BufferGeometry();
+  geometry.setAttribute("position", new BufferAttribute(new Float32Array(positions.map((v) => v * MM)), 3));
+  geometry.setAttribute("color", new BufferAttribute(new Float32Array(colors), 3));
+  geometry.setIndex(index);
+  geometry.computeVertexNormals();
+  return geometry;
+};
+
+const createTestedMaterial = () =>
+  new MeshStandardMaterial({ vertexColors: true, roughness: 0.75, side: DoubleSide });
+
+const PhPaper = ({ simId, strip = null, ...props }) => {
   const kit = useKit();
   const { lower, lid, core, slot, label, tape, strips } = getAssets();
   const labelMaterial = kit.print("ph-paper-label", createLabelTexture);
   const paperMaterial = useMemo(() => createPaperMaterial(), []);
   useEffect(() => () => paperMaterial.dispose(), [paperMaterial]);
+  const { device } = useDevice(simId);
+  const tested = device ? device.strip : strip;
+  const testedColor = tested?.color;
+  const testedGeometry = useMemo(() => (testedColor ? buildTestedStrip(testedColor) : null), [testedColor]);
+  const testedMaterial = useMemo(() => (testedColor ? createTestedMaterial() : null), [testedColor]);
+  useEffect(() => () => testedGeometry?.dispose(), [testedGeometry]);
+  useEffect(() => () => testedMaterial?.dispose(), [testedMaterial]);
 
   return (
     <group {...props}>
@@ -166,9 +217,18 @@ const PhPaper = ({ ...props }) => {
       <mesh geometry={slot} material={kit.plasticDark} />
       <mesh geometry={label} material={labelMaterial} receiveShadow />
       <mesh geometry={tape} material={paperMaterial} castShadow />
-      {strips.map((strip) => (
-        <mesh key={strip.uuid} geometry={strip} material={paperMaterial} castShadow />
+      {strips.map((loose) => (
+        <mesh key={loose.uuid} geometry={loose} material={paperMaterial} castShadow />
       ))}
+      {testedGeometry && testedMaterial && (
+        <mesh
+          geometry={testedGeometry}
+          material={testedMaterial}
+          position={[TESTED.x * MM, 0, TESTED.z * MM]}
+          rotation-y={TESTED.angle}
+          castShadow
+        />
+      )}
       {STRIPS.map(({ x, z, angle }) => (
         <group key={`${x},${z}`} position={[x * MM, 0, z * MM]} rotation-y={angle} scale-z={0.17}>
           <BlobShadow radius={0.037} opacity={0.22} />

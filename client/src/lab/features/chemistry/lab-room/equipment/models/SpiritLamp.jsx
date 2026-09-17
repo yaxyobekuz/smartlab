@@ -1,4 +1,5 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useFrame } from "@react-three/fiber";
 import {
   CanvasTexture,
   CatmullRomCurve3,
@@ -13,7 +14,9 @@ import {
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { useKit } from "../kit/kitContext";
 import GlassVessel from "../kit/GlassVessel";
-import Liquid from "../kit/Liquid";
+import Contents from "../kit/Contents";
+import { DEVICE_PRIORITY, useDevice, stepValue } from "../kit/deviceState";
+import { LampFlame } from "../../effects";
 import BlobShadow from "../kit/BlobShadow";
 import { arc, buildVessel, toVectors } from "../kit/vessel";
 
@@ -217,6 +220,39 @@ const disposeMaterial = (material) => {
   material.dispose();
 };
 
+const CAP_CLOSED = [0, COLLAR_SHOULDER, 0];
+const CAP_ASIDE = [0.064, 0, 0.022];
+const WICK_TIP = [0, WICK_TOP, 0];
+
+// Cap lifts, turns over and settles beside the lamp; p = 0 is capped, 1 is off.
+const poseCap = (group, p, capHeight) => {
+  const ease = p * p * (3 - 2 * p);
+  group.position.set(
+    CAP_ASIDE[0] * ease,
+    (CAP_CLOSED[1] + capHeight) * (1 - ease) + Math.sin(Math.PI * ease) * 0.045,
+    CAP_ASIDE[2] * ease,
+  );
+  group.rotation.set(0, 0, Math.PI * (1 - ease));
+};
+
+// Lamp animation state: cap swing and flame strength, driven once per frame from the device.
+const createLampState = (capOn, capHeight) => {
+  const state = { open: capOn ? 0 : 1, flame: { intensity: 0, boost: 0, dousing: 0 } };
+  return {
+    getFlame: () => (state.flame.intensity > 0.004 ? state.flame : null),
+    update: (device, dt, capGroup, fuelStep, setFuel) => {
+      if (device) state.open += ((device.capOn ? 0 : 1) - state.open) * (1 - Math.exp(-dt / 0.18));
+      if (capGroup) poseCap(capGroup, state.open, capHeight);
+      const lit = device?.lit ? 1 : 0;
+      state.flame.intensity += (lit - state.flame.intensity) * (1 - Math.exp(-dt / (lit ? 0.25 : 0.12)));
+      state.flame.boost = device?.boost ?? 0;
+      state.flame.dousing = device?.dousing ?? 0;
+      const step = device ? stepValue(device.fuelMl ?? 0, 1) : fuelStep;
+      if (step !== fuelStep) setFuel(step);
+    },
+  };
+};
+
 let assets = null;
 const getAssets = () => {
   if (assets) return assets;
@@ -233,15 +269,25 @@ const getAssets = () => {
     ]),
     tube: new LatheGeometry(toVectors(TUBE_PROFILE), 20, SEAM, Math.PI * 2),
     wick: buildWick(),
+    mouth: { innerProfile: body.innerProfile, mouthY: body.rimY, mouthR: NECK_R - 0.0025 },
   };
   return assets;
 };
 
-const SpiritLamp = ({ volumeMl = 60, liquidColor = ALCOHOL_COLOR, liquidOpacity = 0.07, capOn = true, ...props }) => {
+const SpiritLamp = ({ simId, volumeMl = 60, liquidColor = ALCOHOL_COLOR, liquidOpacity = 0.07, capOn = true, ...props }) => {
   const kit = useKit();
-  const { body, cap, capHeight, collar, tube, wick } = getAssets();
+  const { body, cap, capHeight, collar, tube, wick, mouth } = getAssets();
   const wickMaterial = useMemo(() => createWickMaterial(), []);
   useEffect(() => () => disposeMaterial(wickMaterial), [wickMaterial]);
+  const { device } = useDevice(simId);
+  const [fuel, setFuel] = useState(volumeMl);
+  const capRef = useRef(null);
+  const lamp = useMemo(() => createLampState(capOn, capHeight), [capOn, capHeight]);
+
+  useFrame((_, delta) => lamp.update(device, Math.min(delta, 0.1), capRef.current, fuel, setFuel), DEVICE_PRIORITY);
+
+  const volume = device ? fuel : volumeMl;
+  const off = device ? !device.capOn : !capOn;
 
   return (
     <group {...props}>
@@ -249,17 +295,13 @@ const SpiritLamp = ({ volumeMl = 60, liquidColor = ALCOHOL_COLOR, liquidOpacity 
       <mesh geometry={tube} material={kit.steel} castShadow />
       <mesh geometry={wick} material={wickMaterial} castShadow />
       <GlassVessel vessel={body}>
-        {volumeMl > 0 && (
-          <Liquid innerProfile={body.innerProfile} volumeMl={volumeMl} color={liquidColor} opacity={liquidOpacity} />
-        )}
+        <Contents simId={simId} vessel={mouth} fallback={{ volumeMl: volume, color: liquidColor, opacity: liquidOpacity }} />
       </GlassVessel>
-      <group
-        position={capOn ? [0, COLLAR_SHOULDER + capHeight, 0] : [0.064, 0, 0.022]}
-        rotation={capOn ? [0, 0, Math.PI] : [0, 0, 0]}
-      >
+      <LampFlame origin={WICK_TIP} get={lamp.getFlame} />
+      <group ref={capRef} position={capOn ? [0, COLLAR_SHOULDER + capHeight, 0] : [0.064, 0, 0.022]} rotation={[0, 0, capOn ? Math.PI : 0]}>
         <GlassVessel vessel={cap} />
       </group>
-      {!capOn && (
+      {off && (
         <group position={[0.064, 0, 0.022]}>
           <BlobShadow radius={0.024} opacity={0.2} />
         </group>

@@ -22,10 +22,10 @@ import {
 const MAX_DT = 0.1;
 
 // Kinematic capsule + Rapier character controller; the camera is the player's eyes.
-const Player = ({ meta, inputRef, activeRef, settingsRef, poseRef, resetRef, eyeHeight }) => {
+const Player = ({ meta, inputRef, activeRef, settingsRef, poseRef, resetRef, teleportRef, eyeHeight }) => {
   const bodyRef = useRef(null);
   const colliderRef = useRef(null);
-  const motion = useRef({ ready: false, resetToken: 0, yaw: 0, pitch: 0, vx: 0, vz: 0, phase: 0, bob: 0 });
+  const motion = useRef({ ready: false, resetToken: 0, teleportToken: 0, yaw: 0, pitch: 0, vx: 0, vz: 0, phase: 0, bob: 0 });
   const { world } = useRapier();
   const spawn = useMemo(() => spawnPose(meta), [meta]);
 
@@ -62,6 +62,9 @@ const Player = ({ meta, inputRef, activeRef, settingsRef, poseRef, resetRef, eye
     } else if (resetRef.current !== m.resetToken) {
       teleport(spawn);
       m.resetToken = resetRef.current;
+    } else if (teleportRef?.current && teleportRef.current.token !== m.teleportToken) {
+      teleport(teleportRef.current.pose);
+      m.teleportToken = teleportRef.current.token;
     }
 
     const active = activeRef.current;

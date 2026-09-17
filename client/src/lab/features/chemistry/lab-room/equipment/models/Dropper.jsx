@@ -1,9 +1,11 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useFrame } from "@react-three/fiber";
 import { LatheGeometry } from "three";
 import { useKit } from "../kit/kitContext";
 import BlobShadow from "../kit/BlobShadow";
 import { createLiquidMaterial } from "../kit/materials";
 import { arc, toVectors } from "../kit/vessel";
+import { DEVICE_PRIORITY, stepValue, useDevice } from "../kit/deviceState";
 
 // Glass dropper: 90 mm tube (OD 7, wall 1) drawn down to a Ø2 mm tip over 30 mm; red teat Ø16 × 32 mm.
 const MM = 0.001;
@@ -117,14 +119,22 @@ const getAssets = () => {
   return assets;
 };
 
-const Dropper = ({ fillFraction = 0, liquidColor, liquidOpacity, ...props }) => {
+const Dropper = ({ simId, fillFraction = 0, liquidColor, liquidOpacity, ...props }) => {
   const kit = useKit();
   const { outer, bore, teat, rest } = getAssets();
-  const liquid = useMemo(() => buildLiquid(fillFraction), [fillFraction]);
-  const liquidMaterial = useMemo(
-    () => createLiquidMaterial({ color: liquidColor, opacity: liquidOpacity }),
-    [liquidColor, liquidOpacity],
-  );
+  const { device } = useDevice(simId);
+  // Drawing up and releasing drops moves the level in steps, so the column is rebuilt only every ~0.04 ml.
+  const [fill, setFill] = useState(fillFraction);
+  useFrame(() => {
+    if (!device) return;
+    const next = stepValue(Math.min(1, Math.max(0, (device.fillMl ?? 0) / (device.capacityMl || 2))), 1 / 48);
+    if (next !== fill) setFill(next);
+  }, DEVICE_PRIORITY);
+  const level = device ? fill : fillFraction;
+  const color = device?.color ?? liquidColor;
+  const opacity = device?.opacity ?? liquidOpacity;
+  const liquid = useMemo(() => buildLiquid(level), [level]);
+  const liquidMaterial = useMemo(() => createLiquidMaterial({ color, opacity }), [color, opacity]);
   useEffect(() => () => liquid?.dispose(), [liquid]);
   useEffect(() => () => liquidMaterial.dispose(), [liquidMaterial]);
 

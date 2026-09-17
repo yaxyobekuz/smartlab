@@ -1,6 +1,8 @@
 import { useEffect, useMemo } from "react";
+import { useFrame } from "@react-three/fiber";
 import { useKit } from "../../equipment/kit/kitContext";
-import Liquid from "../../equipment/kit/Liquid";
+import Contents from "../../equipment/kit/Contents";
+import { DEVICE_PRIORITY, useDevice, useDeviceStep } from "../../equipment/kit/deviceState";
 import BlobShadow from "../../equipment/kit/BlobShadow";
 import { heightForVolume, volumeBelow } from "../../equipment/kit/vessel";
 import { createSubstanceLabelTexture } from "../labels/substanceLabel";
@@ -132,6 +134,7 @@ const buildNarrow = () => {
     outer: lathe(outer, SEGMENTS),
     inner: lathe(inner, SEGMENTS),
     innerProfile,
+    mouth: { innerProfile, mouthY: rim, mouthR: lip },
     brimMl: volumeBelow(innerProfile, neckBase) * 1e6,
     cone: lathe(cone, 40),
     stopper: (() => {
@@ -191,6 +194,7 @@ const buildDropper = () => {
     outer: lathe(outer, SEGMENTS),
     inner: lathe(inner, SEGMENTS),
     innerProfile,
+    mouth: { innerProfile, mouthY: rim, mouthR: bore },
     brimMl: volumeBelow(innerProfile, neckBase) * 1e6,
     cap: buildScrewCap({ ...cap, innerRadius: 9.5 * MM, ribs: 40, segments: 32, edge: 1.2 * MM }),
     teat: lathe(teat, 28),
@@ -227,10 +231,12 @@ const buildHdpe = () => {
     [0, 3, 6, 4, 0],
   );
   const cap = HDPE.cap;
+  const innerProfile = [...shell].reverse();
   return {
     body: merge([lathe(outer, SEGMENTS), lathe(shell, SEGMENTS)]),
-    innerProfile: [...shell].reverse(),
-    brimMl: volumeBelow([...shell].reverse(), neckBase) * 1e6,
+    innerProfile,
+    mouth: { innerProfile, mouthY: rim - 13 * MM, mouthR: lip },
+    brimMl: volumeBelow(innerProfile, neckBase) * 1e6,
     cap: buildScrewCap({ ...cap, innerRadius: 13.3 * MM, ribs: 60, segments: 44 }),
     label: buildWrapLabel({ ...labelSpec(R, HDPE.label), back: false }),
   };
@@ -268,15 +274,10 @@ const GlassBody = ({ assets, tint, children }) => {
   );
 };
 
-const liquidProps = (container, volumeMl, innerProfile) => ({
-  innerProfile,
-  volumeMl,
-  color: container.color,
-  opacity: container.opacity,
-  meniscus: container.viscous ? 2.6 * MM : undefined,
-});
+const bottleVessel = (assets, container) => ({ ...assets.mouth, meniscus: container.viscous ? 2.6 * MM : 0.0015 });
+const bottleFill = (container, volumeMl) => ({ volumeMl, color: container.color, opacity: container.opacity });
 
-const NarrowBottle = ({ substance, volumeMl, amber, capOn }) => {
+const NarrowBottle = ({ simId, substance, volumeMl, amber, capOn }) => {
   const kit = useKit();
   const assets = assetsFor("narrow");
   const tint = useMemo(() => (amber ? createGlassTint(AMBER) : null), [amber]);
@@ -299,7 +300,7 @@ const NarrowBottle = ({ substance, volumeMl, amber, capOn }) => {
   return (
     <>
       <GlassBody assets={assets} tint={tint}>
-        {liquidVolume > 0 && <Liquid {...liquidProps(container, liquidVolume, assets.innerProfile)} />}
+        <Contents simId={simId} vessel={bottleVessel(assets, container)} fallback={bottleFill(container, liquidVolume)} />
       </GlassBody>
       {capOn ? (
         stopper
@@ -329,7 +330,7 @@ const DROPPER_REST = (() => {
   return { tilt, drop: y * Math.sin(tilt) - r * Math.cos(tilt) };
 })();
 
-const DropperBottle = ({ substance, volumeMl, amber, capOn }) => {
+const DropperBottle = ({ simId, substance, volumeMl, amber, capOn }) => {
   const kit = useKit();
   const assets = assetsFor("dropper");
   const tint = useMemo(() => (amber ? createGlassTint(AMBER) : null), [amber]);
@@ -350,7 +351,7 @@ const DropperBottle = ({ substance, volumeMl, amber, capOn }) => {
   return (
     <>
       <GlassBody assets={assets} tint={tint}>
-        {liquidVolume > 0 && <Liquid {...liquidProps(container, liquidVolume, assets.innerProfile)} />}
+        <Contents simId={simId} vessel={bottleVessel(assets, container)} fallback={bottleFill(container, liquidVolume)} />
       </GlassBody>
       {capOn ? (
         assembly
@@ -368,7 +369,11 @@ const DropperBottle = ({ substance, volumeMl, amber, capOn }) => {
   );
 };
 
-const HdpeBottle = ({ substance, volumeMl, capOn }) => {
+const setFillLine = (material, level) => {
+  material.userData.hdpeLevel.value = level;
+};
+
+const HdpeBottle = ({ simId, substance, volumeMl, capOn }) => {
   const kit = useKit();
   const assets = assetsFor("hdpe");
   const { container } = substance;
@@ -376,16 +381,16 @@ const HdpeBottle = ({ substance, volumeMl, capOn }) => {
   const clear = (container.opacity ?? 0.1) < 0.3;
   const content = clear ? "#a9b4bb" : container.color;
   const strength = clear ? 0.22 : 0.35;
-  const snapped = Math.round(level * 5000) / 5000;
-  const body = useMemo(() => createHdpeMaterial({ level: snapped, content, strength }), [snapped, content, strength]);
+  const body = useMemo(() => createHdpeMaterial({ level: -1, content, strength }), [content, strength]);
   useEffect(() => () => disposeMaterial(body), [body]);
+  useFrame(() => setFillLine(body, level), DEVICE_PRIORITY);
   const spec = labelSpec(HDPE.radius, HDPE.label);
   const cap = <mesh geometry={assets.cap} material={kit.plasticWhite} castShadow />;
 
   return (
     <>
       <mesh geometry={assets.body} material={body} castShadow />
-      {volumeMl > 0 && <Liquid {...liquidProps(container, Math.min(volumeMl, assets.brimMl), assets.innerProfile)} />}
+      <Contents simId={simId} vessel={bottleVessel(assets, container)} fallback={bottleFill(container, Math.min(volumeMl, assets.brimMl))} />
       {capOn ? (
         cap
       ) : (
@@ -404,12 +409,16 @@ const HdpeBottle = ({ substance, volumeMl, capOn }) => {
 
 const NOMINAL = { narrow: 250, dropper: 100, hdpe: 250 };
 
-const ReagentBottle = ({ substance, remaining = 1, capOn = true, ...props }) => {
+const readRemaining = (device) => device.remaining ?? 1;
+
+const ReagentBottle = ({ simId, substance, remaining = 1, capOn = true, ...props }) => {
   const { bottle = "clear", sizeMl = 250, fillMl = 0 } = substance.container;
   const kind = bottle === "plastic" ? "hdpe" : sizeMl <= 100 ? "dropper" : "narrow";
   const scale = Math.cbrt(sizeMl / NOMINAL[kind]);
-  const volumeMl = (Math.max(0, Math.min(1, remaining)) * fillMl) / scale ** 3;
-  const shared = { substance, volumeMl, capOn, amber: bottle === "amber" };
+  const { device } = useDevice(simId);
+  const share = useDeviceStep(device, readRemaining, 0.01, remaining);
+  const volumeMl = (Math.max(0, Math.min(1, share)) * fillMl) / scale ** 3;
+  const shared = { simId, substance, volumeMl, capOn: device ? device.capOn !== false : capOn, amber: bottle === "amber" };
 
   return (
     <group {...props}>

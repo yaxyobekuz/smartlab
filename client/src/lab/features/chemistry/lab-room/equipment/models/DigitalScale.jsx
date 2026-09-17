@@ -1,4 +1,5 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useFrame } from "@react-three/fiber";
 import {
   CanvasTexture,
   CylinderGeometry,
@@ -15,6 +16,7 @@ import { toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.j
 import { useKit } from "../kit/kitContext";
 import BlobShadow from "../kit/BlobShadow";
 import { toVectors } from "../kit/vessel";
+import { DEVICE_PRIORITY, useDevice } from "../kit/deviceState";
 
 // Compact precision balance 200 g × 0.01 g: 130 × 190 × 45 mm body, Ø100 mm pan, sloped front panel with LCD.
 const MM = 0.001;
@@ -178,12 +180,11 @@ const formatReading = (grams) => {
   return cells;
 };
 
-const createLcdTexture = (grams) => {
-  const [w, h, k] = [60, 20, 20];
-  const canvas = document.createElement("canvas");
-  canvas.width = w * k;
-  canvas.height = h * k;
-  const ctx = canvas.getContext("2d");
+const LCD = { w: 60, h: 20, k: 20 };
+
+const paintLcd = (display, grams) => {
+  const [w, h, k] = [LCD.w, LCD.h, LCD.k];
+  const ctx = display.ctx;
   const bg = ctx.createLinearGradient(0, 0, 0, h * k);
   bg.addColorStop(0, "#7f8b7a");
   bg.addColorStop(0.18, "#a3ae9b");
@@ -230,10 +231,35 @@ const createLcdTexture = (grams) => {
   shade.addColorStop(1, "rgba(0, 0, 0, 0)");
   ctx.fillStyle = shade;
   ctx.fillRect(0, 0, w * k, 2.2 * k);
+  display.texture.needsUpdate = true;
+};
+
+// One canvas for the whole session; the digits are repainted only when the reading moves a step.
+const createLcdDisplay = (grams) => {
+  const canvas = document.createElement("canvas");
+  canvas.width = LCD.w * LCD.k;
+  canvas.height = LCD.h * LCD.k;
   const texture = new CanvasTexture(canvas);
   texture.colorSpace = SRGBColorSpace;
   texture.anisotropy = 8;
-  return texture;
+  const display = {
+    canvas,
+    ctx: canvas.getContext("2d"),
+    texture,
+    material: new MeshStandardMaterial({ map: texture, roughness: 0.16, metalness: 0 }),
+    shown: grams,
+  };
+  paintLcd(display, grams);
+  return display;
+};
+
+// A real balance takes a moment to settle on a new mass.
+const settleReading = (display, target, dt) => {
+  const next = display.shown + (target - display.shown) * (1 - Math.exp(-Math.min(dt, 0.1) / 0.18));
+  const value = Math.abs(next - target) < 0.004 ? target : next;
+  if (Math.abs(value - display.shown) < 0.004 && value !== target) return;
+  display.shown = value;
+  paintLcd(display, value);
 };
 
 const createLevelTexture = () => {
@@ -253,8 +279,6 @@ const createLevelTexture = () => {
   texture.colorSpace = SRGBColorSpace;
   return texture;
 };
-
-const createLcdMaterial = (grams) => new MeshStandardMaterial({ map: createLcdTexture(grams), roughness: 0.16, metalness: 0 });
 
 let assets = null;
 const getAssets = () => {
@@ -290,18 +314,23 @@ const getAssets = () => {
   return assets;
 };
 
-const DigitalScale = ({ readingG = 0, ...props }) => {
+const DigitalScale = ({ simId, readingG = 0, ...props }) => {
   const kit = useKit();
   const { cover, base, foot, pan, collar, spindle, level, button, panel, lcd, buttons, feet } = getAssets();
   const panelMaterial = kit.print("digital-scale-panel", createPanelTexture);
   const levelMaterial = kit.print("digital-scale-level", createLevelTexture);
-  const lcdMaterial = useMemo(() => createLcdMaterial(readingG), [readingG]);
+  const [display] = useState(() => createLcdDisplay(readingG));
+  const { device } = useDevice(simId);
+  useEffect(() => paintLcd(display, readingG), [display, readingG]);
+  useFrame((_, delta) => {
+    if (device) settleReading(display, device.readingG ?? 0, delta);
+  }, DEVICE_PRIORITY);
   useEffect(
     () => () => {
-      lcdMaterial.map.dispose();
-      lcdMaterial.dispose();
+      display.texture.dispose();
+      display.material.dispose();
     },
-    [lcdMaterial],
+    [display],
   );
 
   return (
@@ -315,7 +344,7 @@ const DigitalScale = ({ readingG = 0, ...props }) => {
       <mesh geometry={spindle} material={kit.steel} />
       <mesh geometry={pan} material={kit.steel} castShadow receiveShadow />
       <mesh geometry={panel} material={panelMaterial} receiveShadow />
-      <mesh geometry={lcd} material={lcdMaterial} />
+      <mesh geometry={lcd} material={display.material} />
       {buttons.map((position) => (
         <mesh
           key={position.join()}

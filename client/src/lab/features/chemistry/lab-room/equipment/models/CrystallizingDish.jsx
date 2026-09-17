@@ -1,9 +1,10 @@
 import { CanvasTexture, CylinderGeometry, SRGBColorSpace } from "three";
 import { useKit } from "../kit/kitContext";
 import GlassVessel from "../kit/GlassVessel";
-import Liquid from "../kit/Liquid";
+import Contents from "../kit/Contents";
+import { profileTable } from "../kit/profileTable";
 import BlobShadow from "../kit/BlobShadow";
-import { arc, buildVessel } from "../kit/vessel";
+import { arc, buildVessel, radiusAt } from "../kit/vessel";
 
 // Borosilicate crystallizing dish with spout: Ø150 × 75 mm, 2 mm wall, 2.5 mm flat bottom.
 const RADIUS = 0.075;
@@ -66,26 +67,25 @@ const getAssets = () => {
     PRINT_HALF_ANGLE * 2,
   );
   printGeometry.translate(0, (PRINT_Y[0] + PRINT_Y[1]) / 2, 0);
-  assets = { vessel, printGeometry };
+  const mouthY = vessel.rimY;
+  const innerProfile = vessel.innerProfile;
+  assets = {
+    vessel,
+    mouth: { innerProfile, mouthY, mouthR: radiusAt(innerProfile, mouthY), capacityMl: profileTable(innerProfile, mouthY).capacityMl },
+    printGeometry,
+  };
   return assets;
 };
 
-const CrystallizingDish = ({ volumeMl = 0, liquidColor, liquidOpacity, ...props }) => {
+const CrystallizingDish = ({ simId, volumeMl = 0, liquidColor, liquidOpacity, ...props }) => {
   const kit = useKit();
-  const { vessel, printGeometry } = getAssets();
+  const { vessel, mouth, printGeometry } = getAssets();
   const print = { geometry: printGeometry, material: kit.print("crystallizing-dish-150", createStampTexture) };
 
   return (
     <group {...props}>
       <GlassVessel vessel={vessel} print={print}>
-        {volumeMl > 0 && (
-          <Liquid
-            innerProfile={vessel.innerProfile}
-            volumeMl={volumeMl}
-            color={liquidColor}
-            opacity={liquidOpacity}
-          />
-        )}
+        <Contents simId={simId} vessel={mouth} fallback={{ volumeMl, color: liquidColor, opacity: liquidOpacity }} />
       </GlassVessel>
       <BlobShadow radius={RADIUS * 1.35} opacity={0.3} />
     </group>

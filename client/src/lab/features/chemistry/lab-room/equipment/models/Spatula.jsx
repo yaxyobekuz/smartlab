@@ -1,5 +1,8 @@
-import { BufferGeometry, Float32BufferAttribute } from "three";
+import { useEffect, useMemo } from "react";
+import { BufferGeometry, Float32BufferAttribute, SphereGeometry } from "three";
 import { useKit } from "../kit/kitContext";
+import { useDevice } from "../kit/deviceState";
+import { createGrainMaterial, disposeMaterial } from "../../substances/templates/containerMaterials";
 
 // Stainless spoon-spatula, 180 mm: a Ø3 mm rod pressed into a 9 × 14 mm spoon and a bent 8 × 30 mm blade.
 const MM = 0.001;
@@ -148,22 +151,52 @@ const buildSpatula = () => {
   geometry.addGroup(0, polished.length, 0);
   geometry.addGroup(polished.length, index.length, 1);
   geometry.computeVertexNormals();
+  // Where a scoop of powder sits, in the same rotated frame as the finished mesh.
+  const bx = SPOON.center;
+  geometry.userData.bowl = [(bx * c - 0 * s) * MM, (bx * s + 0 * c - floor) * MM + 0.0006, 0];
   return geometry;
+};
+
+// Heaped scoop sitting in the spoon bowl; one unit is 1 cm³ of loose powder.
+const buildHeap = () => {
+  const dome = new SphereGeometry(1, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2);
+  const pos = dome.attributes.position;
+  for (let i = 0; i < pos.count; i += 1) {
+    const [x, y, z] = [pos.getX(i), pos.getY(i), pos.getZ(i)];
+    const lumps = Math.sin(x * 9 + z * 6) * 0.06 + Math.sin(x * 21 - z * 17) * 0.035;
+    pos.setXYZ(i, x * (1.35 + lumps), y * (0.52 + lumps * 0.5), z * (0.95 + lumps));
+  }
+  dome.computeVertexNormals();
+  return dome;
 };
 
 let assets = null;
 const getAssets = () => {
   if (assets) return assets;
-  assets = { spatula: buildSpatula() };
+  const spatula = buildSpatula();
+  assets = { spatula, heap: buildHeap(), bowl: spatula.userData.bowl };
   return assets;
 };
 
-const Spatula = ({ ...props }) => {
+// Loose powder is about 1.2 g/cm³ and the heap geometry holds ~1.4 unit³.
+const heapScale = (grams) => Math.cbrt(Math.max(0.03, grams) / 1.2e6 / 1.4);
+
+const Spatula = ({ simId, load = null, ...props }) => {
   const kit = useKit();
-  const { spatula } = getAssets();
+  const { spatula, heap, bowl } = getAssets();
+  const { device } = useDevice(simId);
+  const scoop = device ? device.load : load;
+  const color = scoop?.color;
+  const grain = scoop?.grain ?? "fine";
+  const powder = useMemo(() => (color ? createGrainMaterial({ color, grain, seed: 5 }) : null), [color, grain]);
+  useEffect(() => () => disposeMaterial(powder), [powder]);
+
   return (
     <group {...props}>
       <mesh geometry={spatula} material={[kit.chrome, kit.steel]} castShadow />
+      {scoop && powder && (
+        <mesh geometry={heap} material={powder} position={bowl} scale={heapScale(scoop.grams)} castShadow />
+      )}
     </group>
   );
 };

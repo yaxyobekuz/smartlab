@@ -1,8 +1,8 @@
 import { useKit } from "../kit/kitContext";
 import GlassVessel from "../kit/GlassVessel";
-import Liquid from "../kit/Liquid";
+import Contents from "../kit/Contents";
 import BlobShadow from "../kit/BlobShadow";
-import { arc, buildPrintBand, buildVessel, heightForVolume } from "../kit/vessel";
+import { arc, buildPrintBand, buildVessel, heightForVolume, radiusAt } from "../kit/vessel";
 import { createGraduationTexture } from "../kit/printTextures";
 
 // 250 ml Griffin low-form beaker: Ø70 × 95 mm, 1.4 mm borosilicate wall.
@@ -50,26 +50,20 @@ const getAssets = () => {
       ],
       patches: [{ x: 0.017, y: level(60), w: 0.017, h: 0.011 }],
     });
-  assets = { vessel, createTexture, printGeometry: buildPrintBand(PRINT_RADIUS, ...PRINT_Y, 96) };
+  const mouth = { innerProfile: vessel.innerProfile, capacityMl: 250, mouthY: vessel.rimY, mouthR: radiusAt(vessel.innerProfile, vessel.rimY) };
+  assets = { vessel, mouth, createTexture, printGeometry: buildPrintBand(PRINT_RADIUS, ...PRINT_Y, 96) };
   return assets;
 };
 
-const Beaker = ({ volumeMl = 0, liquidColor, liquidOpacity, ...props }) => {
+const Beaker = ({ simId, volumeMl = 0, liquidColor, liquidOpacity, ...props }) => {
   const kit = useKit();
-  const { vessel, createTexture, printGeometry } = getAssets();
+  const { vessel, mouth, createTexture, printGeometry } = getAssets();
   const print = { geometry: printGeometry, material: kit.print("beaker-250", createTexture) };
 
   return (
     <group {...props}>
       <GlassVessel vessel={vessel} print={print}>
-        {volumeMl > 0 && (
-          <Liquid
-            innerProfile={vessel.innerProfile}
-            volumeMl={volumeMl}
-            color={liquidColor}
-            opacity={liquidOpacity}
-          />
-        )}
+        <Contents simId={simId} vessel={mouth} fallback={{ volumeMl, color: liquidColor, opacity: liquidOpacity }} />
       </GlassVessel>
       <BlobShadow radius={RADIUS * 1.45} opacity={0.28} />
     </group>

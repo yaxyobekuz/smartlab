@@ -18,19 +18,52 @@ export const PROMPTS = {
     full: "Barcha 5 joy band: avval biror narsani qo'ying",
   },
 
-  holding: (held, placement) => {
+  holding: (held, placement, subtitle = null) => {
     const reason = placement ? placement.reason : "far";
     const actions = [
       { keys: [LMB], label: placement?.valid ? "Qo'yish" : PROMPTS.reasons[reason], disabled: !placement?.valid },
       { keys: ["G"], label: "Tashlash" },
     ];
-    return { key: `hold:${held.id}:${placement?.valid ?? "none"}:${reason}`, title: displayName(held.typeId), actions };
+    return {
+      key: `hold:${held.id}:${placement?.valid ?? "none"}:${reason}:${subtitle}`,
+      title: displayName(held.typeId),
+      subtitle,
+      actions,
+    };
   },
 
-  focus: (object) =>
+  focus: (object, subtitle = null) =>
     object && {
-      key: `focus:${object.id}`,
+      key: `focus:${object.id}:${subtitle}`,
       title: displayName(object.typeId),
+      subtitle,
       actions: [{ keys: [LMB], label: "Olish" }],
     },
+
+  action: (action, target, subtitle, held) => {
+    const actions = [
+      {
+        keys: [action.mode === "hold" ? `${LMB} (bosib turing)` : LMB],
+        label: action.label,
+        disabled: !action.valid,
+      },
+    ];
+    if (held) actions.push({ keys: ["G"], label: "Tashlash" });
+    return {
+      key: `act:${action.id}:${action.targetId}:${action.label}:${action.valid}:${subtitle}`,
+      title: target ? displayName(target.typeId) : action.label,
+      subtitle,
+      actions,
+    };
+  },
+
+  progress: (info) =>
+    info && { key: `progress:${info.title}:${info.subtitle}`, title: info.title, subtitle: info.subtitle, actions: [] },
+
+  monitor: () => ({
+    key: "monitor",
+    title: "Laboratoriya kompyuteri",
+    subtitle: "Oxirgi reaksiya haqida ma'lumot",
+    actions: [{ keys: [LMB], label: "O'qish" }],
+  }),
 };

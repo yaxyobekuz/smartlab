@@ -1,4 +1,5 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 import {
   BufferAttribute,
   BufferGeometry,
@@ -17,6 +18,7 @@ import BlobShadow from "../../equipment/kit/BlobShadow";
 import { createGasTagTexture } from "../labels/substanceLabel";
 import { MM, SEAM, arc, buildWrapLabel, dedupe, ellipse, faceted, lathe, merge, random, seedOf } from "./shapeUtils";
 import { createBrass, disposeMaterial } from "./containerMaterials";
+import { DEVICE_PRIORITY, useDevice } from "../../equipment/kit/deviceState";
 
 // Steel lecture bottle Ø51 × 380 mm with elliptical heads, standing in a black foot ring; brass valve with a side outlet.
 const R = 25.5 * MM;
@@ -359,8 +361,14 @@ const createStencilMaterial = (container, seed) => {
   });
 };
 
-// remaining has no visible effect (the gas cannot be seen); it is only kept off the group.
-const GasCylinder = ({ substance, remaining = 1, ...props }) => {
+// Two and a half turns from shut to fully open, the way a lecture-bottle valve behaves.
+const turnWheel = (wheel, flow, dt, state) => {
+  state.angle += ((flow ?? 0) * 2.5 * Math.PI * 2 - state.angle) * (1 - Math.exp(-Math.min(dt, 0.1) / 0.5));
+  if (wheel) wheel.rotation.y = state.angle;
+};
+
+// remaining has no visible effect (the gas cannot be seen); the valve wheel shows the flow instead.
+const GasCylinder = ({ simId, substance, remaining = 1, flow = 0, ...props }) => {
   const kit = useKit();
   const parts = getAssets();
   const { container } = substance;
@@ -374,6 +382,10 @@ const GasCylinder = ({ substance, remaining = 1, ...props }) => {
   const tag = kit.print(`gas-tag-${substance.id}`, () =>
     createGasTagTexture(substance, { widthMm: TAG.width / MM, heightMm: TAG.height / MM, scale: kit.printScale }),
   );
+  const { device } = useDevice(simId);
+  const wheelRef = useRef(null);
+  const spin = useMemo(() => ({ angle: 0 }), []);
+  useFrame((_, delta) => turnWheel(wheelRef.current, device ? device.flow : flow, delta, spin), DEVICE_PRIORITY);
 
   return (
     <group {...props}>
@@ -383,7 +395,7 @@ const GasCylinder = ({ substance, remaining = 1, ...props }) => {
       <mesh geometry={parts.collar} material={kit.steel} castShadow />
       <mesh geometry={parts.brass} material={brass} castShadow />
       <mesh geometry={parts.spindle} material={kit.chrome} castShadow />
-      <mesh geometry={parts.wheel} material={kit.plasticDark} castShadow />
+      <mesh ref={wheelRef} geometry={parts.wheel} material={kit.plasticDark} castShadow />
       <mesh geometry={parts.string} material={kit.cotton} castShadow />
       <mesh geometry={parts.tag.front} material={tag} castShadow />
       <mesh geometry={parts.tag.paper} material={kit.paper} />

@@ -1,7 +1,8 @@
 import { CanvasTexture, LatheGeometry, SRGBColorSpace } from "three";
 import { useKit } from "../kit/kitContext";
 import GlassVessel from "../kit/GlassVessel";
-import Liquid from "../kit/Liquid";
+import Contents from "../kit/Contents";
+import { profileTable } from "../kit/profileTable";
 import BlobShadow from "../kit/BlobShadow";
 import { arc, heightForVolume, radiusAt, toVectors } from "../kit/vessel";
 
@@ -194,6 +195,9 @@ const createPrintTexture = (level, radiusAtY) => {
   return texture;
 };
 
+// Mouth plane where pours and tools aim: the top of the neck bore.
+const MOUTH = { y: HEIGHT - WALL, r: NECK_RADIUS - WALL };
+
 let assets = null;
 const getAssets = () => {
   if (assets) return assets;
@@ -203,28 +207,22 @@ const getAssets = () => {
   const print = buildPrintSurface(outer);
   assets = {
     vessel: { outer: lathe(outer, SEGMENTS), inner: lathe(inner, SEGMENTS), innerProfile, rimY: HEIGHT },
+    mouth: { innerProfile, mouthY: MOUTH.y, mouthR: MOUTH.r, capacityMl: profileTable(innerProfile, MOUTH.y).capacityMl },
     printGeometry: print.geometry,
     createTexture: () => createPrintTexture(level, print.radiusAtY),
   };
   return assets;
 };
 
-const ConicalFlask = ({ volumeMl = 0, liquidColor, liquidOpacity, ...props }) => {
+const ConicalFlask = ({ simId, volumeMl = 0, liquidColor, liquidOpacity, ...props }) => {
   const kit = useKit();
-  const { vessel, printGeometry, createTexture } = getAssets();
+  const { vessel, mouth, printGeometry, createTexture } = getAssets();
   const print = { geometry: printGeometry, material: kit.print("conical-flask-250", createTexture) };
 
   return (
     <group {...props}>
       <GlassVessel vessel={vessel} print={print}>
-        {volumeMl > 0 && (
-          <Liquid
-            innerProfile={vessel.innerProfile}
-            volumeMl={volumeMl}
-            color={liquidColor}
-            opacity={liquidOpacity}
-          />
-        )}
+        <Contents simId={simId} vessel={mouth} fallback={{ volumeMl, color: liquidColor, opacity: liquidOpacity }} />
       </GlassVessel>
       <BlobShadow radius={BASE_RADIUS * 1.4} opacity={0.3} />
     </group>

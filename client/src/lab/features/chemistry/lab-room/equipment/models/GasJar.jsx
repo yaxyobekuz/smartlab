@@ -3,9 +3,11 @@ import { DoubleSide, ExtrudeGeometry, LatheGeometry, MeshPhysicalMaterial, Shape
 import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { useKit } from "../kit/kitContext";
 import GlassVessel from "../kit/GlassVessel";
-import Liquid from "../kit/Liquid";
+import Contents from "../kit/Contents";
+import { profileTable } from "../kit/profileTable";
 import BlobShadow from "../kit/BlobShadow";
 import { applySpecularAlpha } from "../kit/glassShading";
+import { useDevice } from "../kit/deviceState";
 import { arc, toVectors } from "../kit/vessel";
 
 // Soda-glass gas jar Ø60 × 200 mm with a ground Ø75 mm flange, plus an 80 × 80 × 4 mm ground cover plate.
@@ -146,7 +148,14 @@ const buildPlate = () => {
 let assets = null;
 const getAssets = () => {
   if (assets) return assets;
-  assets = { ...buildJar(), plate: buildPlate() };
+  const jar = buildJar();
+  const innerProfile = jar.vessel.innerProfile;
+  const mouthY = innerProfile[innerProfile.length - 1][1];
+  assets = {
+    ...jar,
+    plate: buildPlate(),
+    mouth: { innerProfile, mouthY, mouthR: innerProfile[innerProfile.length - 1][0], capacityMl: profileTable(innerProfile, mouthY).capacityMl },
+  };
   return assets;
 };
 
@@ -165,31 +174,26 @@ const createGroundGlass = () =>
     0.2,
   );
 
-const GasJar = ({ volumeMl = 0, liquidColor, liquidOpacity, coverOn = true, ...props }) => {
+const GasJar = ({ simId, volumeMl = 0, liquidColor, liquidOpacity, coverOn = true, ...props }) => {
   const kit = useKit();
-  const { vessel, groundTop, plate } = getAssets();
+  const { vessel, mouth, groundTop, plate } = getAssets();
   const ground = useMemo(() => createGroundGlass(), []);
   useEffect(() => () => ground.dispose(), [ground]);
+  const { device } = useDevice(simId);
+  const covered = device ? device.coverOn !== false : coverOn;
 
   return (
     <group {...props}>
       <GlassVessel vessel={vessel}>
-        {volumeMl > 0 && (
-          <Liquid
-            innerProfile={vessel.innerProfile}
-            volumeMl={volumeMl}
-            color={liquidColor}
-            opacity={liquidOpacity}
-          />
-        )}
+        <Contents simId={simId} vessel={mouth} fallback={{ volumeMl, color: liquidColor, opacity: liquidOpacity }} />
       </GlassVessel>
       <mesh geometry={groundTop} material={ground} renderOrder={3} />
       <mesh
         geometry={plate}
         material={[kit.glass, ground]}
         renderOrder={4}
-        position={coverOn ? [0, HEIGHT, 0] : [RADIUS + PLATE_SIZE / 2 + 0.014, 0, 0.012]}
-        rotation-y={coverOn ? 0 : 0.22}
+        position={covered ? [0, HEIGHT, 0] : [RADIUS + PLATE_SIZE / 2 + 0.014, 0, 0.012]}
+        rotation-y={covered ? 0 : 0.22}
       />
       <BlobShadow radius={RADIUS * 1.45} opacity={0.3} />
     </group>

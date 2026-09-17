@@ -10,19 +10,22 @@ const InteractionPrompt = ({ world }) => {
       {prompt && (
         <div className="flex flex-col items-center gap-1.5 rounded-xl bg-black/50 px-4 py-2 text-white">
           <span className="text-sm font-semibold">{prompt.title}</span>
-          <div className="flex flex-wrap justify-center gap-3">
-            {prompt.actions.map((action) => (
-              <span
-                key={action.label}
-                className={cn("flex items-center gap-1.5 text-xs", action.disabled ? "text-amber-300" : "text-white/85")}
-              >
-                {action.keys.map((key) => (
-                  <KeyCap key={key}>{key}</KeyCap>
-                ))}
-                {action.label}
-              </span>
-            ))}
-          </div>
+          {prompt.subtitle && <span className="-mt-1 text-xs text-white/75">{prompt.subtitle}</span>}
+          {prompt.actions.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-3">
+              {prompt.actions.map((action) => (
+                <span
+                  key={action.label}
+                  className={cn("flex items-center gap-1.5 text-xs", action.disabled ? "text-amber-300" : "text-white/85")}
+                >
+                  {action.keys.map((key) => (
+                    <KeyCap key={key}>{key}</KeyCap>
+                  ))}
+                  {action.label}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       )}
       {flash && (

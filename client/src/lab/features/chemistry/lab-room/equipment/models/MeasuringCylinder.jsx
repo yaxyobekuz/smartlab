@@ -2,7 +2,8 @@ import { CanvasTexture, CylinderGeometry, ExtrudeGeometry, LatheGeometry, SRGBCo
 import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { useKit } from "../kit/kitContext";
 import GlassVessel from "../kit/GlassVessel";
-import Liquid from "../kit/Liquid";
+import Contents from "../kit/Contents";
+import { profileTable } from "../kit/profileTable";
 import BlobShadow from "../kit/BlobShadow";
 import { arc, heightForVolume, toVectors } from "../kit/vessel";
 
@@ -189,6 +190,9 @@ const createPrintTexture = (level, y0, y1) => {
   return texture;
 };
 
+// Mouth plane where pours and tools aim: the top of the tube bore.
+const MOUTH = { y: HEIGHT - WALL, r: TUBE_RADIUS - WALL };
+
 let assets = null;
 const getAssets = () => {
   if (assets) return assets;
@@ -209,6 +213,7 @@ const getAssets = () => {
   printGeometry.translate(0, (y0 + y1) / 2, 0);
   assets = {
     vessel,
+    mouth: { innerProfile: vessel.innerProfile, mouthY: MOUTH.y, mouthR: MOUTH.r, capacityMl: profileTable(vessel.innerProfile, MOUTH.y).capacityMl, meniscus: 0.0017 },
     foot: buildFoot(),
     printGeometry,
     createTexture: () => createPrintTexture(level, y0, y1),
@@ -216,23 +221,15 @@ const getAssets = () => {
   return assets;
 };
 
-const MeasuringCylinder = ({ volumeMl = 0, liquidColor, liquidOpacity, ...props }) => {
+const MeasuringCylinder = ({ simId, volumeMl = 0, liquidColor, liquidOpacity, ...props }) => {
   const kit = useKit();
-  const { vessel, foot, printGeometry, createTexture } = getAssets();
+  const { vessel, mouth, foot, printGeometry, createTexture } = getAssets();
   const print = { geometry: printGeometry, material: kit.print("measuring-cylinder-100", createTexture) };
 
   return (
     <group {...props}>
       <GlassVessel vessel={vessel} print={print}>
-        {volumeMl > 0 && (
-          <Liquid
-            innerProfile={vessel.innerProfile}
-            volumeMl={volumeMl}
-            color={liquidColor}
-            opacity={liquidOpacity}
-            meniscus={0.0017}
-          />
-        )}
+        <Contents simId={simId} vessel={mouth} fallback={{ volumeMl, color: liquidColor, opacity: liquidOpacity }} />
       </GlassVessel>
       <mesh geometry={foot} material={kit.glass} renderOrder={3} />
       <BlobShadow radius={FOOT_FLATS * 0.68} opacity={0.3} />

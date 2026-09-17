@@ -1,6 +1,6 @@
 import { LatheGeometry } from "three";
 import GlassVessel from "../kit/GlassVessel";
-import Liquid from "../kit/Liquid";
+import Contents from "../kit/Contents";
 import BlobShadow from "../kit/BlobShadow";
 import { arc, toVectors } from "../kit/vessel";
 
@@ -61,32 +61,26 @@ const getAssets = () => {
     ...beadProfile(RADIUS, WALL, LENGTH, BEAD, BEAD_FILLET),
   ]);
   const innerPoints = dedupe([[inner, LENGTH - WALL], ...arc(0, RADIUS, inner, 0, -Math.PI / 2, 12)]);
+  const innerProfile = [...innerPoints].reverse();
   assets = {
     vessel: {
       outer: lathe(outerPoints, SEGMENTS),
       inner: lathe(innerPoints, SEGMENTS),
-      innerProfile: [...innerPoints].reverse(),
+      innerProfile,
       rimY: LENGTH,
     },
+    mouth: { innerProfile, capacityMl: 30, mouthY: LENGTH - WALL, mouthR: inner, meniscus: 0.0019 },
   };
   return assets;
 };
 
-const TestTube = ({ volumeMl = 0, liquidColor, liquidOpacity, ...props }) => {
-  const { vessel } = getAssets();
+const TestTube = ({ simId, volumeMl = 0, liquidColor, liquidOpacity, ...props }) => {
+  const { vessel, mouth } = getAssets();
 
   return (
     <group {...props}>
       <GlassVessel vessel={vessel}>
-        {volumeMl > 0 && (
-          <Liquid
-            innerProfile={vessel.innerProfile}
-            volumeMl={volumeMl}
-            color={liquidColor}
-            opacity={liquidOpacity}
-            meniscus={0.0019}
-          />
-        )}
+        <Contents simId={simId} vessel={mouth} fallback={{ volumeMl, color: liquidColor, opacity: liquidOpacity }} />
       </GlassVessel>
       <BlobShadow radius={RADIUS * 1.5} opacity={0.2} />
     </group>

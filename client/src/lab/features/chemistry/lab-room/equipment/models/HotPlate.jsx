@@ -1,4 +1,5 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 import {
   BoxGeometry,
   BufferGeometry,
@@ -22,6 +23,7 @@ import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js
 import { useKit } from "../kit/kitContext";
 import BlobShadow from "../kit/BlobShadow";
 import { arc, toVectors } from "../kit/vessel";
+import { DEVICE_PRIORITY, useDevice } from "../kit/deviceState";
 
 // Magnetic stirrer hot plate: 160 × 280 × 110 mm housing, Ø135 mm ceramic-glass plate, sloped control panel.
 const W = 0.16;
@@ -452,6 +454,14 @@ const drawDisplay = (display, value) => {
   texture.needsUpdate = true;
 };
 
+// Repaints the seven-segment display only when the shown whole degree changes.
+const showDegrees = (display, celsius) => {
+  const value = Math.max(-99, Math.min(999, Math.round(celsius)));
+  if (value === display.shown) return;
+  display.shown = value;
+  drawDisplay(display, value);
+};
+
 const createDisplay = () => {
   const canvas = document.createElement("canvas");
   canvas.width = 512;
@@ -469,7 +479,7 @@ const createDisplay = () => {
     emissiveMap: texture,
     emissiveIntensity: 1.35,
   });
-  return { canvas, texture, material };
+  return { canvas, texture, material, shown: null };
 };
 
 let assets = null;
@@ -502,16 +512,65 @@ const getAssets = () => {
   return assets;
 };
 
-const createPlateMaterial = () =>
-  new MeshPhysicalMaterial({ color: "#c4c8cb", roughness: 0.22, clearcoat: 0.8, clearcoatRoughness: 0.06 });
+// Ceramic plate with the heating spiral glowing faintly through it once the surface is hot.
+const createPlateMaterial = () => {
+  const material = new MeshPhysicalMaterial({ color: "#c4c8cb", roughness: 0.22, clearcoat: 0.8, clearcoatRoughness: 0.06 });
+  const uniforms = { uHeat: { value: 0 } };
+  material.userData.heat = uniforms.uHeat;
+  material.onBeforeCompile = (shader) => {
+    Object.assign(shader.uniforms, uniforms);
+    shader.vertexShader = shader.vertexShader
+      .replace("#include <common>", "#include <common>\nvarying vec3 vPlateLocal;")
+      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvPlateLocal = position;");
+    shader.fragmentShader = shader.fragmentShader
+      .replace("#include <common>", "#include <common>\nuniform float uHeat;\nvarying vec3 vPlateLocal;")
+      .replace(
+        "#include <emissivemap_fragment>",
+        `#include <emissivemap_fragment>
+        if ( uHeat > 0.001 ) {
+          float ring = 0.5 + 0.5 * cos( length( vPlateLocal.xz ) * 420.0 );
+          float disc = 1.0 - smoothstep( 0.03, 0.062, length( vPlateLocal.xz ) );
+          totalEmissiveRadiance += vec3( 1.0, 0.22, 0.04 ) * uHeat * disc * ( 0.2 + 0.5 * ring ) * 0.35;
+        }`,
+      );
+  };
+  material.customProgramCacheKey = () => "hot-plate-plate";
+  return material;
+};
+
+// Knob angles, indicator lamps and plate glow, driven once per frame from the device.
+const createPlateState = (heatLevel, stirLevel) => {
+  const state = { heat: heatLevel, stir: stirLevel, glow: 0, blink: 0 };
+  return {
+    update: (device, dt, refs) => {
+      const step = 1 - Math.exp(-Math.min(dt, 0.1) / 0.12);
+      const level = device ? device.level ?? 0 : heatLevel;
+      const stir = device ? (device.stir ? 3 : 0) : stirLevel;
+      state.heat += (level - state.heat) * step;
+      state.stir += (stir - state.stir) * step;
+      if (refs.heatKnob) refs.heatKnob.rotation.z = dialAngle(state.heat) - Math.PI / 2;
+      if (refs.stirKnob) refs.stirKnob.rotation.z = dialAngle(state.stir) - Math.PI / 2;
+      if (!device) return;
+      const plateC = device.plateC ?? 22;
+      showDegrees(refs.display, plateC);
+      state.glow += (Math.max(0, Math.min(1, (plateC - 170) / 160)) - state.glow) * (1 - Math.exp(-Math.min(dt, 0.1) / 0.8));
+      if (refs.plateHeat) refs.plateHeat.value = state.glow;
+      // The thermostat cycles once the plate is at its set point, so the lamp blinks instead of staying lit.
+      state.blink += dt;
+      const heating = level > 0 && (plateC < (device.setC ?? 0) - 2 || state.blink % 1.6 < 0.9);
+      if (refs.heatLed) refs.heatLed.material.emissiveIntensity = heating ? LED_COLORS.heat.glow : 0;
+      if (refs.stirLed) refs.stirLed.material.emissiveIntensity = device.stir ? LED_COLORS.stir.glow : 0;
+    },
+  };
+};
 
 const LED_COLORS = {
   heat: { off: "#4a2410", on: "#ff5a0a", glow: 1.8 },
   stir: { off: "#15361c", on: "#22ff4a", glow: 1.4 },
 };
 
-const Led = ({ geometry, position, colors, on }) => (
-  <mesh geometry={geometry} position={position}>
+const Led = ({ ref, geometry, position, colors, on }) => (
+  <mesh ref={ref} geometry={geometry} position={position}>
     <meshStandardMaterial
       color={on ? colors.on : colors.off}
       emissive={on ? colors.on : "#000000"}
@@ -521,18 +580,18 @@ const Led = ({ geometry, position, colors, on }) => (
   </mesh>
 );
 
-const Knob = ({ kit, geometry, indexDisk, indexMaterial, position, level }) => (
-  <group position={position} rotation-z={dialAngle(level) - Math.PI / 2}>
+const Knob = ({ ref, kit, geometry, indexDisk, indexMaterial, position, level }) => (
+  <group ref={ref} position={position} rotation-z={dialAngle(level) - Math.PI / 2}>
     <mesh geometry={geometry} material={kit.plasticDark} castShadow />
     <mesh geometry={indexDisk} material={indexMaterial} />
   </group>
 );
 
-const HotPlate = ({ displayC = 25, heating = false, stirring = false, heatLevel, stirLevel, ...props }) => {
+const HotPlate = ({ simId, displayC = 25, heating = false, stirring = false, heatLevel, stirLevel, ...props }) => {
   const kit = useKit();
   const a = getAssets();
   const display = useMemo(() => createDisplay(), []);
-  useEffect(() => drawDisplay(display, displayC), [display, displayC]);
+  useEffect(() => showDegrees(display, displayC), [display, displayC]);
   useEffect(
     () => () => {
       display.texture.dispose();
@@ -545,6 +604,18 @@ const HotPlate = ({ displayC = 25, heating = false, stirring = false, heatLevel,
   const panelMaterial = kit.print("hot-plate-panel", createPanelTexture);
   const heatIndex = kit.print("hot-plate-index-heat", () => createIndexTexture("#ff6a1f"));
   const stirIndex = kit.print("hot-plate-index-stir", () => createIndexTexture("#2f8cff"));
+  const { device } = useDevice(simId);
+  const refs = useRef({});
+  const live = useMemo(
+    () => createPlateState(heatLevel ?? (heating ? 4 : 0), stirLevel ?? (stirring ? 3 : 0)),
+    [heatLevel, heating, stirLevel, stirring],
+  );
+  useFrame((_, delta) => {
+    const r = refs.current;
+    r.display = display;
+    r.plateHeat = plateMaterial.userData.heat;
+    live.update(device, delta, r);
+  }, DEVICE_PRIORITY);
 
   return (
     <group {...props}>
@@ -561,9 +632,10 @@ const HotPlate = ({ displayC = 25, heating = false, stirring = false, heatLevel,
         <mesh geometry={a.panelPrint} material={panelMaterial} receiveShadow />
         <mesh geometry={a.darkParts} material={kit.plasticDark} />
         <mesh geometry={a.displayFace} material={display.material} />
-        <Led geometry={a.led} position={[...LEDS.heat, 0.0009]} colors={LED_COLORS.heat} on={heating} />
-        <Led geometry={a.led} position={[...LEDS.stir, 0.0009]} colors={LED_COLORS.stir} on={stirring} />
+        <Led ref={(led) => { refs.current.heatLed = led; }} geometry={a.led} position={[...LEDS.heat, 0.0009]} colors={LED_COLORS.heat} on={heating} />
+        <Led ref={(led) => { refs.current.stirLed = led; }} geometry={a.led} position={[...LEDS.stir, 0.0009]} colors={LED_COLORS.stir} on={stirring} />
         <Knob
+          ref={(knob) => { refs.current.heatKnob = knob; }}
           kit={kit}
           geometry={a.knob}
           indexDisk={a.indexDisk}
@@ -572,6 +644,7 @@ const HotPlate = ({ displayC = 25, heating = false, stirring = false, heatLevel,
           level={heatLevel ?? (heating ? 4 : 0)}
         />
         <Knob
+          ref={(knob) => { refs.current.stirKnob = knob; }}
           kit={kit}
           geometry={a.knob}
           indexDisk={a.indexDisk}
