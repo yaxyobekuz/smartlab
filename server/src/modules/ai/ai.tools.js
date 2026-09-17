@@ -39,7 +39,7 @@ export const AI_TOOLS = [
           topic: {
             type: "string",
             description:
-              "Mavzu slug'i, masalan: molecules, lab, atoms, cell, dna, solar-system, wave.",
+              "Mavzu slug'i, masalan: molecules, lab, atoms, cell, dna, engine.",
           },
         },
         required: ["subject", "topic"],
@@ -52,7 +52,7 @@ export const AI_TOOLS = [
     function: {
       name: "select_item",
       description:
-        "Joriy mavzuda muayyan modelni (molekula, sayyora, to'lqin va h.k.) tanlash. Faqat joriy mavzuda mavjud item id'laridan birini uzat. Mavjud id'lar har bir so'rovda kontekstda beriladi.",
+        "Joriy mavzuda muayyan modelni (molekula, dvigatel rejimi, qism va h.k.) tanlash. Faqat joriy mavzuda mavjud item id'laridan birini uzat. Mavjud id'lar har bir so'rovda kontekstda beriladi.",
       parameters: {
         type: "object",
         properties: {

@@ -18,8 +18,12 @@ BIOLOGIYA (biology):
   select_item bilan to'plamlar: all, skeleton, muscles, organs, cardio, nervous, body.
 
 FIZIKA (physics):
-- Quyosh tizimi (solar-system): sayyoralar orbitada aylanishi.
-- To'lqin va tebranish (wave): sinus to'lqini va mayatnik.
+- Ichki yonuv dvigateli (engine): 4 taktli bir silindrli benzin dvigateli 3D da ishlaydi.
+  Rejimlar: Butun, Rentgen (korpus shaffof bo'lib, ichi ko'rinadi), Qismlarga ajratish.
+  Taktlar: so'rish, siqish, ish yo'li, chiqarish. Qismlar: silindr bloki, silindr kallagi,
+  klapan qopqog'i, karter, porshen, porshen barmog'i, shatun, tirsakli val, taqsimlash vallari,
+  kiritish va chiqarish klapanlari, sham, maxovik, taqsimlash tasmasi, kiritish kollektori,
+  chiqarish quvuri. Qismni bosib uning vazifasini o'qish mumkin.
 
 FOYDALANUVCHI 3D SAHNADA QILA OLADIGAN AMALLAR:
 - Modelni sichqoncha bilan aylantirish, yaqinlashtirish/uzoqlashtirish.

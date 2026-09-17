@@ -6,7 +6,7 @@ const FEATURES = [
     sprite: "cube",
     tag: "3D",
     title: "3D interaktiv modellar",
-    text: "Molekula, hujayra, anatomiya va sayyoralarni aylantiring, kattalashtiring va ichidan ko'ring.",
+    text: "Molekula, hujayra, anatomiya va dvigatelni aylantiring, kattalashtiring va ichidan ko'ring.",
   },
   {
     sprite: "gear",

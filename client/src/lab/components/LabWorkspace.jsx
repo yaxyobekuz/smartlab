@@ -68,6 +68,9 @@ const LeftPanel = ({ title, description, backTo, backLabel, items, activeId, onS
   </div>
 );
 
+const DEFAULT_VR_HINT =
+  "Shishaga qarab bosing (yoki qarab turing) - oling · probirkaga qaratib yana bosing - quyiladi";
+
 const WorkspaceBody = ({
   title,
   description,
@@ -79,6 +82,7 @@ const WorkspaceBody = ({
   scene,
   info,
   aiContext,
+  vrHint = DEFAULT_VR_HINT,
 }) => {
   const rootRef = useRef(null);
   const { panelsHidden, vrDismissed, leftOpen, aiOpen, setField } = useObjectState({
@@ -109,6 +113,9 @@ const WorkspaceBody = ({
 
   // Immersive/walk modes take over the whole screen - no panels, no mobile bar.
   const immersive = cardboard || inVR || walk || vrBox;
+  // A page may give separate hints for a headset (controllers) and phone VR (gaze + tap).
+  const activeVrHint =
+    vrHint && typeof vrHint === "object" ? (inVR ? vrHint.headset : vrHint.phone) : vrHint;
 
   // Feed the live page context to the AI agent: subject, topic, item list, and
   // the full real data of the active item so answers are grounded, not invented.
@@ -244,15 +251,11 @@ const WorkspaceBody = ({
           )
         )}
 
-        {/* VR (cardboard/vrBox/headset) da qo'l bilan quyish yo'riqnomasi:
-            markazga qaratib shishani ol, probirkaga qaratib quy. Cardboard'da
-            butun ekran stereo bo'lgani uchun matnni ikkala ko'zga chiqmaydigan
-            markaziy tasmada emas, tepada beramiz. */}
-        {(cardboard || vrBox || inVR) && (
+        {/* Cardboard'da stereo seam markazda, shuning uchun yo'riqnoma tepada. */}
+        {(cardboard || vrBox || inVR) && activeVrHint && (
           <div className="pointer-events-none absolute inset-x-0 top-4 z-20 flex justify-center px-4">
             <div className="pointer-events-auto rounded-full border border-border bg-background/90 px-4 py-1.5 text-center text-xs font-medium text-muted-foreground shadow-sm backdrop-blur">
-              Shishaga qarab bosing (yoki qarab turing) - oling · probirkaga
-              qaratib yana bosing - quyiladi
+              {activeVrHint}
             </div>
           </div>
         )}

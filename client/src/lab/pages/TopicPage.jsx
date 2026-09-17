@@ -35,21 +35,11 @@ const PAGES = {
   "biology/simulator": lazy(() =>
     import("@/lab/features/biology/simulator/SimulatorPage"),
   ),
-  "physics/solar-system": lazy(() =>
-    import("@/lab/features/physics/solar-system/SolarSystemPage"),
-  ),
-  "physics/wave": lazy(() => import("@/lab/features/physics/wave/WavePage")),
-  "physics/quantum-coin": lazy(() =>
-    import("@/lab/features/physics/quantum-coin/QuantumCoinPage"),
+  "physics/engine": lazy(() =>
+    import("@/lab/features/physics/engine/EnginePage"),
   ),
   "electronics/arduino": lazy(() =>
     import("@/lab/features/electronics/circuit/CircuitPage"),
-  ),
-  "physics/projectile": lazy(() =>
-    import("@/lab/features/physics/projectile/ProjectilePage"),
-  ),
-  "physics/spring": lazy(() =>
-    import("@/lab/features/physics/spring/SpringPage"),
   ),
   "chemistry/ph": lazy(() => import("@/lab/features/chemistry/ph/PhPage")),
   "chemistry/gas-laws": lazy(() =>
