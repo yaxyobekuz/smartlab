@@ -1,0 +1,5 @@
+# Generated build products (rebuild with build_all.sh)
+build/
+*.blend
+*.blend1
+__pycache__/

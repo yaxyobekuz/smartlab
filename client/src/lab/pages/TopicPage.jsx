@@ -15,6 +15,10 @@ const PAGES = {
   "chemistry/lab": lazy(() =>
     import("@/lab/features/chemistry/lab/LabBenchPage"),
   ),
+  // Walkable lab room (M1+); hidden until it replaces chemistry/lab.
+  "chemistry/lab-3d": lazy(() =>
+    import("@/lab/features/chemistry/lab-room/LabRoomPage"),
+  ),
   "chemistry/atoms": lazy(() =>
     import("@/lab/features/chemistry/atoms/AtomsPage"),
   ),
