@@ -17,6 +17,8 @@ import {
 } from "../chemistry/mixture";
 import { phOf, phPaperColor, phWord } from "../chemistry/acidity";
 import { CONTAINERS } from "../sim/containers";
+import { spillPortion } from "../sim/spills";
+import { pushFeed } from "../sim/feed";
 import { SUBSTANCE_PREFIX } from "../world/objectTypes";
 
 const DROP_ML = 0.05;
@@ -85,6 +87,11 @@ const deviceAction = (lab, target, part) => {
 
 // What left click does right now for the held item and the object under the crosshair (null = take / put down).
 export const resolveAction = ({ lab, world, held, focus }) => {
+  // The extinguisher sprays wherever the player aims, so it needs no target under the crosshair.
+  if (held?.typeId === "extinguisher") {
+    const charge = lab.device(held.id)?.chargeS ?? 0;
+    return charge > 0.05 ? hold("spray", "Purkash", null) : blocked("spray", "O't o'chirgich bo'shadi", null);
+  }
   const target = focus?.objectId ? world.get(focus.objectId) : null;
   if (!target) return null;
   if (!held) return deviceAction(lab, target, focus.part);
@@ -151,11 +158,6 @@ export const resolveAction = ({ lab, world, held, focus }) => {
 };
 
 const flash = (world, text) => world.flash(text);
-
-const pushNote = (lab, item) => {
-  const current = lab.feed.get();
-  lab.feed.set({ ...current, items: [...current.items, { ...item, at: lab.now() }].slice(-4) });
-};
 
 // Absorbed share of bubbled gas: reactive solutions soak most of it up, plain water very little.
 const absorption = (m, species) => {
@@ -266,7 +268,7 @@ export const runClick = (action, { lab, world, held }) => {
       if (sulfuricFraction(mixture) > 0.8) color = "#1a1a1a";
       else if (nitricFraction(mixture) > 0.5) color = "#d9c24a";
       lab.setDevice(held.id, { strip: { color, ph } });
-      pushNote(lab, { kind: "ph", ph, word: phWord(ph), color, simId: target.id });
+      pushFeed(lab, { kind: "ph", ph, word: phWord(ph), color, simId: target.id });
       return;
     }
     case "ignite":
@@ -293,8 +295,28 @@ const pourRate = (holdS, sourceTypeId) => {
   return Math.min(max, 1.2 + t * t * 7);
 };
 
+const SPRAY_NOSE = 0.42;
+const SPRAY_DROP = 0.12;
+
+// CO2 jet from the horn: puts out puddle fires and floods whatever it covers with cold carbon dioxide.
+const spray = (lab, held, dt) => {
+  const device = lab.device(held.id);
+  const from = lab.activity.cameraPosition;
+  const dir = lab.activity.cameraDirection;
+  if (!device || !from || !dir || device.chargeS <= 0) return;
+  device.chargeS = Math.max(0, device.chargeS - dt);
+  const origin = [from[0] + dir[0] * SPRAY_NOSE, from[1] + dir[1] * SPRAY_NOSE - SPRAY_DROP, from[2] + dir[2] * SPRAY_NOSE];
+  lab.hazards.sprayAt(origin, dir);
+  lab.activity.spray = { sourceId: held.id, origin, direction: [...dir], chargeS: device.chargeS };
+  if (device.chargeS <= 0) pushFeed(lab, { kind: "note", text: "O't o'chirgich bo'shadi" });
+};
+
 // Continuous actions while the left button is held; `state` persists for this press.
 export const runHold = (action, { lab, world, held }, dt, state) => {
+  if (action.id === "spray") {
+    spray(lab, held, dt);
+    return;
+  }
   const target = world.get(action.targetId);
   if (!target) return;
   const activity = lab.activity;
@@ -318,9 +340,23 @@ export const runHold = (action, { lab, world, held }, dt, state) => {
       };
       if (heldSubstance) lab.device(held.id).capOn = false;
       if (ml <= EPS) {
-        if (rate > 0 && free <= 0.05 && !state.fullNoted) {
-          state.fullNoted = true;
-          world.flash("Idish to'ldi");
+        // A full target means the rest of the pour runs down the outside of the glass.
+        if (rate > 0 && free <= 0.05) {
+          if (!state.fullNoted) {
+            state.fullNoted = true;
+            world.flash("Idish to'ldi");
+          }
+          const overflow = Math.min(rate * dt, available);
+          if (overflow > EPS) {
+            const spilled = heldSubstance
+              ? reagentPortion(heldSubstance.id, overflow, { label: heldSubstance.formula })
+              : takePortion(lab.mixture(held.id), overflow);
+            if (heldSubstance) {
+              const device = lab.device(held.id);
+              device.remaining = Math.max(0, device.remaining - overflow / heldSubstance.container.fillMl);
+            }
+            spillPortion(lab, spilled, target.position);
+          }
         }
         return;
       }
@@ -361,7 +397,7 @@ export const runHold = (action, { lab, world, held }, dt, state) => {
         lamp.dousing = Math.min(1, lamp.dousing + dt * 1.8);
         if (lamp.dousing >= 1 && lamp.lit) {
           lab.setDevice(target.id, { lit: false, dousing: 0 });
-          pushNote(lab, { kind: "note", text: "CO₂ oqimida alanga o'chdi" });
+          pushFeed(lab, { kind: "note", text: "CO₂ oqimida alanga o'chdi" });
         }
       } else if (species === "O2") {
         lamp.boost = 1.5;
@@ -416,15 +452,18 @@ export const endHold = (action, { lab, held }) => {
     if (held) lab.device(held.id).targetId = null;
     activity.measure = null;
   }
+  if (action.id === "spray") activity.spray = null;
   if (action.id === "heat-in-flame") activity.heat = null;
   if (action.id === "immerse") activity.immerse = null;
 };
 
 // Publishes this frame's aim and running action for the hand poses, effects and runtime.
-export const noteActivity = (lab, running, aim) => {
+export const noteActivity = (lab, running, aim, eye, direction) => {
   const activity = lab.activity;
   activity.action = running;
   activity.aim = aim;
+  activity.cameraPosition = [eye.x, eye.y, eye.z];
+  activity.cameraDirection = [direction.x, direction.y, direction.z];
   if (activity.ignite && lab.now() > activity.ignite.until) activity.ignite = null;
 };
 
@@ -434,5 +473,5 @@ const HOT_TOUCH_C = 60;
 export const warnIfHot = (lab, objectId) => {
   const mixture = lab.mixture(objectId);
   if (!mixture || mixture.tempC < HOT_TOUCH_C) return;
-  pushNote(lab, { kind: "warning", id: "hot-glass", simId: objectId });
+  pushFeed(lab, { kind: "warning", id: "hot-glass", simId: objectId });
 };

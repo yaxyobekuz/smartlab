@@ -57,6 +57,11 @@ const substanceBody = (substance) => {
   return { shape: "cylinder", radius: 0.033, height: 0.442, breaks: null };
 };
 
+// Wall fittings the player takes off their bracket instead of out of the cabinet.
+export const FIXTURES = {
+  extinguisher: { name: "O't o'chirgich", body: { shape: "cylinder", radius: 0.078, height: 0.53, heavy: true } },
+};
+
 const cache = new Map();
 
 export const objectType = (typeId) => {
@@ -67,6 +72,8 @@ export const objectType = (typeId) => {
     if (substance) type = { kind: "substance", name: substance.name, substance, body: substanceBody(substance) };
   } else if (EQUIPMENT_BY_ID[typeId]) {
     type = { kind: "equipment", name: EQUIPMENT_BY_ID[typeId].name, body: EQUIPMENT_BODIES[typeId] };
+  } else if (FIXTURES[typeId]) {
+    type = { kind: "fixture", name: FIXTURES[typeId].name, body: FIXTURES[typeId].body };
   }
   cache.set(typeId, type);
   return type;

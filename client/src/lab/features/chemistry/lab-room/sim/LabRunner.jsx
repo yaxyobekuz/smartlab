@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Euler, Quaternion, Vector3 } from "three";
 import { SUBSTANCE_BY_ID } from "../substances/catalog";
@@ -6,15 +6,21 @@ import { SUBSTANCE_PREFIX } from "../world/objectTypes";
 import { SPECIES } from "../chemistry/species";
 import { addAq, addGas, addSolid, massG } from "../chemistry/mixture";
 import { CONTAINERS, EMPTY_MASS_G } from "./containers";
+import { spillMixture } from "./spills";
+import { inFumeHood } from "../hazards/hazardStore";
+import { pushFeed, warnOnce } from "./feed";
+import { seedHazards } from "../hazards/hazardScenarios";
 
 const STEP = 1 / 30;
 const MAX_STEPS = 4;
 const ROOM_C = 22;
-const FEED_LIMIT = 4;
 const TOXIC_NOTICE_S = 15;
 const LAMP_UNDER_RING_W = 120;
 const FLAME_W = 150;
 const HOT_PLATE_LEVELS = [22, 50, 100, 200, 300];
+// A 5 kg CO₂ extinguisher empties in about a quarter of a minute.
+const EXTINGUISHER_S = 14;
+const SPILL_NOTICE_ML = 3;
 
 const DEVICE_DEFAULTS = {
   "spirit-lamp": () => ({ lit: false, capOn: true, fuelMl: 60, boost: 0, dousing: 0 }),
@@ -27,6 +33,7 @@ const DEVICE_DEFAULTS = {
   "crucible-tongs": () => ({ piece: null }),
   "ph-paper": () => ({ strip: null }),
   funnel: () => ({ solidsMl: 0, solidsColor: "#f5f5f0", wet: 0 }),
+  extinguisher: () => ({ chargeS: EXTINGUISHER_S }),
 };
 
 const sourceDefaults = (substance) =>
@@ -63,6 +70,23 @@ const syncEntities = (world, lab, known) => {
     lab.removeDevice(id);
   }
 };
+
+// Heat a container takes from nearby fires on the bench.
+const fireHeatAt = (lab, position) => {
+  if (!position) return 0;
+  let watts = 0;
+  for (const fire of lab.hazards.fires()) {
+    const d = Math.hypot(fire.position[0] - position[0], fire.position[2] - position[2]);
+    watts += Math.min(90, (40 * Math.min(1, fire.flammableMl / 3)) / Math.max(0.09, d * d));
+  }
+  return Math.min(160, watts);
+};
+
+// Magnesium and sodium keep burning in carbon dioxide, so the jet cannot put them out.
+const BURNS_IN_CO2 = new Set(["Mg", "Na"]);
+
+const burningMetal = (mixture) =>
+  Boolean(mixture?.solids.some((s) => BURNS_IN_CO2.has(s.species) && (s.state?.burning || s.state?.molten)));
 
 const inBox = (position, anchor) => {
   if (!anchor || !position) return false;
@@ -198,6 +222,17 @@ const contextFor = (world, lab, meta) => (entry) => {
     }
   }
   if (activity.ignite?.simId === entry.simId) ctx.flame = activity.ignite.kind ?? "lamp";
+  const fireW = fireHeatAt(lab, position);
+  if (fireW > 0) {
+    ctx.heatW = (ctx.heatW ?? 0) + fireW;
+    if (fireW > 40) ctx.flame = ctx.flame ?? "burning";
+  }
+  if (lab.hazards.sprayCovers(position)) {
+    ctx.sprayed = true;
+    ctx.flame = null;
+    ctx.heatW = 0;
+    if (burningMetal(lab.mixture(entry.simId))) warnOnce(lab, "metal-fire", 60, { simId: entry.simId });
+  }
   const immerse = activity.immerse?.simId === entry.simId ? lab.mixture(activity.immerse.jarId) : null;
   if (immerse) {
     const space = Math.max(1, immerse.capacityMl - immerse.volumeMl);
@@ -209,21 +244,12 @@ const contextFor = (world, lab, meta) => (entry) => {
       Cl2: fraction("Cl2"),
       H2: fraction("H2"),
     };
+  } else if (ctx.sprayed) {
+    ctx.atmosphere = { O2: 0.02, CO2: 0.95, Cl2: 0, H2: 0 };
   } else {
     ctx.atmosphere = { O2: 0.21, CO2: 0, Cl2: 0, H2: 0 };
   }
   return ctx;
-};
-
-const pushFeed = (lab, item) => {
-  const current = lab.feed.get();
-  const items = [...current.items, { ...item, at: lab.now() }].slice(-FEED_LIMIT);
-  const next = { ...current, items };
-  if (item.kind === "reaction") {
-    next.monitor = item.id;
-    next.history = [item.id, ...current.history.filter((id) => id !== item.id)].slice(0, 6);
-  }
-  lab.feed.set(next);
 };
 
 const handleEvents = (world, lab, events, meta, notices) => {
@@ -232,7 +258,8 @@ const handleEvents = (world, lab, events, meta, notices) => {
     if (event.type === "reaction") pushFeed(lab, { kind: "reaction", id: event.id, simId: event.simId });
     else if (event.type === "warning") pushFeed(lab, { kind: "warning", id: event.id, simId: event.simId });
     else if (event.type === "gas") {
-      if (inBox(position, meta?.anchors?.fumehood_work_surface)) continue;
+      if (position) lab.hazards.addGas(event.species, position, event.mmol);
+      if (position && inFumeHood(position) && lab.hazards.devices.hoodFan) continue;
       const last = notices.get(event.species) ?? -Infinity;
       if (lab.now() - last < TOXIC_NOTICE_S) continue;
       notices.set(event.species, lab.now());
@@ -246,10 +273,17 @@ const handleEvents = (world, lab, events, meta, notices) => {
           at: lab.now(),
         });
       }
-      if (event.type === "bang" && position) world.knock(position, event.radius ?? 1.5, event.strength ?? 1, event.simId);
+      if (event.type === "bang" && position) {
+        world.knock(position, event.radius ?? 1.5, event.strength ?? 1, event.simId);
+        lab.hazards.blast(Math.min(1, event.strength ?? 1));
+      }
+      if (event.type === "ignite" && position) lab.hazards.igniteNear(position);
+    } else if (event.type === "spatter") {
+      if (position) spillMixture(lab, event.simId, position, { fraction: Math.min(0.3, 0.08 * (event.radius ?? 1)) });
     } else if (event.type === "shatter") {
       const object = world.get(event.simId);
       if (!object || object.state === "held") continue;
+      spillMixture(lab, event.simId, object.position);
       tmpQuat.setFromEuler(new Euler(...object.rotation));
       world.shatter(event.simId, object.position, [tmpQuat.x, tmpQuat.y, tmpQuat.z, tmpQuat.w], [0, 0.6, 0]);
     }
@@ -258,9 +292,31 @@ const handleEvents = (world, lab, events, meta, notices) => {
   while (lab.flashes.length && lab.flashes[0].at < cutoff) lab.flashes.shift();
 };
 
+// Open flames in containers can set a nearby spill alight and feed the room's fire state.
+const stepHazards = (world, lab, dt) => {
+  const fires = [];
+  const heatSources = [];
+  for (const object of world.store.get().objects) {
+    const visual = lab.visual(object.id);
+    const flame = visual?.fx?.flame;
+    const position = positionOf(world, lab, object.id);
+    if (flame && position) {
+      fires.push({ position, power: flame.intensity ?? 1, flammableMl: 2 });
+      heatSources.push({ position, hot: true });
+    }
+    if (object.typeId === "spirit-lamp" && lab.device(object.id)?.lit && position) {
+      heatSources.push({ position: [position[0], position[1] + 0.1, position[2]], hot: true });
+    }
+  }
+  const events = lab.hazards.step(dt, { playerPosition: lab.activity.cameraPosition, containerFires: fires, heatSources });
+  if (lab.hazards.puddles.some((p) => p.ml > SPILL_NOTICE_ML)) warnOnce(lab, "spill", 60);
+  for (const event of events) {
+    if (event.type === "alarm") pushFeed(lab, { kind: "warning", id: event.reason === "fire" ? "fire-alarm" : "gas-alarm" });
+  }
+};
+
 // Runs the fixed-step loop for one rendered frame; `runner` is the component's mutable loop state.
-const advanceFrame = (world, lab, meta, runner, camera, delta) => {
-  lab.activity.cameraPosition = camera.getWorldPosition(tmpVec).toArray();
+const advanceFrame = (world, lab, meta, runner, delta) => {
   if (runner.generation !== lab.generation()) {
     runner.generation = lab.generation();
     runner.known = new Set();
@@ -275,14 +331,19 @@ const advanceFrame = (world, lab, meta, runner, camera, delta) => {
     consumeJarGas(lab, STEP);
     tubeBubbles(lab);
     handleEvents(world, lab, events, meta, runner.notices);
+    stepHazards(world, lab, STEP);
   }
 };
 
 // Advances every mixture and device at a fixed 30 Hz and turns engine events into HUD, lights and world changes.
-const LabRunner = ({ world, lab, meta }) => {
+const LabRunner = ({ world, lab, meta, hazardSeed = null }) => {
   const runner = useRef({ acc: 0, known: new Set(), generation: -1, notices: new Map() });
 
-  useFrame(({ camera }, delta) => advanceFrame(world, lab, meta, runner.current, camera, delta), 0.55);
+  useEffect(() => {
+    if (hazardSeed) seedHazards(lab, hazardSeed);
+  }, [lab, hazardSeed]);
+
+  useFrame((_, delta) => advanceFrame(world, lab, meta, runner.current, delta), 0.55);
 
   return null;
 };

@@ -137,6 +137,20 @@ export const FLAME_KINDS = {
     flicker: 0.08, sway: 0.002,
     shimmer: 1,
   },
+  // A burning pool of spirit on the bench or the floor: wide, lazy and smoky.
+  puddle: {
+    size: (r) => {
+      const radius = Math.max(0.05, Math.min(0.34, r * 0.95));
+      return [radius, Math.max(0.14, Math.min(0.5, radius * 1.5))];
+    },
+    pool: 1, turb: 0.42, freq: 15, rise: 0.5, base: 1, hollow: 0,
+    cone: 0, shell: 1, body: 0.5, core: 0,
+    blue: hdr("#79a8ff", 0.7), bodyColor: hdr("#ffb257", 0.75), tipColor: hdr("#ffd79a", 0.6), coreColor: BLACK,
+    flicker: 0.12, sway: 0.004,
+    shimmer: 1,
+    light: { color: "#ff9a42", intensity: 0.08, distance: 4 },
+    glow: { color: "#ff9440", intensity: [0.2, 0.8], size: 0.35 },
+  },
   magnesium: {
     size: () => [0.0055, 0.016],
     pool: 0, turb: 0.5, freq: 60, rise: 0.35, base: 0.9, hollow: 0.1,

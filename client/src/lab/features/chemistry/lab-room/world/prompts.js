@@ -60,10 +60,11 @@ export const PROMPTS = {
   progress: (info) =>
     info && { key: `progress:${info.title}:${info.subtitle}`, title: info.title, subtitle: info.subtitle, actions: [] },
 
-  monitor: () => ({
-    key: "monitor",
-    title: "Laboratoriya kompyuteri",
-    subtitle: "Oxirgi reaksiya haqida ma'lumot",
-    actions: [{ keys: [LMB], label: "O'qish" }],
+  // Wall fittings: the computer screen, the fan switches and the extinguisher bracket.
+  panel: (hit) => ({
+    key: `panel:${hit.id}:${hit.label}`,
+    title: hit.panel.title,
+    subtitle: hit.subtitle,
+    actions: [{ keys: [LMB], label: hit.label, disabled: Boolean(hit.disabled) }],
   }),
 };

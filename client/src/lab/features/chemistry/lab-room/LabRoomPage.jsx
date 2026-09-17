@@ -18,11 +18,12 @@ import CabinetMenu from "./components/CabinetMenu";
 import { BENCH_LAYOUT } from "./equipment/layout";
 import { EQUIPMENT } from "./equipment/catalog";
 import { SUBSTANCES } from "./substances/catalog";
-import { SUBSTANCE_PREFIX } from "./world/objectTypes";
+import { FIXTURES, SUBSTANCE_PREFIX } from "./world/objectTypes";
 import { createWorld } from "./world/worldStore";
 import { createThumbnailStore } from "./world/thumbnailStore";
 import { createLab } from "./sim/createLab";
 import ReactionFeed from "./hud/ReactionFeed";
+import HazardOverlay from "./components/HazardOverlay";
 import MonitorReader from "./hud/MonitorReader";
 
 // Embedded frames without the pointer-lock permission can't capture the mouse.
@@ -34,9 +35,9 @@ const applyLabPrefs = (lab, settings) => {
   lab.prefs.reduceMotion = Boolean(settings.reduceMotion);
 };
 
-// Dev-only review helpers: ?debug=colliders &pose=x,z,yawDeg,pitchDeg &autostart=1 &hud=0 &showcase= &fxlab= &effects= &t= &spacing= &eye= &fov= &lm=
+// Dev-only review helpers: ?debug=colliders &pose=x,z,yawDeg,pitchDeg &autostart=1 &hud=0 &showcase= &fxlab= &effects= &hazard= &t= &spacing= &eye= &fov= &lm=
 const readDebugParams = () => {
-  const off = { colliders: false, pose: null, autostart: false, hud: true, showcase: null, fxlab: null, effects: null, t: null, eye: null, fov: null, lightmap: null, spacing: null };
+  const off = { colliders: false, pose: null, autostart: false, hud: true, showcase: null, fxlab: null, effects: null, hazard: null, t: null, eye: null, fov: null, lightmap: null, spacing: null };
   if (!import.meta.env.DEV) return off;
   const params = new URLSearchParams(window.location.search);
   const parts = params.get("pose")?.split(",").map(Number);
@@ -54,6 +55,7 @@ const readDebugParams = () => {
     showcase: params.get("showcase"),
     fxlab: params.get("fxlab"),
     effects: params.get("effects"),
+    hazard: params.get("hazard"),
     t: number("t"),
     eye: number("eye"),
     fov: number("fov"),
@@ -177,7 +179,7 @@ const LabRoomPage = () => {
 
   const handleReady = useCallback(() => {
     setters.current.setField("ready", true);
-    thumbs.request([...EQUIPMENT.map((e) => e.id), ...SUBSTANCES.map((sub) => `${SUBSTANCE_PREFIX}${sub.id}`)]);
+    thumbs.request([...EQUIPMENT.map((e) => e.id), ...Object.keys(FIXTURES), ...SUBSTANCES.map((sub) => `${SUBSTANCE_PREFIX}${sub.id}`)]);
     if (boot.debug.autostart) enterDragMode();
   }, [boot, enterDragMode, thumbs]);
 
@@ -309,6 +311,7 @@ const LabRoomPage = () => {
       {playing && boot.debug.hud && <InteractionPrompt world={world} />}
       {playing && boot.debug.hud && <Hotbar world={world} thumbs={thumbs} />}
       {playing && boot.debug.hud && <ReactionFeed lab={lab} />}
+      {playing && <HazardOverlay lab={lab} />}
       {phase === "menu" && overlay === "cabinet" && <CabinetMenu world={world} thumbs={thumbs} onClose={actions.closeCabinet} />}
       {phase === "menu" && overlay === "monitor" && <MonitorReader lab={lab} onClose={actions.closeCabinet} />}
       {playing && dragging && boot.debug.hud && <DragHint />}

@@ -40,13 +40,15 @@ test("every warning id the rules can emit has a text", () => {
     "hot-glass",
     "open-flame",
   ];
-  for (const id of ids) {
+  // Raised by the room itself (doc 16), not by a reaction rule.
+  const roomIds = ["fire-alarm", "gas-alarm", "spill", "metal-fire"];
+  for (const id of [...ids, ...roomIds]) {
     const entry = WARNING_INFO[id];
     assert.ok(entry, `missing warningInfo entry: ${id}`);
     assert.ok(entry.title && entry.text, `${id}: empty text`);
     assert.ok(DANGER.includes(entry.danger), `${id}: danger "${entry.danger}"`);
   }
-  assert.equal(Object.keys(WARNING_INFO).length, ids.length, "an unused warning text");
+  assert.equal(Object.keys(WARNING_INFO).length, ids.length + roomIds.length, "an unused warning text");
 });
 
 test("the rules of doc 14 § 3 cover every table number", () => {

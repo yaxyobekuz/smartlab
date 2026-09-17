@@ -7,6 +7,7 @@ import { bodyBounds, objectType } from "./objectTypes";
 import { poseBounds, restPose } from "./poses";
 import { PROMPTS } from "./prompts";
 import { snapCandidates } from "./snapping";
+import { panelAt, runPanel } from "./wallPanels";
 import { endHold, noteActivity, partAt, resolveAction, runClick, runHold, warnIfHot } from "../tools/actions";
 import { describeObject, formatNumber } from "../tools/describe";
 
@@ -15,6 +16,7 @@ const MENU_REACH = 4.5;
 const MIN_UP = 0.85;
 
 const tmpDir = new Vector3();
+const tmpEye = new Vector3();
 const tmpRight = new Vector3();
 const tmpLocal = new Vector3();
 const tmpQuat = new Quaternion();
@@ -34,17 +36,6 @@ const toLocal = (object, point) => {
   return [tmpLocal.x, tmpLocal.y, tmpLocal.z];
 };
 
-// The lab computer screen is part of the baked room, so it is hit-tested as a rectangle facing the benches.
-const monitorAlong = (anchor, origin, direction, limit) => {
-  if (!anchor || Math.abs(direction.z) < 1e-4) return null;
-  const [x, y, z] = anchor.position;
-  const t = (z - origin.z) / direction.z;
-  if (t <= 0 || t > limit) return null;
-  const hx = origin.x + direction.x * t - x;
-  const hy = origin.y + direction.y * t - y;
-  return Math.abs(hx) <= anchor.size[0] / 2 && Math.abs(hy) <= anchor.size[1] / 2 ? t : null;
-};
-
 const sameAction = (a, b) => Boolean(a && b && a.id === b.id && a.targetId === b.targetId);
 
 const pourTitle = (lab, activity) => {
@@ -57,7 +48,7 @@ const pourTitle = (lab, activity) => {
 };
 
 // Frame-driven aiming, tool actions, placement checks and the discrete actions (take, put down, drop, slots).
-const WorldInteraction = ({ world, lab, inputRef, activeRef, monitor, onMonitor }) => {
+const WorldInteraction = ({ world, lab, inputRef, activeRef, anchors, onMonitor }) => {
   const { world: physics, rapier } = useRapier();
   const camera = useThree((s) => s.camera);
   const markerRef = useRef(null);
@@ -154,14 +145,14 @@ const WorldInteraction = ({ world, lab, inputRef, activeRef, monitor, onMonitor 
     const active = activeRef.current && !drag;
 
     let focus = null;
-    let monitorFocus = false;
+    let panel = null;
     let action = null;
     if (active) {
       focus = queries.objectAlong(camera.position, tmpDir);
-      const monitorAt = monitorAlong(monitor, camera.position, tmpDir, REACH + 0.4);
-      monitorFocus = monitorAt != null && (!focus || monitorAt < focus.distance);
-      if (monitorFocus) focus = null;
-      action = resolveAction({ lab, world, held, focus });
+      const hit = panelAt({ anchors, lab, world, held, origin: camera.position, direction: tmpDir, limit: REACH + 0.4 });
+      panel = hit && (!focus || hit.distance < focus.distance) ? hit : null;
+      if (panel) focus = null;
+      action = panel ? null : resolveAction({ lab, world, held, focus });
     }
 
     let placement = null;
@@ -177,8 +168,9 @@ const WorldInteraction = ({ world, lab, inputRef, activeRef, monitor, onMonitor 
     if (active) {
       for (const event of events) {
         if (event.type === "primary") {
-          if (monitorFocus && !held) onMonitor?.();
-          else if (action?.mode === "click") runClick(action, env);
+          if (panel) {
+            if (runPanel(panel, env) === "monitor") onMonitor?.();
+          } else if (action?.mode === "click") runClick(action, env);
           else if (action?.mode === "hold") {
             holding.armed = action.valid;
             if (!action.valid) world.flash(action.label);
@@ -220,7 +212,7 @@ const WorldInteraction = ({ world, lab, inputRef, activeRef, monitor, onMonitor 
       holding.heldId = held?.id ?? null;
     }
     if (holding.action) runHold(holding.action, env, Math.min(delta, 0.1), holding.state);
-    noteActivity(lab, holding.action, action);
+    noteActivity(lab, holding.action, action, camera.getWorldPosition(tmpEye), tmpDir);
 
     const target = held ?? (drag ? { typeId: drag.typeId } : null);
     if (marker) {
@@ -241,8 +233,8 @@ const WorldInteraction = ({ world, lab, inputRef, activeRef, monitor, onMonitor 
     const subtitle = describeObject(lab, focusObject);
     if (holding.action?.id === "pour" && lab.activity.pour) {
       world.setPrompt(PROMPTS.progress(pourTitle(lab, lab.activity.pour)));
-    } else if (monitorFocus && !held) {
-      world.setPrompt(PROMPTS.monitor());
+    } else if (panel) {
+      world.setPrompt(PROMPTS.panel(panel));
     } else if (action) {
       world.setPrompt(PROMPTS.action(action, focusObject, subtitle, held));
     } else if (held) {

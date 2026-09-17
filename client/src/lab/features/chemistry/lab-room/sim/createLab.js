@@ -1,5 +1,6 @@
 import { createSnapStore } from "@/shared/utils/snapStore";
 import { appearance } from "../chemistry/appearance";
+import { createHazards } from "../hazards/hazardStore";
 import { createMixture } from "../chemistry/mixture";
 import { stepMixture } from "../chemistry/engine";
 import { CONTAINERS } from "./containers";
@@ -24,12 +25,16 @@ export const createLab = () => {
   const lab = {
     // Player settings effects must honour (reduceMotion dims flashes and shakes).
     prefs: { reduceMotion: false },
+    // Spills, fires, room gas and the alarm.
+    hazards: createHazards(),
     // What the player is doing this frame (pouring, heating, stirring…); written by the interaction system.
     activity: {},
     // Reaction pop-ups, warnings and the monitor's current reaction.
     feed: createSnapStore({ items: [], monitor: null, history: [] }),
     // Short-lived world-space light flashes (pops, bangs, ignition).
     flashes: [],
+    // When each repeatable warning was last shown, so toasts don't repeat every step.
+    notices: new Map(),
     queueMix: (simId, result) => {
       if (!result) return;
       if (!pendingMixes.has(simId)) pendingMixes.set(simId, []);
@@ -104,8 +109,10 @@ export const createLab = () => {
       containers.clear();
       devices.clear();
       pendingMixes.clear();
+      lab.hazards.reset();
       lab.activity = {};
       lab.flashes.length = 0;
+      lab.notices.clear();
       lab.feed.set({ items: [], monitor: null, history: [] });
       for (const simId of listeners.keys()) notify(simId);
       now = 0;

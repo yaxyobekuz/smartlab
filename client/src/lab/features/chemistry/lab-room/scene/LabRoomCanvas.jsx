@@ -24,11 +24,16 @@ import { LabContext } from "../sim/labContext";
 import LabRunner from "../sim/LabRunner";
 import ToolEffects from "../tools/ToolEffects";
 import LabMonitor from "../hud/LabMonitor";
+import Puddles from "../hazards/Puddles";
+import GasHaze from "../hazards/GasHaze";
+import RoomFixtures from "../hazards/RoomFixtures";
 
 const FPS_WINDOW = 0.5;
 
-const exposeRendererInDev = ({ gl }) => {
-  if (import.meta.env.DEV) window.__labRoomGl = gl;
+const exposeRendererInDev = ({ gl, scene }) => {
+  if (!import.meta.env.DEV) return;
+  window.__labRoomGl = gl;
+  window.__labScene = scene;
 };
 
 const FpsMeter = ({ store }) => {
@@ -109,19 +114,22 @@ const LabRoomCanvas = ({
               ) : (
                 <>
                   <WorldSurfaces boxes={manifest.boxes} anchors={meta.anchors} />
-                  <WorldObjects world={world} />
+                  <WorldObjects world={world} lab={lab} />
                   <Shards world={world} />
                   <WorldInteraction
                     world={world}
                     lab={lab}
                     inputRef={inputRef}
                     activeRef={activeRef}
-                    monitor={meta.anchors?.monitor_screen}
+                    anchors={meta.anchors}
                     onMonitor={onMonitor}
                   />
-                  <LabRunner world={world} lab={lab} meta={meta} />
+                  <LabRunner world={world} lab={lab} meta={meta} hazardSeed={debug.hazard} />
                   <ToolEffects lab={lab} />
                   <LabMonitor lab={lab} anchor={meta.anchors?.monitor_screen} />
+                  <Puddles lab={lab} />
+                  <GasHaze lab={lab} />
+                  <RoomFixtures lab={lab} world={world} enabled={!placeholder} />
                 </>
               )}
             </Physics>

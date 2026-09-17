@@ -10,9 +10,14 @@ import { CONTAINERS } from "../sim/containers";
 
 const BLEND_S = 0.12;
 
+// Wall fittings are carried low, at arm's length, so they don't fill half the view.
+const FIXTURE_POSE = { position: [0.3, -0.72, -0.78], rotation: [0.2, -1.05, -0.12] };
+
 // Hand position in camera space: lower right, far enough to stay out of the near plane.
 const handPose = (typeId) => {
-  const { half, center } = bodyBounds(objectType(typeId).body);
+  const type = objectType(typeId);
+  if (type.kind === "fixture") return FIXTURE_POSE;
+  const { half, center } = bodyBounds(type.body);
   const size = Math.max(half[0], half[1], half[2]) * 2;
   const lying = half[0] > half[1] * 2.5;
   return {

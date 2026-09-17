@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Vector3 } from "three";
 import { FlashLight, GasTube, PourStream } from "../effects";
+import Co2Jet from "../effects/Co2Jet";
 
 const FLASH_S = 0.45;
 const pourFrom = new Vector3();
@@ -50,6 +51,7 @@ const ToolEffects = ({ lab }) => {
   return (
     <>
       <PourStream get={() => pourParams(lab)} />
+      <Co2Jet lab={lab} />
       <GasTube get={() => gasParams(lab)} />
       <group ref={flashGroup}>
         <FlashLight origin={[0, 0, 0]} get={() => flashParams(lab)} />

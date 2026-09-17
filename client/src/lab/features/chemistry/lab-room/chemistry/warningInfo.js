@@ -35,6 +35,26 @@ export const WARNING_INFO = {
     text: "Shisha issiqligini ko'rsatmaydi. Qisqich yoki probirka ushlagichdan foydalaning, issiq idishni sovuq yuzaga yoki suvga qo'ymang — yorilib ketadi.",
     danger: "o'rta",
   },
+  "fire-alarm": {
+    title: "Yong'in signali!",
+    text: "Xonada olov tarqalmoqda. Devordagi o't o'chirgichni oling va chap tugmani bosib turib olov tubiga purkang, yonuvchan idishlarni olib qo'ying, shamollatgichni yoqing.",
+    danger: "yuqori",
+  },
+  "gas-alarm": {
+    title: "Havoda zaharli gaz — signal",
+    text: "Xona havosidagi gaz miqdori xavfli darajaga chiqdi. Xona shamollatgichini va mo'rili shkaf so'rg'ichini yoqing, gaz ajratayotgan idishni shkaf ichiga qo'ying, eshik tomon chiqing.",
+    danger: "yuqori",
+  },
+  spill: {
+    title: "Suyuqlik to'kildi",
+    text: "To'kilgan joyni darhol tozalang: kislotani avval ko'p suv bilan suyultiring, keyin latta bilan arting. Spirt to'kilgan bo'lsa, yaqindagi alangani o'chiring — u tez alangalanadi.",
+    danger: "o'rta",
+  },
+  "metal-fire": {
+    title: "Yonayotgan metallni CO₂ o'chirmaydi",
+    text: "Magniy va natriy karbonat angidrid ichida ham yonaveradi, suv quyilsa portlaydi. Bunday olov quruq qum yoki maxsus D-sinf o't o'chirgich bilan bostiriladi.",
+    danger: "yuqori",
+  },
   "open-flame": {
     title: "Ochiq alanga bilan ishlamoqdasiz",
     text: "Yonuvchan suyuqliklar (spirt, glitserin) va qog'ozni alangadan uzoqqa olib qo'ying, sochni yig'ing. O'chirish uchun plastinka yoki o't o'chirgich tayyor tursin.",
