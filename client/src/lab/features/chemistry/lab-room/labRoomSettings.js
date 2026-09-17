@@ -8,8 +8,8 @@ export const DEFAULT_SETTINGS = {
 };
 
 export const TIERS = {
-  high: { dpr: [1, 1.75], antialias: false, effects: true, lightmap: "high", envSize: 256 },
-  low: { dpr: 1, antialias: true, effects: false, lightmap: "low", envSize: 128 },
+  high: { dpr: [1, 1.75], effects: true, lightmap: "high", envSize: 256 },
+  low: { dpr: 1, effects: false, lightmap: "low", envSize: 256 },
 };
 
 export const loadSettings = () => {

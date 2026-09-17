@@ -21,7 +21,7 @@ import {
 const MAX_DT = 0.1;
 
 // Kinematic capsule + Rapier character controller; the camera is the player's eyes.
-const Player = ({ meta, inputRef, activeRef, settingsRef, poseRef, resetRef }) => {
+const Player = ({ meta, inputRef, activeRef, settingsRef, poseRef, resetRef, eyeHeight }) => {
   const bodyRef = useRef(null);
   const colliderRef = useRef(null);
   const motion = useRef({ ready: false, resetToken: 0, yaw: 0, pitch: 0, vx: 0, vz: 0, phase: 0, bob: 0 });
@@ -95,7 +95,8 @@ const Player = ({ meta, inputRef, activeRef, settingsRef, poseRef, resetRef }) =
     const sway = Math.sin(m.phase) * m.bob * 0.5;
     const cos = Math.cos(m.yaw);
     const sin = Math.sin(m.yaw);
-    state.camera.position.set(x + cos * sway, EYE_HEIGHT + Math.sin(m.phase * 2) * m.bob, z - sin * sway);
+    const eye = eyeHeight ?? EYE_HEIGHT;
+    state.camera.position.set(x + cos * sway, eye + Math.sin(m.phase * 2) * m.bob, z - sin * sway);
     state.camera.rotation.set(m.pitch, m.yaw, 0, "YXZ");
 
     poseRef.current = { x, z, yaw: m.yaw, pitch: m.pitch };

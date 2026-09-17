@@ -11,19 +11,29 @@ import {
 // One knob for overall brightness so High (post-processing) and Low (renderer) tone map the same scene.
 export const EXPOSURE = 1;
 
-// The baked lightmap already contains the room's bounce light; drop the environment's diffuse part
-// on lightmapped surfaces so it isn't counted twice (specular reflections still come from it).
+// Baked surfaces already hold bounce light, so drop the environment's diffuse part (keep its reflections).
 const LIGHTMAP_FRAGMENT = ShaderChunk.lights_fragment_maps.replace(
   "iblIrradiance += getIBLIrradiance( geometryNormal );",
   "",
 );
 
+// Real-time lights exist only for the equipment; baked surfaces already contain the room's lighting.
+const NO_DIRECT_LIGHTS = ShaderChunk.lights_fragment_begin
+  .replaceAll(
+    "RE_Direct( directLight, geometryPosition, geometryNormal, geometryViewDir, geometryClearcoatNormal, material, reflectedLight );",
+    "",
+  )
+  .replace("irradiance += getHemisphereLightIrradiance( hemisphereLights[ i ], geometryNormal );", "");
+
+// The environment BRDF fit dips below zero at grazing angles; negative HDR pixels turn into black blobs after FXAA.
+const CLAMPED_OUTPUT = "#include <opaque_fragment>\ngl_FragColor.rgb = max( gl_FragColor.rgb, vec3( 0.0 ) );";
+
 const patchLightmapped = (material) => {
   material.onBeforeCompile = (shader) => {
-    shader.fragmentShader = shader.fragmentShader.replace(
-      "#include <lights_fragment_maps>",
-      LIGHTMAP_FRAGMENT,
-    );
+    shader.fragmentShader = shader.fragmentShader
+      .replace("#include <lights_fragment_begin>", NO_DIRECT_LIGHTS)
+      .replace("#include <lights_fragment_maps>", LIGHTMAP_FRAGMENT)
+      .replace("#include <opaque_fragment>", CLAMPED_OUTPUT);
   };
   material.customProgramCacheKey = () => "lab-room-lightmapped";
 };

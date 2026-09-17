@@ -18,20 +18,28 @@ const pointerLockBlocked = () => document.featurePolicy?.allowsFeature?.("pointe
 
 const DEG = Math.PI / 180;
 
-// Dev-only review helpers: ?debug=colliders, ?pose=x,z,yawDeg,pitchDeg, ?autostart=1, ?hud=0
+// Dev-only review helpers: ?debug=colliders &pose=x,z,yawDeg,pitchDeg &autostart=1 &hud=0 &showcase= &spacing= &eye= &fov= &lm=
 const readDebugParams = () => {
-  if (!import.meta.env.DEV) return { colliders: false, pose: null, autostart: false, hud: true };
+  const off = { colliders: false, pose: null, autostart: false, hud: true, showcase: null, eye: null, fov: null, lightmap: null, spacing: null };
+  if (!import.meta.env.DEV) return off;
   const params = new URLSearchParams(window.location.search);
   const parts = params.get("pose")?.split(",").map(Number);
   const pose =
     parts?.length === 4 && parts.every(Number.isFinite)
       ? { x: parts[0], z: parts[1], yaw: parts[2] * DEG, pitch: parts[3] * DEG }
       : null;
+  const number = (key) => (params.has(key) && Number.isFinite(Number(params.get(key))) ? Number(params.get(key)) : null);
   return {
+    ...off,
     colliders: params.get("debug") === "colliders",
     pose,
     autostart: params.get("autostart") === "1",
     hud: params.get("hud") !== "0",
+    showcase: params.get("showcase"),
+    eye: number("eye"),
+    fov: number("fov"),
+    lightmap: ["high", "low"].includes(params.get("lm")) ? params.get("lm") : null,
+    spacing: number("spacing"),
   };
 };
 
@@ -213,7 +221,7 @@ const LabRoomPage = () => {
           poseRef={poseRef}
           resetRef={resetRef}
           fpsStore={fpsStore}
-          debugColliders={boot.debug.colliders}
+          debug={boot.debug}
           onReady={handleReady}
         />
       )}
