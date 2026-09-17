@@ -54,7 +54,7 @@ export const createLiquidMaterial = ({ color = "#0d2230", opacity = 0.08 } = {})
 
 const standard = (params) => new MeshStandardMaterial(params);
 
-export const createKitMaterials = () => {
+export const createKitMaterials = ({ printScale = 1 } = {}) => {
   const materials = {
     glass: createGlass(),
     porcelainGlazed: new MeshPhysicalMaterial({
@@ -82,6 +82,8 @@ export const createKitMaterials = () => {
   return {
     ...materials,
     blobTexture,
+    // Low tier draws substance labels at half resolution to save GPU memory on integrated graphics.
+    printScale,
     // Print materials are per texture (graduations differ per vessel), cached so remounts reuse them.
     print: (key, createTexture) => {
       if (!printCache.has(key)) printCache.set(key, createPrint(createTexture()));

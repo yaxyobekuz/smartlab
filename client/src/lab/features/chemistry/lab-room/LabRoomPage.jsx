@@ -12,6 +12,15 @@ import StartScreen from "./components/StartScreen";
 import PauseMenu from "./components/PauseMenu";
 import DeviceNotice from "./components/DeviceNotice";
 import { Crosshair, DragHint, FpsBadge } from "./components/HudOverlays";
+import Hotbar from "./components/Hotbar";
+import InteractionPrompt from "./components/InteractionPrompt";
+import CabinetMenu from "./components/CabinetMenu";
+import { BENCH_LAYOUT } from "./equipment/layout";
+import { EQUIPMENT } from "./equipment/catalog";
+import { SUBSTANCES } from "./substances/catalog";
+import { SUBSTANCE_PREFIX } from "./world/objectTypes";
+import { createWorld } from "./world/worldStore";
+import { createThumbnailStore } from "./world/thumbnailStore";
 
 // Embedded frames without the pointer-lock permission can't capture the mouse.
 const pointerLockBlocked = () => document.featurePolicy?.allowsFeature?.("pointer-lock") === false;
@@ -52,6 +61,8 @@ const LabRoomPage = () => {
     debug: readDebugParams(),
   }));
   const [fpsStore] = useState(() => createSnapStore(0));
+  const [world] = useState(() => createWorld(BENCH_LAYOUT));
+  const [thumbs] = useState(createThumbnailStore);
   const modeRef = useRef("pointer");
   const inputRef = useFpsInput(modeRef);
   const activeRef = useRef(false);
@@ -94,11 +105,11 @@ const LabRoomPage = () => {
   // Dev-only handle for automated walk-through tests.
   useEffect(() => {
     if (!import.meta.env.DEV) return undefined;
-    window.__labRoom = { pose: () => poseRef.current, phase: () => phaseRef.current, mode: () => modeRef.current };
+    window.__labRoom = { pose: () => poseRef.current, phase: () => phaseRef.current, mode: () => modeRef.current, world, thumbs };
     return () => {
       delete window.__labRoom;
     };
-  }, []);
+  }, [world, thumbs]);
 
   useEffect(() => {
     let alive = true;
@@ -110,35 +121,6 @@ const LabRoomPage = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const onLockChange = () => {
-      const locked = document.pointerLockElement === rootRef.current;
-      if (locked) {
-        setters.current.setFields({ phase: "playing", view: "main", lockHint: false, notice: "" });
-      } else if (phaseRef.current === "playing" && modeRef.current === "pointer") {
-        setters.current.setFields({ phase: "paused", view: "main" });
-      }
-    };
-    // Without a mouse lock the browser doesn't turn Esc into an unlock, so handle it here.
-    const onKeyDown = (e) => {
-      if (e.code === "Escape" && modeRef.current === "drag" && phaseRef.current === "playing") {
-        setters.current.setFields({ phase: "paused", view: "main" });
-      }
-    };
-    // Safari reports refused locks only through this event, not a rejected promise.
-    const onLockError = () => {
-      if (modeRef.current !== "drag") setters.current.setField("lockHint", true);
-    };
-    document.addEventListener("pointerlockchange", onLockChange);
-    document.addEventListener("pointerlockerror", onLockError);
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("pointerlockchange", onLockChange);
-      document.removeEventListener("pointerlockerror", onLockError);
-      window.removeEventListener("keydown", onKeyDown);
-      if (document.pointerLockElement) document.exitPointerLock();
-    };
-  }, []);
 
   const enterDragMode = useCallback(() => {
     modeRef.current = "drag";
@@ -174,23 +156,85 @@ const LabRoomPage = () => {
 
   const handleReady = useCallback(() => {
     setters.current.setField("ready", true);
+    thumbs.request([...EQUIPMENT.map((e) => e.id), ...SUBSTANCES.map((sub) => `${SUBSTANCE_PREFIX}${sub.id}`)]);
     if (boot.debug.autostart) enterDragMode();
-  }, [boot, enterDragMode]);
+  }, [boot, enterDragMode, thumbs]);
 
   const actions = useMemo(
     () => ({
       view: (next) => setters.current.setFields({ view: next, notice: "" }),
       reset: () => {
         resetRef.current += 1;
+        world.reset();
         setters.current.setField("notice", TEXT.resetDone);
+      },
+      // The phase changes before the unlock so the lock listener doesn't treat it as a pause.
+      openCabinet: () => {
+        phaseRef.current = "menu";
+        setters.current.setFields({ phase: "menu" });
+        if (document.pointerLockElement) document.exitPointerLock();
+      },
+      closeCabinet: () => {
+        if (modeRef.current === "drag") {
+          phaseRef.current = "playing";
+          setters.current.setFields({ phase: "playing" });
+        } else {
+          playRef.current();
+        }
       },
       exit: () => {
         if (document.pointerLockElement) document.exitPointerLock();
         navigate(BACK_TO);
       },
     }),
-    [navigate],
+    [navigate, world],
   );
+
+  const actionsRef = useRef(actions);
+  const playRef = useRef(play);
+  useEffect(() => {
+    actionsRef.current = actions;
+    playRef.current = play;
+  });
+
+  useEffect(() => {
+    const onLockChange = () => {
+      const locked = document.pointerLockElement === rootRef.current;
+      if (locked) {
+        setters.current.setFields({ phase: "playing", view: "main", lockHint: false, notice: "" });
+      } else if (phaseRef.current === "playing" && modeRef.current === "pointer") {
+        setters.current.setFields({ phase: "paused", view: "main" });
+      }
+    };
+    // Without a mouse lock the browser doesn't turn Esc into an unlock, so handle it here.
+    const onKeyDown = (e) => {
+      if (e.code === "Escape" && phaseRef.current === "menu") {
+        phaseRef.current = "paused";
+        setters.current.setFields({ phase: "paused", view: "main" });
+        return;
+      }
+      if (e.code === "Escape" && modeRef.current === "drag" && phaseRef.current === "playing") {
+        setters.current.setFields({ phase: "paused", view: "main" });
+        return;
+      }
+      if (e.code !== "KeyE" || e.repeat || e.target instanceof HTMLInputElement) return;
+      if (phaseRef.current === "playing") actionsRef.current.openCabinet();
+      else if (phaseRef.current === "menu") actionsRef.current.closeCabinet();
+    };
+    // Safari reports refused locks only through this event, not a rejected promise.
+    const onLockError = () => {
+      if (modeRef.current !== "drag") setters.current.setField("lockHint", true);
+    };
+    document.addEventListener("pointerlockchange", onLockChange);
+    document.addEventListener("pointerlockerror", onLockError);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerlockchange", onLockChange);
+      document.removeEventListener("pointerlockerror", onLockError);
+      window.removeEventListener("keydown", onKeyDown);
+      if (document.pointerLockElement) document.exitPointerLock();
+    };
+  }, []);
 
   const updateSetting = (key, value) => setField("settings", { ...settings, [key]: value });
 
@@ -198,6 +242,7 @@ const LabRoomPage = () => {
   if (device.touchOnly) return <DeviceNotice kind="touch" />;
 
   const playing = phase === "playing";
+  const live = playing || phase === "menu";
   const dragging = lockMode === "drag";
 
   return (
@@ -214,7 +259,9 @@ const LabRoomPage = () => {
           key={tierName}
           tierName={tierName}
           manifest={manifest}
-          playing={playing}
+          live={live}
+          world={world}
+          thumbs={thumbs}
           inputRef={inputRef}
           activeRef={activeRef}
           settingsRef={settingsRef}
@@ -227,6 +274,9 @@ const LabRoomPage = () => {
       )}
 
       {playing && boot.debug.hud && <Crosshair />}
+      {playing && boot.debug.hud && <InteractionPrompt world={world} />}
+      {playing && boot.debug.hud && <Hotbar world={world} thumbs={thumbs} />}
+      {phase === "menu" && <CabinetMenu world={world} thumbs={thumbs} onClose={actions.closeCabinet} />}
       {playing && dragging && boot.debug.hud && <DragHint />}
       {settings.showFps && <FpsBadge store={fpsStore} />}
 

@@ -1,4 +1,5 @@
 import { Component, Suspense, lazy } from "react";
+import SubstanceModel from "../substances/SubstanceModel";
 
 // models/ConicalFlask.jsx ↔ id "conical-flask"; loaded on demand so a broken model can't take down the room.
 const toId = (path) =>
@@ -27,7 +28,17 @@ class ModelBoundary extends Component {
   }
 }
 
+const SUBSTANCE_PREFIX = "sub:";
+
+// "sub:<substanceId>" renders a substance container; anything else is an equipment id.
 const EquipmentModel = ({ id, ...props }) => {
+  if (id.startsWith(SUBSTANCE_PREFIX)) {
+    return (
+      <ModelBoundary id={id}>
+        <SubstanceModel substanceId={id.slice(SUBSTANCE_PREFIX.length)} {...props} />
+      </ModelBoundary>
+    );
+  }
   const Model = MODELS[id];
   if (!Model) return null;
   return (

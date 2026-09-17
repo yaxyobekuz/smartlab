@@ -16,17 +16,17 @@ const WATER = { liquidColor: "#0d2230", liquidOpacity: 0.08 };
 // Students work on the +Z half of bench_1 (the monitor sits at its right end) and bench_2.
 export const BENCH_LAYOUT = [
   { key: "retort-stand", id: "retort-stand", position: [STAND.x, TOP, STAND.z] },
-  { key: "spirit-lamp", id: "spirit-lamp", position: [GAUZE.x, STAND_BASE_TOP, GAUZE.z] },
-  { key: "beaker-heating", id: "beaker", position: [GAUZE.x, GAUZE.y, GAUZE.z], rotation: [0, -0.5, 0], volumeMl: 120, ...WATER },
+  { key: "spirit-lamp", id: "spirit-lamp", position: [GAUZE.x, STAND_BASE_TOP, GAUZE.z], on: "retort-stand" },
+  { key: "beaker-heating", id: "beaker", position: [GAUZE.x, GAUZE.y, GAUZE.z], rotation: [0, -0.5, 0], on: "retort-stand", volumeMl: 120, ...WATER },
 
   { key: "test-tube-rack", id: "test-tube-rack", position: [RACK.x, TOP, RACK.z] },
-  { key: "test-tube-1", id: "test-tube", position: [RACK.x - 0.07, RACK_TUBE_Y, RACK_HOLE_Z] },
-  { key: "test-tube-2", id: "test-tube", position: [RACK.x - 0.014, RACK_TUBE_Y, RACK_HOLE_Z] },
-  { key: "test-tube-3", id: "test-tube", position: [RACK.x + 0.042, RACK_TUBE_Y, RACK_HOLE_Z] },
+  { key: "test-tube-1", id: "test-tube", position: [RACK.x - 0.07, RACK_TUBE_Y, RACK_HOLE_Z], on: "test-tube-rack" },
+  { key: "test-tube-2", id: "test-tube", position: [RACK.x - 0.014, RACK_TUBE_Y, RACK_HOLE_Z], on: "test-tube-rack" },
+  { key: "test-tube-3", id: "test-tube", position: [RACK.x + 0.042, RACK_TUBE_Y, RACK_HOLE_Z], on: "test-tube-rack" },
 
   { key: "beaker-1", id: "beaker", position: [-0.52, TOP, -0.66], rotation: [0, 0.35, 0] },
   { key: "conical-flask", id: "conical-flask", position: [FLASK.x, TOP, FLASK.z], rotation: [0, 0.2, 0] },
-  { key: "funnel", id: "funnel", position: [FLASK.x, FUNNEL_Y, FLASK.z], rotation: [0, 1.1, 0] },
+  { key: "funnel", id: "funnel", position: [FLASK.x, FUNNEL_Y, FLASK.z], rotation: [0, 1.1, 0], on: "conical-flask" },
   { key: "measuring-cylinder", id: "measuring-cylinder", position: [-0.04, TOP, -0.94], rotation: [0, -0.3, 0] },
   { key: "thermometer", id: "thermometer", position: [-0.17, TOP, -0.56], rotation: [0, 0.06, 0] },
 

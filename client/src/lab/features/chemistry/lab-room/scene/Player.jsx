@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { CapsuleCollider, RigidBody, useRapier } from "@react-three/rapier";
+import { GROUPS } from "../world/groups";
 import {
   ACCELERATION,
   BOB_AMPLITUDE,
@@ -77,7 +78,7 @@ const Player = ({ meta, inputRef, activeRef, settingsRef, poseRef, resetRef, eye
     m.vx += (target.x - m.vx) * k;
     m.vz += (target.z - m.vz) * k;
 
-    controller.computeColliderMovement(collider, { x: m.vx * dt, y: 0, z: m.vz * dt });
+    controller.computeColliderMovement(collider, { x: m.vx * dt, y: 0, z: m.vz * dt }, undefined, GROUPS.player);
     const move = controller.computedMovement();
     const pos = body.translation();
     const x = pos.x + move.x;
@@ -110,7 +111,7 @@ const Player = ({ meta, inputRef, activeRef, settingsRef, poseRef, resetRef, eye
       position={[spawn.x, CAPSULE_CENTER_Y, spawn.z]}
       enabledRotations={[false, false, false]}
     >
-      <CapsuleCollider ref={colliderRef} args={[CAPSULE_HALF_HEIGHT, CAPSULE_RADIUS]} />
+      <CapsuleCollider ref={colliderRef} args={[CAPSULE_HALF_HEIGHT, CAPSULE_RADIUS]} collisionGroups={GROUPS.player} />
     </RigidBody>
   );
 };

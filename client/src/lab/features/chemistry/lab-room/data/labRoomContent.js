@@ -9,8 +9,25 @@ export const CONTROLS = [
   { keys: ["W", "A", "S", "D"], label: "Yurish" },
   { keys: ["Shift"], label: "Yugurish" },
   { keys: ["Sichqoncha"], label: "Atrofga qarash" },
+  { keys: ["Chap tugma"], label: "Olish / qo'yish" },
+  { keys: ["G"], label: "Qo'ldagini tashlash" },
+  { keys: ["1–5"], label: "Qo'ldagi narsani tanlash" },
+  { keys: ["E"], label: "Moddalar shkafi" },
   { keys: ["Esc"], label: "Menyu" },
 ];
+
+export const CABINET = {
+  title: "Kimyoviy reaktivlar shkafi",
+  stock: (reagents, tools) => `${reagents} ta reaktiv · ${tools} ta jihoz`,
+  results: "Qidiruv natijalari",
+  search: "Qidirish...",
+  close: "Yopish",
+  empty: "Hech narsa topilmadi",
+  hint: "yopish · bosing: qo'lga olish · sudrang: qo'l paneliga yoki stolga qo'yish",
+  dropHere: "Shu yerga qo'yish",
+  returnHere: "Shkafga qaytarish",
+  slotTaken: "Bu joy band",
+};
 
 export const QUALITY_OPTIONS = [
   { id: "high", label: "Yuqori", hint: "Kuchli kompyuterlar uchun" },
