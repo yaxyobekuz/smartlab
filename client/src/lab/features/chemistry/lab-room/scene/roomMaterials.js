@@ -1,4 +1,5 @@
 import { MeshStandardMaterial, SRGBColorSpace, ShaderChunk } from "three";
+import { capTexture } from "../textureCap";
 import {
   createDynamicTexture,
   createExitSignTexture,
@@ -120,9 +121,11 @@ const clockTime = (date) =>
   `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 
 // Canvas-textured surfaces (whiteboard, poster, screen, clock, exit sign). Returns tick + dispose.
-export const dressSurfaces = (room, lightmap, scale) => {
+export const dressSurfaces = (room, lightmap, scale, textureCap = 2048) => {
   const created = [];
-  const swap = (name, material, texture) => {
+  // Printed surfaces are canvases; the clock and the monitor are repainted, so only static ones shrink.
+  const swap = (name, material, texture, fixed = true) => {
+    if (fixed && texture) capTexture(texture, textureCap);
     const surface = room.surfaces[name];
     if (!surface) {
       material.dispose();
@@ -147,7 +150,7 @@ export const dressSurfaces = (room, lightmap, scale) => {
   );
 
   const clock = createDynamicTexture(512, 512, drawClock);
-  swap("clock_face", litSurface({ map: clock.texture, roughness: 0.35 }, lightmap, scale), clock.texture);
+  swap("clock_face", litSurface({ map: clock.texture, roughness: 0.35 }, lightmap, scale), clock.texture, false);
 
   const monitor = createDynamicTexture(1024, 576, drawMonitor);
   swap(
@@ -160,6 +163,7 @@ export const dressSurfaces = (room, lightmap, scale) => {
       roughness: 0.15,
     }),
     monitor.texture,
+    false,
   );
 
   const tick = () => {

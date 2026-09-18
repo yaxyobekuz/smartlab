@@ -1,5 +1,6 @@
 import { CanvasTexture, DoubleSide, MeshPhysicalMaterial, MeshStandardMaterial } from "three";
 import { applySpecularAlpha } from "./glassShading";
+import { capTexture } from "../../textureCap";
 
 // Grayscale radial falloff used as an alpha map (alphaMap reads the green channel).
 const createBlobTexture = () => {
@@ -54,7 +55,7 @@ export const createLiquidMaterial = ({ color = "#0d2230", opacity = 0.08 } = {})
 
 const standard = (params) => new MeshStandardMaterial(params);
 
-export const createKitMaterials = ({ printScale = 1, quality = "high" } = {}) => {
+export const createKitMaterials = ({ printScale = 1, quality = "high", textureCap = 2048 } = {}) => {
   const materials = {
     glass: createGlass(),
     porcelainGlazed: new MeshPhysicalMaterial({
@@ -88,7 +89,7 @@ export const createKitMaterials = ({ printScale = 1, quality = "high" } = {}) =>
     quality,
     // Print materials are per texture (graduations differ per vessel), cached so remounts reuse them.
     print: (key, createTexture) => {
-      if (!printCache.has(key)) printCache.set(key, createPrint(createTexture()));
+      if (!printCache.has(key)) printCache.set(key, createPrint(capTexture(createTexture(), textureCap)));
       return printCache.get(key);
     },
     dispose: () => {

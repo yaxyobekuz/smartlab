@@ -1,7 +1,8 @@
-# 17 — Lab room sound (M6)
+# 17 — Lab room sound and performance (M6)
 
-How the walkable lab (`13-chemistry-lab-room.md`) sounds. Recordings are CC0; the room can also run
-without them. Code root: `client/src/lab/features/chemistry/lab-room/sound/`.
+How the walkable lab (`13-chemistry-lab-room.md`) sounds, and what it costs to load and run.
+Recordings are CC0; the room can also run without them. Code root:
+`client/src/lab/features/chemistry/lab-room/`.
 
 ## Graph
 
@@ -60,3 +61,40 @@ There is no way to hear it from a test, so measure instead: `window.__labAudio` 
 in dev, `engine.tap()` returns an analyser on the room's own output, and a headless run with
 `--autoplay-policy=no-user-gesture-required` can compare the RMS of a quiet room (~0.004) with a
 scene that has fire and the alarm (~0.02) or a bang (peak ~0.07).
+
+## Performance
+
+Measured on the developer's M4 Mac (headless Chromium, vsync off) and on a throttled link. School
+machines are slower; the numbers are here as a baseline to compare against once someone runs the
+room on one.
+
+| | High | Low |
+|---|---|---|
+| Frame rate, room only | ~260 fps | ~430 fps |
+| Frame rate, fire + gas + alarm | ~140 fps | ~460 fps |
+| Draw calls at spawn | 444 | 316 |
+| Triangles | 505k | 355k |
+| Texture memory (mipmapped RGBA) | 343 MB | 194 MB |
+
+**Texture budget.** `TIERS.*.textureCap` (High 2048, Low 1024) is applied to every texture the room
+GLB brings in (`RoomModel`), to the printed wall surfaces (`dressSurfaces`) and to every canvas
+print in the equipment kit (`kit.print`). Substance labels shrink separately through
+`TIERS.*.printScale`. Shrinking is one-way: raising the quality mid-session keeps the smaller room
+textures until the page reloads. The Low lightmap is its own 2048² file and is not capped again.
+
+**Download.** The page needs ≈8.2 MB before the lab is ready: `room.glb` 4.1 MB (already meshopt +
+WebP inside), `lightmap-low.webp` 1.4 MB, and ≈1.6 MB of gzipped JavaScript. Sound (2.1 MB) and the
+window backdrop load after the player enters, so they never delay the start screen.
+
+| link | first paint | ready to enter |
+|---|---|---|
+| unthrottled | 0.8 s | 2.5 s |
+| 10 Mbps | 1.4 s | 6.8 s |
+| 4 Mbps | 3.2 s | 15.1 s |
+
+Vendor code is split in `vite.config.js` (`three`, `rapier`, `postfx`) so the 3D pages share it and
+the browser fetches it in parallel; the lab's own chunk is 348 kB (120 kB gzip).
+
+Next levers, if a school PC asks for them: halve the room's normal maps (a Blender re-bake, ≈0.5 MB
+off the GLB), KTX2/Basis textures (a much larger VRAM cut, needs a re-bake and a transcoder), and
+merging the meshes of the heaviest models.

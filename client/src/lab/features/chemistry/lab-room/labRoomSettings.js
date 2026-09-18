@@ -8,9 +8,10 @@ export const DEFAULT_SETTINGS = {
   reduceMotion: false,
 };
 
+// textureCap: the largest texture the tier uploads (mipmapped RGBA ≈ 1.33·w·h·4 bytes each).
 export const TIERS = {
-  high: { dpr: [1, 1.75], effects: true, lightmap: "high", envSize: 256, printScale: 1 },
-  low: { dpr: 1, effects: false, lightmap: "low", envSize: 256, printScale: 0.5 },
+  high: { dpr: [1, 1.75], effects: true, lightmap: "high", envSize: 256, printScale: 1, textureCap: 2048 },
+  low: { dpr: 1, effects: false, lightmap: "low", envSize: 256, printScale: 0.5, textureCap: 1024 },
 };
 
 export const loadSettings = () => {

@@ -92,7 +92,7 @@ const LabRoomCanvas = ({
     >
       <color attach="background" args={["#dfe6ee"]} />
       <Suspense fallback={null}>
-        <KitProvider printScale={tier.printScale} quality={tierName}>
+        <KitProvider printScale={tier.printScale} quality={tierName} textureCap={tier.textureCap}>
           <LabContext.Provider value={lab}>
             <Physics gravity={[0, -9.81, 0]} timeStep="vary">
               <RoomColliders boxes={manifest.boxes} debug={debug.colliders} />
@@ -145,8 +145,9 @@ const LabRoomCanvas = ({
           <PlaceholderRoom />
         ) : (
           <>
-            <RoomModel lightmapKey={debug.lightmap ?? tier.lightmap} lightmapScale={meta.lightmapScale} />
-            <RoomBackdrop url={ROOM_ASSETS.exterior} />
+            <RoomModel lightmapKey={debug.lightmap ?? tier.lightmap} lightmapScale={meta.lightmapScale} textureCap={tier.textureCap} />
+            {/* The view through the windows is hidden behind the start screen, so it loads after entry. */}
+            {live && <RoomBackdrop url={ROOM_ASSETS.exterior} />}
           </>
         )}
         <RoomEnvironment size={tier.envSize} />
