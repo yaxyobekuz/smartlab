@@ -69,6 +69,10 @@ const click = (id, label, targetId, extra = {}) => ({ id, label, mode: "click", 
 const hold = (id, label, targetId, extra = {}) => ({ id, label, mode: "hold", targetId, valid: true, ...extra });
 const blocked = (id, reason, targetId) => ({ id, label: reason, mode: "click", targetId, valid: false });
 
+// Reaching for the lamp with something in hand should still light it; without this the flame actions
+// are a dead end ("light the lamp first" with no way to light it).
+const lampToggle = (lab, lamp) => click("lamp-toggle", lab.device(lamp.id)?.lit ? "O'chirish" : "Yoqish", lamp.id);
+
 const deviceAction = (lab, target, part) => {
   const device = lab.device(target.id);
   if (!device) return null;
@@ -120,7 +124,7 @@ export const resolveAction = ({ lab, world, held, focus }) => {
     const piece = lab.device(held.id)?.piece;
     if (!piece && targetSubstance?.state === "solid") return click("tongs-pick", "Bo'lak olish", target.id);
     if (piece && targetVessel && target.typeId !== "gas-jar") return click("tongs-release", "Tushirish", target.id);
-    if (piece && lamp) return lamp.lit ? hold("heat-in-flame", "Alangada qizdirish", target.id) : blocked("heat-in-flame", "Avval lampani yoqing", target.id);
+    if (piece && lamp) return lamp.lit ? hold("heat-in-flame", "Alangada qizdirish", target.id) : lampToggle(lab, target);
     if (piece && target.typeId === "gas-jar") {
       const hot = piece.state?.burning || piece.state?.molten;
       return hot ? hold("immerse", "Silindrga tushirish", target.id) : click("tongs-release", "Tushirish", target.id);
@@ -142,7 +146,7 @@ export const resolveAction = ({ lab, world, held, focus }) => {
 
   const heldLiquid = liquidMl(lab, held);
   if ((held.typeId === "test-tube" || held.typeId === "crucible") && lamp) {
-    return lamp.lit ? hold("heat-in-flame", "Alangada qizdirish", target.id) : blocked("heat-in-flame", "Avval lampani yoqing", target.id);
+    return lamp.lit ? hold("heat-in-flame", "Alangada qizdirish", target.id) : lampToggle(lab, target);
   }
   if (held.typeId === "crucible" && target.typeId === "gas-jar") return hold("immerse", "Silindrga tushirish", target.id);
   if (heldLiquid > 0.05 && (heldSubstance?.state === "liquid" || isVessel(held.typeId))) {
@@ -155,6 +159,8 @@ export const resolveAction = ({ lab, world, held, focus }) => {
     }
     if (targetVessel) return hold("pour", "Quyish", target.id, { intoId: target.id });
   }
+  // Nothing else fits: a lamp under the crosshair can always be lit or put out.
+  if (lamp) return lampToggle(lab, target);
   return null;
 };
 
