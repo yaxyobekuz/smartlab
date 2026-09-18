@@ -19,6 +19,7 @@ import { phOf, phPaperColor, phWord } from "../chemistry/acidity";
 import { CONTAINERS } from "../sim/containers";
 import { spillPortion } from "../sim/spills";
 import { pushFeed } from "../sim/feed";
+import { pushSound } from "../sound/queue";
 import { SUBSTANCE_PREFIX } from "../world/objectTypes";
 
 const DROP_ML = 0.05;
@@ -199,18 +200,23 @@ export const runClick = (action, { lab, world, held }) => {
   switch (action.id) {
     case "lamp-toggle":
       lab.setDevice(target.id, { lit: !device.lit, capOn: device.lit, dousing: 0, boost: 0 });
+      pushSound(lab, { type: device.lit ? "click" : "whoosh", position: target.position });
       return;
     case "hotplate-heat":
       lab.setDevice(target.id, { level: (device.level + 1) % HOT_PLATE_STEPS.length });
+      pushSound(lab, { type: "click" });
       return;
     case "hotplate-stir":
       lab.setDevice(target.id, { stir: !device.stir });
+      pushSound(lab, { type: "click" });
       return;
     case "cover-toggle":
       lab.setDevice(target.id, { coverOn: !device.coverOn });
+      pushSound(lab, { type: "click", soft: true });
       return;
     case "scale-tare":
       lab.setDevice(target.id, { tareG: device.grossG ?? 0 });
+      pushSound(lab, { type: "click", soft: true });
       return;
     case "dropper-draw": {
       const dropper = lab.device(held.id);

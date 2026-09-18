@@ -4,6 +4,7 @@ export const DEFAULT_SETTINGS = {
   quality: null,
   sensitivity: 1,
   showFps: false,
+  sound: 0.7,
   reduceMotion: false,
 };
 

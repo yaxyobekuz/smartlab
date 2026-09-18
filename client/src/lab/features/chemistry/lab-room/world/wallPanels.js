@@ -1,3 +1,5 @@
+import { pushSound } from "../sound/queue";
+
 // Fittings baked into the room that the player still uses: the computer screen, the two fan switches
 // and the extinguisher bracket. Each is hit-tested as a rectangle on the wall plane it sits in.
 export const PANELS = {
@@ -56,6 +58,7 @@ export const runPanel = (hit, { lab, world, held }) => {
   if (panel.device) {
     const next = !lab.hazards.devices[panel.device];
     lab.hazards.setDevice(panel.device, next);
+    pushSound(lab, { type: "click" });
     world.flash(`${panel.title}: ${next ? "yoqildi" : "o'chirildi"}`);
     return null;
   }

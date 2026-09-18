@@ -36,7 +36,9 @@ const paint = (root, lab) => {
   setLayer(root.querySelector("[data-layer='gas']"), Math.min(0.55, irritant * 0.38), {
     background: `radial-gradient(ellipse at center, transparent 22%, ${haze.color} 115%)`,
   });
-  const blur = Math.min(calm ? 1.6 : 3.4, Math.max(0, irritant - 0.45) * 3.4);
+  // A full-screen backdrop blur is the one expensive layer here, so school machines get the vignette only.
+  const ceiling = lab.prefs.tier === "low" ? 0 : calm ? 1.6 : 3.4;
+  const blur = Math.min(ceiling, Math.max(0, irritant - 0.45) * 3.4);
   setLayer(root.querySelector("[data-layer='blur']"), blur > 0.05 ? 1 : 0, {
     backdropFilter: blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : "none",
   });

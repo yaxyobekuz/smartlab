@@ -117,6 +117,17 @@ const PauseMenu = ({
             unit="×"
             onChange={(value) => onSetting("sensitivity", value)}
           />
+          <Slider
+            className="mt-4"
+            label={TEXT.volume}
+            value={settings.sound}
+            min={0}
+            max={1}
+            step={0.05}
+            display={settings.sound > 0 ? Math.round(settings.sound * 100) : TEXT.volumeOff}
+            unit={settings.sound > 0 ? "%" : ""}
+            onChange={(value) => onSetting("sound", value)}
+          />
         </>
       )}
 

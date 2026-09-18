@@ -35,6 +35,8 @@ export const createLab = () => {
     flashes: [],
     // When each repeatable warning was last shown, so toasts don't repeat every step.
     notices: new Map(),
+    // One-shot sounds the runtime asks for; the sound layer drains this every frame.
+    sounds: [],
     queueMix: (simId, result) => {
       if (!result) return;
       if (!pendingMixes.has(simId)) pendingMixes.set(simId, []);
@@ -113,6 +115,7 @@ export const createLab = () => {
       lab.activity = {};
       lab.flashes.length = 0;
       lab.notices.clear();
+      lab.sounds.length = 0;
       lab.feed.set({ items: [], monitor: null, history: [] });
       for (const simId of listeners.keys()) notify(simId);
       now = 0;

@@ -49,6 +49,8 @@ export const TEXT = {
   exit: "Chiqish",
   back: "Orqaga",
   sensitivity: "Sichqoncha sezgirligi",
+  volume: "Ovoz balandligi",
+  volumeOff: "o'chiq",
   showFps: "Kadr tezligini ko'rsatish",
   reduceMotion: "Miltillash va silkinishni kamaytirish",
   lockHint: "Davom etish uchun ekranni bosing",

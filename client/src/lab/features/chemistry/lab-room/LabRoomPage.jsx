@@ -31,8 +31,9 @@ const pointerLockBlocked = () => document.featurePolicy?.allowsFeature?.("pointe
 
 const DEG = Math.PI / 180;
 
-const applyLabPrefs = (lab, settings) => {
+const applyLabPrefs = (lab, settings, tier) => {
   lab.prefs.reduceMotion = Boolean(settings.reduceMotion);
+  lab.prefs.tier = tier;
 };
 
 // Dev-only review helpers: ?debug=colliders &pose=x,z,yawDeg,pitchDeg &autostart=1 &hud=0 &showcase= &fxlab= &effects= &hazard= &t= &spacing= &eye= &fov= &lm=
@@ -115,8 +116,8 @@ const LabRoomPage = () => {
   useEffect(() => {
     settingsRef.current = settings;
     saveSettings(settings);
-    applyLabPrefs(lab, settings);
-  }, [settings, lab]);
+    applyLabPrefs(lab, settings, tierName);
+  }, [settings, lab, tierName]);
 
   // Dev-only handle for automated walk-through tests.
   useEffect(() => {

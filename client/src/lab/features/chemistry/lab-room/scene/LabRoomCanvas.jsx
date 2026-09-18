@@ -22,6 +22,7 @@ import HeldItem from "../world/HeldItem";
 import ThumbnailRenderer from "../world/ThumbnailRenderer";
 import { LabContext } from "../sim/labContext";
 import LabRunner from "../sim/LabRunner";
+import LabSound from "../sound/LabSound";
 import ToolEffects from "../tools/ToolEffects";
 import LabMonitor from "../hud/LabMonitor";
 import Puddles from "../hazards/Puddles";
@@ -125,6 +126,7 @@ const LabRoomCanvas = ({
                     onMonitor={onMonitor}
                   />
                   <LabRunner world={world} lab={lab} meta={meta} hazardSeed={debug.hazard} />
+                  <LabSound world={world} lab={lab} live={live} settingsRef={settingsRef} />
                   <ToolEffects lab={lab} />
                   <LabMonitor lab={lab} anchor={meta.anchors?.monitor_screen} />
                   <Puddles lab={lab} />

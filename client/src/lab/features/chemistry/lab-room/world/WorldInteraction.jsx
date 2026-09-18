@@ -8,6 +8,7 @@ import { poseBounds, restPose } from "./poses";
 import { PROMPTS } from "./prompts";
 import { snapCandidates } from "./snapping";
 import { panelAt, runPanel } from "./wallPanels";
+import { pushSound } from "../sound/queue";
 import { endHold, noteActivity, partAt, resolveAction, runClick, runHold, warnIfHot } from "../tools/actions";
 import { describeObject, formatNumber } from "../tools/describe";
 
@@ -193,8 +194,10 @@ const WorldInteraction = ({ world, lab, inputRef, activeRef, anchors, onMonitor 
           );
         } else if (event.type === "slot") {
           world.selectSlot(event.slot);
+          pushSound(lab, { type: "click", soft: true });
         } else if (event.type === "wheel") {
           world.cycleSlot(event.direction);
+          pushSound(lab, { type: "click", soft: true });
         }
       }
     }

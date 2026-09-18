@@ -9,6 +9,7 @@ import { CONTAINERS, EMPTY_MASS_G } from "./containers";
 import { spillMixture } from "./spills";
 import { inFumeHood } from "../hazards/hazardStore";
 import { pushFeed, warnOnce } from "./feed";
+import { pushSound } from "../sound/queue";
 import { seedHazards } from "../hazards/hazardScenarios";
 
 const STEP = 1 / 30;
@@ -252,6 +253,9 @@ const contextFor = (world, lab, meta) => (entry) => {
   return ctx;
 };
 
+// Engine events that make a noise, and which cue plays for them.
+const LOUD = { pop: "pop", bang: "bang", ignite: "whoosh", shatter: "shatter" };
+
 const handleEvents = (world, lab, events, meta, notices) => {
   for (const event of events) {
     const position = positionOf(world, lab, event.simId);
@@ -273,6 +277,7 @@ const handleEvents = (world, lab, events, meta, notices) => {
           at: lab.now(),
         });
       }
+      if (position && LOUD[event.type]) pushSound(lab, { type: LOUD[event.type], position, strength: event.strength });
       if (event.type === "bang" && position) {
         world.knock(position, event.radius ?? 1.5, event.strength ?? 1, event.simId);
         lab.hazards.blast(Math.min(1, event.strength ?? 1));
