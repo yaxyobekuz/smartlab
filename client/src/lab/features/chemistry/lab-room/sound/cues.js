@@ -200,7 +200,7 @@ export const createCues = (engine) => {
           engine.ramp(out.gain.gain, at.gain, 0.2);
         }
       },
-      tune: (value, seconds = 0.15) => engine.ramp(filter.frequency, value, seconds),
+      tune: (amount, seconds = 0.15) => engine.ramp(filter.frequency, frequency * (0.7 + 1.1 * amount), seconds),
       stop: () => {
         try {
           src.stop();

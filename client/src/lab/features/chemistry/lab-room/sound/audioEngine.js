@@ -107,6 +107,54 @@ export const createAudioEngine = () => {
       return { gain, panner, dispose: () => { gain.disconnect(); panner.disconnect(); } };
     },
 
+    // One-shot from a recording: a fresh source per hit, with a small random pitch shift.
+    play: (buffer, at, { gain = 1, rate = 1, bus = "world" } = {}) => {
+      if (!ctx || !buffer) return;
+      const out = engine.channel(bus);
+      out.panner.pan.value = at?.pan ?? 0;
+      out.gain.gain.value = (at?.gain ?? 1) * gain;
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+      src.playbackRate.value = rate;
+      src.connect(out.gain);
+      src.onended = () => {
+        src.disconnect();
+        out.dispose();
+      };
+      src.start();
+    },
+
+    // Continuous voice from a looping recording; the level is ramped, never switched.
+    loop: (buffer, { bus = "ambience", gain = 1 } = {}) => {
+      const out = engine.channel(bus);
+      const env = ctx.createGain();
+      env.gain.value = 0;
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+      src.loop = true;
+      src.connect(env).connect(out.gain);
+      src.start(0, Math.random() * buffer.duration);
+      return {
+        set: (level, at = null, seconds = 0.12) => {
+          ramp(env.gain, Math.max(0, level) * gain, seconds);
+          if (at) {
+            ramp(out.panner.pan, at.pan, 0.2);
+            ramp(out.gain.gain, at.gain, 0.2);
+          }
+        },
+        // 0..1 "brighter and faster"; the synth voice in cues.js answers the same call with its filter.
+        tune: (amount, seconds = 0.2) => ramp(src.playbackRate, 0.85 + 0.35 * Math.max(0, Math.min(1, amount)), seconds),
+        stop: () => {
+          try {
+            src.stop();
+          } catch {
+            // already stopped
+          }
+          out.dispose();
+        },
+      };
+    },
+
     source: () => {
       const src = ctx.createBufferSource();
       src.buffer = noise;
