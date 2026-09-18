@@ -8,7 +8,7 @@ export const sodiumWater = {
   step(m, dt, ctx, k, events) {
     const piece = m.solids.find((s) => s.species === "Na" && s.form === "piece");
     if (!piece && !m.rules["sodium-water"]) return 0;
-    const state = k.state(m, "sodium-water", { grams: 0, burning: false, popped: false });
+    const state = k.state(m, "sodium-water", { grams: 0, total: 0, burning: false, popped: false, banged: false });
     const watery = k.aq(m, "H2O") > k.EPS && k.aq(m, "H2O") >= k.aq(m, "C2H5OH");
     if (!piece || m.volumeMl <= k.EPS || !watery) {
       if (state.grams > 0 && !state.popped) {
@@ -32,6 +32,7 @@ export const sodiumWater = {
     // 15 s for a rice grain; a narrow vessel traps the heat and makes it run away.
     const n = Math.min(k.shrink(piece, dt, m.narrow ? 6 : 15, inAcid ? 4 : 1), k.aq(m, "H2O"));
     if (n <= k.EPS) return 0;
+    state.total += (n * 22.99) / 1000;
     k.takeSolid(m, piece, n);
     k.takeAq(m, "H2O", n);
     k.addAq(m, "Na+", n);
@@ -41,7 +42,9 @@ export const sodiumWater = {
     k.fx(m, "sodiumBall", { size: Math.min(1, Math.cbrt(grams / 0.1)), burning: state.burning });
     k.fx(m, "steam", Math.min(0.6, (n / Math.max(dt, 1e-3)) * 3));
     if (state.burning) k.fx(m, "flame", { kind: "sodium-water", intensity: Math.min(1, state.grams * 3) });
-    if (m.narrow && state.grams > 0.3) {
+    // A tube holds the hydrogen and the heat in: one rice grain only burns, but a second one cracks it.
+    if (m.narrow && !state.banged && (state.grams > 0.3 || state.total > 0.15)) {
+      state.banged = true;
       k.emit(events, "bang", { strength: 1, radius: 1.5 });
       k.emit(events, "shatter");
     }
