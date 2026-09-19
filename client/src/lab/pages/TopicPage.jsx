@@ -5,10 +5,6 @@ import { useParams } from "react-router-dom";
 import NotFoundPage from "./NotFoundPage";
 
 const PAGES = {
-  // One page for all human-anatomy systems; the active one is picked in-page.
-  "biology/anatomy": lazy(() =>
-    import("@/lab/features/biology/anatomy/AnatomyPage"),
-  ),
   "chemistry/molecules": lazy(() =>
     import("@/lab/features/chemistry/molecules/MoleculesPage"),
   ),
@@ -29,20 +25,6 @@ const PAGES = {
   "chemistry/periodic-table": lazy(() =>
     import("@/lab/features/chemistry/periodic/PeriodicTablePage"),
   ),
-  "biology/cell": lazy(() => import("@/lab/features/biology/cell/CellPage")),
-  "biology/cell-studio": lazy(() =>
-    import("@/lab/features/biology/cell-studio/CellStudioPage"),
-  ),
-  "biology/dna": lazy(() => import("@/lab/features/biology/dna/DnaPage")),
-  "biology/human-atlas": lazy(() =>
-    import("@/lab/features/biology/human-atlas/HumanAtlasPage"),
-  ),
-  "biology/surgery": lazy(() =>
-    import("@/lab/features/biology/surgery/SurgeryPage"),
-  ),
-  "biology/simulator": lazy(() =>
-    import("@/lab/features/biology/simulator/SimulatorPage"),
-  ),
   "physics/engine": lazy(() =>
     import("@/lab/features/physics/engine/EnginePage"),
   ),
@@ -52,9 +34,6 @@ const PAGES = {
   "chemistry/ph": lazy(() => import("@/lab/features/chemistry/ph/PhPage")),
   "chemistry/gas-laws": lazy(() =>
     import("@/lab/features/chemistry/gas-laws/GasLawsPage"),
-  ),
-  "biology/genetics": lazy(() =>
-    import("@/lab/features/biology/genetics/GeneticsPage"),
   ),
   "history/registan": lazy(() =>
     import("@/lab/features/history/registan/RegistanGuidePage"),

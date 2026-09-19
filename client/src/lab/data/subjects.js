@@ -1,4 +1,4 @@
-// Central registry: subjects (chemistry/biology/physics) -> topics.
+// Central registry: subjects (chemistry/physics/electronics/history) -> topics.
 // `slug` values are URL params: /:subject and /:subject/:topic.
 // UI text in Uzbek, code values in English.
 
@@ -45,63 +45,6 @@ export const SUBJECTS = [
         title: "Gaz qonunlari",
         short: "Hajm, harorat va mol miqdorini o'zgartirib bosimni hisoblang.",
         icon: "Gauge",
-      },
-    ],
-  },
-  {
-    slug: "biology",
-    title: "Biologiya",
-    short: "Tirik organizm asoslari - hujayra va DNK tuzilishi.",
-    icon: "Dna",
-    color: "#059669",
-    topics: [
-      {
-        slug: "cell",
-        title: "Hujayra",
-        short: "Hujayra organoidlari bilan tanishing.",
-        icon: "Microscope",
-      },
-      {
-        slug: "cell-studio",
-        title: "Hujayra studiyasi",
-        short: "7 xil hujayrani 3D da o'rganing — organoidlar, mikroskop va solishtirish.",
-        icon: "Microscope",
-      },
-      {
-        slug: "dna",
-        title: "DNK spirali",
-        short: "Qo'sh spiral va nukleotidlarni ko'ring.",
-        icon: "Dna",
-      },
-      {
-        slug: "anatomy",
-        title: "Odam anatomiyasi",
-        short: "Mushak, qon-tomir, asab, bo'g'im va ichki a'zolar tizimlarini 3D da o'rganing.",
-        icon: "PersonStanding",
-      },
-      {
-        slug: "human-atlas",
-        title: "Inson atlasi",
-        short: "2234 ta qism, 15 tizim: qidiring, tizimlarni yoqing, portlating va ajratib ko'ring.",
-        icon: "ScanSearch",
-      },
-      {
-        slug: "surgery",
-        title: "Jarrohlik",
-        short: "Qatlamlarni yeching yoki skalpel bilan kesib ichki a'zolarni ko'ring.",
-        icon: "Scissors",
-      },
-      {
-        slug: "genetics",
-        title: "Genetika (Punnett)",
-        short: "Ota-ona allellarini tanlab, avlod nisbatlarini Punnett jadvalida ko'ring.",
-        icon: "GitFork",
-      },
-      {
-        slug: "simulator",
-        title: "Odam Tanasi Simulyatori",
-        short: "Inson tanasi tizimlarini interaktiv 3D simulyatorda o'rganing.",
-        icon: "PersonStanding",
       },
     ],
   },

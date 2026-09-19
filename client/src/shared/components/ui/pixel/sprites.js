@@ -335,7 +335,6 @@ export const SPRITES = {
 
 export const SUBJECT_SPRITES = {
   chemistry: "flask",
-  biology: "dna",
   physics: "planet",
   electronics: "chip",
   history: "dome",
