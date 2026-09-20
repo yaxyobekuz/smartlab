@@ -29,12 +29,6 @@ export const SUBJECTS = [
         icon: "TestTubes",
       },
       {
-        slug: "ph",
-        title: "pH simulyatsiya",
-        short: "Eritma kuchini o'zgartirib pH va indikator rangini kuzating.",
-        icon: "Droplet",
-      },
-      {
         slug: "gas-laws",
         title: "Gaz qonunlari",
         short: "Hajm, harorat va mol miqdorini o'zgartirib bosimni hisoblang.",

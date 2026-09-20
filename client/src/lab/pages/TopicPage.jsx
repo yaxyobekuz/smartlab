@@ -25,7 +25,6 @@ const PAGES = {
   "electronics/arduino": lazy(() =>
     import("@/lab/features/electronics/circuit/CircuitPage"),
   ),
-  "chemistry/ph": lazy(() => import("@/lab/features/chemistry/ph/PhPage")),
   "chemistry/gas-laws": lazy(() =>
     import("@/lab/features/chemistry/gas-laws/GasLawsPage"),
   ),
