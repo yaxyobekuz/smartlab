@@ -11,12 +11,6 @@ export const SUBJECTS = [
     color: "#b5751a",
     topics: [
       {
-        slug: "registan",
-        title: "Registon (audio-gid)",
-        short: "3D Registon: hotspotlar, sayohat, vaqt sayohati va AI gid.",
-        icon: "Landmark",
-      },
-      {
         slug: "atlas",
         title: "Tarixiy atlas",
         short: "Vaqt jadvalini suring: qaysi davrda qaysi davlat qanday hududlarni egallaganini ko'ring.",
