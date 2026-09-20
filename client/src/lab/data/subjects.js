@@ -17,12 +17,6 @@ export const SUBJECTS = [
         icon: "Grid3x3",
       },
       {
-        slug: "molecules",
-        title: "Molekulalar",
-        short: "Suv, CO₂, metan kabi birikmalarni aylantirib ko'ring.",
-        icon: "Hexagon",
-      },
-      {
         slug: "lab",
         title: "Interaktiv laboratoriya",
         short: "Laboratoriya xonasida yuring, reaktivlarni aralashtirib reaksiyalarni kuzating.",

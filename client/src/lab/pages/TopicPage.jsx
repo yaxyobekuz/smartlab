@@ -5,9 +5,6 @@ import { useParams } from "react-router-dom";
 import NotFoundPage from "./NotFoundPage";
 
 const PAGES = {
-  "chemistry/molecules": lazy(() =>
-    import("@/lab/features/chemistry/molecules/MoleculesPage"),
-  ),
   // Walkable lab room; lab-3d stays as an alias for old links and review scripts.
   "chemistry/lab": lazy(() =>
     import("@/lab/features/chemistry/lab-room/LabRoomPage"),
