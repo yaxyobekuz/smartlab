@@ -1,4 +1,4 @@
-// Central registry: subjects (chemistry/physics/electronics/history) -> topics.
+// Central registry: subjects (chemistry/electronics/history) -> topics.
 // `slug` values are URL params: /:subject and /:subject/:topic.
 // UI text in Uzbek, code values in English.
 
@@ -45,21 +45,6 @@ export const SUBJECTS = [
         title: "Gaz qonunlari",
         short: "Hajm, harorat va mol miqdorini o'zgartirib bosimni hisoblang.",
         icon: "Gauge",
-      },
-    ],
-  },
-  {
-    slug: "physics",
-    title: "Fizika",
-    short: "Dvigatellar qanday ishlaydi - ichini ko'ring, qismlarga ajratib o'rganing.",
-    icon: "Gauge",
-    color: "#ea580c",
-    topics: [
-      {
-        slug: "engine",
-        title: "Ichki yonuv dvigateli",
-        short: "To'rt taktli dvigatel ishini rentgen rejimida kuzating va qismlarga ajrating.",
-        icon: "Cog",
       },
     ],
   },

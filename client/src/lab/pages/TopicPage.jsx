@@ -25,9 +25,6 @@ const PAGES = {
   "chemistry/periodic-table": lazy(() =>
     import("@/lab/features/chemistry/periodic/PeriodicTablePage"),
   ),
-  "physics/engine": lazy(() =>
-    import("@/lab/features/physics/engine/EnginePage"),
-  ),
   "electronics/arduino": lazy(() =>
     import("@/lab/features/electronics/circuit/CircuitPage"),
   ),
