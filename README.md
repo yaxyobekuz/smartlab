@@ -1,6 +1,6 @@
-# SmartLab - 3D virtual laboratoriya
+# LearnStuff - 3D virtual laboratoriya
 
-SmartLab - o'quvchilar uchun **interaktiv 3D virtual laboratoriya**. Kimyo, biologiya va
+LearnStuff - o'quvchilar uchun **interaktiv 3D virtual laboratoriya**. Kimyo, biologiya va
 fizika mavzularini brauzerda aylantirib, yaqindan ko'rib o'rganish mumkin. Loyihaga
 **Mira AI** yordamchisi va **Cardboard (gyroskop) VR** rejimi ham qo'shilgan.
 
@@ -23,7 +23,7 @@ Loyiha Prezentatsiyasi - https://gamma.app/docs/Istalgan-joyda-istalgan-vaqtdaxa
 ## 🗂 Loyiha tuzilmasi
 
 ```
-smartlab/
+LearnStuff/
 ├─ client/          # Frontend: Vite + React 19 + Three.js + Redux + TanStack Query
 ├─ server/          # Backend: Node.js + Express + MongoDB (Mongoose) + Agenda + AI
 ├─ CLAUDE.md        # Loyiha qoidalari (umumiy)
@@ -59,8 +59,8 @@ Talablar: **Node.js 18+**, **MongoDB** (lokal yoki Atlas), va Mira AI uchun **Op
 ### 1. Repozitoriyani klonlash
 
 ```bash
-git clone <repo-url> smartlab
-cd smartlab
+git clone <repo-url> LearnStuff
+cd LearnStuff
 ```
 
 ### 2. Backend (`server/`)

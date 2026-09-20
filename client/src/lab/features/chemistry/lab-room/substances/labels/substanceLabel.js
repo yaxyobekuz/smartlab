@@ -164,8 +164,8 @@ const drawReagentLabel = (ctx, px, substance, W, H, amount) => {
   drawBand(ctx, band, W, bandH);
   ctx.fillStyle = band.text;
   ctx.textBaseline = "middle";
-  fitText(ctx, "SMART LAB", 800, bandH * 0.5, W * 0.26);
-  spacedText(ctx, "SMART LAB", W * 0.22, bandH * 0.54, bandH * 0.06);
+  fitText(ctx, "LearnStuff", 800, bandH * 0.5, W * 0.26);
+  spacedText(ctx, "LearnStuff", W * 0.22, bandH * 0.54, bandH * 0.06);
   if (signal) {
     fitText(ctx, signal, 800, bandH * 0.5, W * 0.26);
     spacedText(ctx, signal, W * 0.78, bandH * 0.54, bandH * 0.05);

@@ -260,7 +260,7 @@ const Worksheet = () => {
               )}
 
               <div className="worksheet-footer">
-                <span>Smart Lab tomonidan yaratildi</span>
+                <span>LearnStuff tomonidan yaratildi</span>
               </div>
             </div>
           )}

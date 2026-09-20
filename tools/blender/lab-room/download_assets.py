@@ -24,7 +24,7 @@ HDRIS = {
     "museumplein": ("4k", "hdr"),
 }
 API = "https://api.polyhaven.com"
-UA = {"User-Agent": "smartlab-lab-room-build/1.0"}
+UA = {"User-Agent": "LearnStuff-lab-room-build/1.0"}
 
 
 def fetch_json(url):

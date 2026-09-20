@@ -22,7 +22,7 @@ from PIL import Image
 
 TILE_SIZE = 256
 # OSM foydalanish shartlariga ko'ra User-Agent majburiy.
-HEADERS = {"User-Agent": "smartlab-history-map/1.0 (educational lab)"}
+HEADERS = {"User-Agent": "LearnStuff-history-map/1.0 (educational lab)"}
 TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
 
 

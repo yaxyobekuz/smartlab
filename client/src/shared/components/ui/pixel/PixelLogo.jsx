@@ -13,7 +13,7 @@ const PixelLogo = ({ to = "/", size = 30, className }) => (
     <PixelSprite
       name="logo"
       size={size}
-      title="Smartlab"
+      title="LearnStuff"
       className="transition-transform duration-200 group-hover:-rotate-6 motion-reduce:transition-none"
     />
     <span>

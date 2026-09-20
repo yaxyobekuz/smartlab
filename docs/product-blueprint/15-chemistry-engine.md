@@ -268,4 +268,4 @@ http://localhost:5173/chemistry/lab-3d?autostart=1&hud=0&fxlab=agno3-hcl,mg-hcl&
 - The page sets `window.__labFx = { lab, clock, rows }` and `window.__labRoom.phase()`. Wait for phase `playing` and `__labFx`, then capture.
 - `?t=` pre-runs the timeline.
 - Scenario names are in `sim/scenarios.js`; `fx:*` scenarios force visuals for effect work.
-- Low tier: set localStorage `smartlab:lab-room:settings` to `{ "quality": "low", "sensitivity": 1, "showFps": true, "reduceMotion": false }`.
+- Low tier: set localStorage `LearnStuff:lab-room:settings` to `{ "quality": "low", "sensitivity": 1, "showFps": true, "reduceMotion": false }`.

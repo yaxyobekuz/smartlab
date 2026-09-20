@@ -1,4 +1,4 @@
-# Smart Lab — Product Audit & Expansion Blueprint
+# LearnStuff — Product Audit & Expansion Blueprint
 
 > **Council synthesis:** Claude (Opus 4.8) + Gemini 3 Flash. ChatGPT/`codex` was unavailable this run (no OpenAI key/CLI), so this is a two-voice council. Gemini's contributions are attributed inline.
 
@@ -6,11 +6,11 @@
 
 ## 0. Reality check (read this first)
 
-The brief describes Smart Lab as a **"Flutter Mobile App"** with a Quiz System, User Profiles, Progress Tracking, Categories and a History subject already implemented. **The actual codebase is a different — and in several ways more advanced — product.** This blueprint is written for what *actually exists*, so the estimates and hooks are real.
+The brief describes LearnStuff as a **"Flutter Mobile App"** with a Quiz System, User Profiles, Progress Tracking, Categories and a History subject already implemented. **The actual codebase is a different — and in several ways more advanced — product.** This blueprint is written for what *actually exists*, so the estimates and hooks are real.
 
 | Brief says | Codebase reality |
 |---|---|
-| Flutter mobile app | **React 19 + Vite + Three.js** web app (`smartlab-client`), public 3D laboratory |
+| Flutter mobile app | **React 19 + Vite + Three.js** web app (`LearnStuff-client`), public 3D laboratory |
 | Auth / Profiles / Progress implemented | Server template has JWT auth/roles, but the **lab client is public** — no accounts-gated learning, no profiles in the lab yet |
 | Quiz System implemented | **No quiz engine** in the lab client |
 | Categories / Progress Tracking | Not present in the lab client |
@@ -34,7 +34,7 @@ This is a strong foundation. The gap is **not** more demos — it's the connecti
 
 > **Gemini (council):** *"You have the tools (simulators), but you lack the 'Why.' Building an Arduino circuit is a toy; building an Arduino circuit to prevent a 3D reactor core from overheating is a game."*
 
-Smart Lab today is a **collection of excellent sandboxes**. Sandboxes have a known weakness (PhET's problem): **low retention** — students poke for 90 seconds and leave. Guided tutorials (Labster's model) fix retention but kill **replayability**. The winning move is the middle path:
+LearnStuff today is a **collection of excellent sandboxes**. Sandboxes have a known weakness (PhET's problem): **low retention** — students poke for 90 seconds and leave. Guided tutorials (Labster's model) fix retention but kill **replayability**. The winning move is the middle path:
 
 **The single highest-leverage build is a `Quest Engine`** — a data-driven mission layer that gives every existing simulator a goal, a win-condition, and a payoff. Everything else in this blueprint (quizzes, gamification, AI tutor, progress) plugs into it.
 
@@ -55,7 +55,7 @@ The brief asks to replace `Read → Quiz` with `Discover → Watch → Explore �
 
 > **Gemini (council):** *Observe → Predict → Verify → Synthesize. The UI pauses and the user MUST commit to a prediction before acting.* The "commit a bet" step is the single most important pedagogical mechanic — it converts passive watching into a stake.
 
-**The Smart Lab lesson loop** (maps the brief's stages onto O.P.V.S.):
+**The LearnStuff lesson loop** (maps the brief's stages onto O.P.V.S.):
 
 | Stage | O.P.V.S. phase | What happens | UI surface |
 |---|---|---|---|
@@ -118,7 +118,7 @@ You already ship AI reactions in the chemistry bench, so the plumbing exists. Pr
 
 **Design principle:** reward *discovery and manipulation*, not *attendance*. Tie every currency to a learning act.
 
-| Mechanic | Smart Lab instantiation | Tied to | Backfire risk if… |
+| Mechanic | LearnStuff instantiation | Tied to | Backfire risk if… |
 |---|---|---|---|
 | **XP** | Earned per prediction made (win or lose), demo completed, mission solved | Active manipulation time | …given for logins/video-watching |
 | **Coins** | Spend on cosmetic lab skins, avatar gear, extra AI hints | Spending sink only | …buys correct answers |

@@ -1,7 +1,7 @@
 {
-  "name": "smartlab",
+  "name": "LearnStuff",
   "version": "1.0.0",
-  "description": "SmartLab - o'quvchilar uchun **interaktiv 3D virtual laboratoriya**. Kimyo, biologiya va fizika mavzularini brauzerda aylantirib, yaqindan ko'rib o'rganish mumkin. Loyihaga **Mira AI** yordamchisi va **Cardboard (gyroskop) VR** rejimi ham qo'shilgan.",
+  "description": "LearnStuff - o'quvchilar uchun **interaktiv 3D virtual laboratoriya**. Kimyo, biologiya va fizika mavzularini brauzerda aylantirib, yaqindan ko'rib o'rganish mumkin. Loyihaga **Mira AI** yordamchisi va **Cardboard (gyroskop) VR** rejimi ham qo'shilgan.",
   "main": "index.js",
   "directories": {
     "doc": "docs"
@@ -11,15 +11,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yaxyobekuz/smartlab.git"
+    "url": "git+https://github.com/yaxyobekuz/LearnStuff.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/yaxyobekuz/smartlab/issues"
+    "url": "https://github.com/yaxyobekuz/LearnStuff/issues"
   },
-  "homepage": "https://github.com/yaxyobekuz/smartlab#readme"
+  "homepage": "https://github.com/yaxyobekuz/LearnStuff#readme"
 }
   

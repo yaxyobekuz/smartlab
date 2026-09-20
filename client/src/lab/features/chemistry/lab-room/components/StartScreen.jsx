@@ -38,7 +38,7 @@ const StartScreen = ({ ready, tier, recommended, placeholder, lockHint, onQualit
 
       <div className="space-y-8">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-300">Smart Lab</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-300">LearnStuff</p>
           <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">{TITLE}</h1>
           <p className="mt-4 max-w-md text-base leading-relaxed text-white/70">{SUBTITLE}</p>
         </div>

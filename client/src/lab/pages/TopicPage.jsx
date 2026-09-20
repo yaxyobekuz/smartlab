@@ -19,9 +19,6 @@ const PAGES = {
   "chemistry/lab-classic": lazy(() =>
     import("@/lab/features/chemistry/lab/LabBenchPage"),
   ),
-  "chemistry/atoms": lazy(() =>
-    import("@/lab/features/chemistry/atoms/AtomsPage"),
-  ),
   "chemistry/periodic-table": lazy(() =>
     import("@/lab/features/chemistry/periodic/PeriodicTablePage"),
   ),

@@ -1,7 +1,7 @@
 # Biology
 
 ## Snapshot
-Biology is Smart Lab's most built-out subject: 5 live topics under `/biology` — `cell`, `cell-studio` (7 cell types), `dna`, `anatomy` (12 Z-Anatomy GLB systems, BVH picking), and `surgery` (real clipping-plane scalpel). The anatomy/surgery pair is genuinely strong; the cell/dna trio is half-built and half-facade (mock "AI o'qituvchi", flat-swatch microscope, decorative DNA with wrong base pairing, two duplicate "Hujayra" topics). **Vision:** turn the human body and the cell into one explorable, clickable, quizzable system — every organ, organelle, and base pair honest, interactive, and wired to the real Mira AI tutor and a shared progress/quiz layer.
+Biology is LearnStuff's most built-out subject: 5 live topics under `/biology` — `cell`, `cell-studio` (7 cell types), `dna`, `anatomy` (12 Z-Anatomy GLB systems, BVH picking), and `surgery` (real clipping-plane scalpel). The anatomy/surgery pair is genuinely strong; the cell/dna trio is half-built and half-facade (mock "AI o'qituvchi", flat-swatch microscope, decorative DNA with wrong base pairing, two duplicate "Hujayra" topics). **Vision:** turn the human body and the cell into one explorable, clickable, quizzable system — every organ, organelle, and base pair honest, interactive, and wired to the real Mira AI tutor and a shared progress/quiz layer.
 
 ## Feature Tree
 
@@ -77,4 +77,4 @@ Biology is Smart Lab's most built-out subject: 5 live topics under `/biology` �
 | **Neuron & Action Potential** | Best "aha" for signaling | High | High | P2 | ~7 dev-days | Med-High |
 | **Ecology predator-prey** | Systems-thinking capstone, cheap 2D | Med-High | Med-High | P2 | ~7 dev-days | Med-High |
 
-Key files to build from: `/Users/shukrullo/Desktop/smartlab/client/src/lab/features/biology/` (pages) and `/Users/shukrullo/Desktop/smartlab/client/src/lab/data/` (`cell.js`, `anatomy.js`, `anatomyMaterials.js`, `surgery.js`) plus `cell-studio/data/cells.js`; the duplicate twin-topic wiring is `subjects.js` lines 45–76; the real AI panel to reuse lives in `client/src/lab/components/` (`LabWorkspace.jsx`, `AiPanel.jsx`, `useAiChat.js`).
+Key files to build from: `/Users/shukrullo/Desktop/LearnStuff/client/src/lab/features/biology/` (pages) and `/Users/shukrullo/Desktop/LearnStuff/client/src/lab/data/` (`cell.js`, `anatomy.js`, `anatomyMaterials.js`, `surgery.js`) plus `cell-studio/data/cells.js`; the duplicate twin-topic wiring is `subjects.js` lines 45–76; the real AI panel to reuse lives in `client/src/lab/components/` (`LabWorkspace.jsx`, `AiPanel.jsx`, `useAiChat.js`).

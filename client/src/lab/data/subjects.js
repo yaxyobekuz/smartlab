@@ -29,12 +29,6 @@ export const SUBJECTS = [
         icon: "TestTubes",
       },
       {
-        slug: "atoms",
-        title: "Atomlar",
-        short: "Yadro va elektron orbitalarini kuzating.",
-        icon: "Atom",
-      },
-      {
         slug: "ph",
         title: "pH simulyatsiya",
         short: "Eritma kuchini o'zgartirib pH va indikator rangini kuzating.",
