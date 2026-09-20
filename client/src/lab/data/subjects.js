@@ -11,12 +11,6 @@ export const SUBJECTS = [
     color: "#2563eb",
     topics: [
       {
-        slug: "periodic-table",
-        title: "Davriy jadval",
-        short: "118 element, ionlar va tenglama/molyar massa kalkulyatorlari.",
-        icon: "Grid3x3",
-      },
-      {
         slug: "lab",
         title: "Interaktiv laboratoriya",
         short: "Laboratoriya xonasida yuring, reaktivlarni aralashtirib reaksiyalarni kuzating.",
