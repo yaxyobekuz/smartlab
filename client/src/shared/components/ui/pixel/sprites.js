@@ -334,7 +334,6 @@ export const SPRITES = {
 };
 
 export const SUBJECT_SPRITES = {
-  chemistry: "flask",
   electronics: "chip",
   history: "dome",
 };

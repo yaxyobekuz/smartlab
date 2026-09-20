@@ -1,23 +1,8 @@
-// Central registry: subjects (chemistry/electronics/history) -> topics.
+// Central registry: subjects (electronics/history) -> topics.
 // `slug` values are URL params: /:subject and /:subject/:topic.
 // UI text in Uzbek, code values in English.
 
 export const SUBJECTS = [
-  {
-    slug: "chemistry",
-    title: "Kimyo",
-    short: "Modda tuzilishi - molekula va atomlarni 3D da o'rganing.",
-    icon: "FlaskConical",
-    color: "#2563eb",
-    topics: [
-      {
-        slug: "lab",
-        title: "Interaktiv laboratoriya",
-        short: "Laboratoriya xonasida yuring, reaktivlarni aralashtirib reaksiyalarni kuzating.",
-        icon: "TestTubes",
-      },
-    ],
-  },
   {
     slug: "electronics",
     title: "Elektron mehanika",
