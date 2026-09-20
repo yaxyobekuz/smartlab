@@ -334,7 +334,6 @@ export const SPRITES = {
 };
 
 export const SUBJECT_SPRITES = {
-  history: "dome",
 };
 
 // Rows -> horizontal runs of one color, so an SVG needs far fewer <rect>s.

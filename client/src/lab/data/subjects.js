@@ -1,23 +1,8 @@
-// Central registry: subjects (history) -> topics.
+// Central registry: subjects -> topics. Every subject now lives in LearnStuff.
 // `slug` values are URL params: /:subject and /:subject/:topic.
 // UI text in Uzbek, code values in English.
 
 export const SUBJECTS = [
-  {
-    slug: "history",
-    title: "Tarix",
-    short: "O'tmish yodgorliklari - Registonni 3D da AI gid bilan kashf eting.",
-    icon: "Landmark",
-    color: "#b5751a",
-    topics: [
-      {
-        slug: "atlas",
-        title: "Tarixiy atlas",
-        short: "Vaqt jadvalini suring: qaysi davrda qaysi davlat qanday hududlarni egallaganini ko'ring.",
-        icon: "Map",
-      },
-    ],
-  },
 ];
 
 export const getSubject = (slug) =>
