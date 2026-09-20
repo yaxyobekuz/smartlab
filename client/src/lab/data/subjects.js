@@ -1,23 +1,8 @@
-// Central registry: subjects (electronics/history) -> topics.
+// Central registry: subjects (history) -> topics.
 // `slug` values are URL params: /:subject and /:subject/:topic.
 // UI text in Uzbek, code values in English.
 
 export const SUBJECTS = [
-  {
-    slug: "electronics",
-    title: "Elektron mehanika",
-    short: "Platalar va sxemalar - Arduino bilan LED va motorlarni boshqaring.",
-    icon: "CircuitBoard",
-    color: "#7c3aed",
-    topics: [
-      {
-        slug: "arduino",
-        title: "Sxema quruvchi",
-        short: "Komponentlarni tortib ulang, kod yozing va simulyatsiyani jonli kuzating.",
-        icon: "Cpu",
-      },
-    ],
-  },
   {
     slug: "history",
     title: "Tarix",

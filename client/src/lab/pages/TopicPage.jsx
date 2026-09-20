@@ -5,9 +5,6 @@ import { useParams } from "react-router-dom";
 import NotFoundPage from "./NotFoundPage";
 
 const PAGES = {
-  "electronics/arduino": lazy(() =>
-    import("@/lab/features/electronics/circuit/CircuitPage"),
-  ),
   "history/registan": lazy(() =>
     import("@/lab/features/history/registan/RegistanGuidePage"),
   ),
