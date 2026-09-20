@@ -28,12 +28,6 @@ export const SUBJECTS = [
         short: "Laboratoriya xonasida yuring, reaktivlarni aralashtirib reaksiyalarni kuzating.",
         icon: "TestTubes",
       },
-      {
-        slug: "gas-laws",
-        title: "Gaz qonunlari",
-        short: "Hajm, harorat va mol miqdorini o'zgartirib bosimni hisoblang.",
-        icon: "Gauge",
-      },
     ],
   },
   {

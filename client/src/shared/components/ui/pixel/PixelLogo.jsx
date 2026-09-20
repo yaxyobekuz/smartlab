@@ -17,7 +17,7 @@ const PixelLogo = ({ to = "/", size = 30, className }) => (
       className="transition-transform duration-200 group-hover:-rotate-6 motion-reduce:transition-none"
     />
     <span>
-      Smart<span className="text-primary">lab</span>
+      Learn<span className="text-primary">Stuff</span>
     </span>
   </Link>
 );
