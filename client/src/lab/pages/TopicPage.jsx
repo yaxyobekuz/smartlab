@@ -12,10 +12,6 @@ const PAGES = {
   "chemistry/lab-3d": lazy(() =>
     import("@/lab/features/chemistry/lab-room/LabRoomPage"),
   ),
-  // The earlier single-bench lab, for phones and computers that can't run the room.
-  "chemistry/lab-classic": lazy(() =>
-    import("@/lab/features/chemistry/lab/LabBenchPage"),
-  ),
   "chemistry/periodic-table": lazy(() =>
     import("@/lab/features/chemistry/periodic/PeriodicTablePage"),
   ),
